@@ -833,7 +833,7 @@ async function ask(text) {
   } catch (e) {
     bubble.classList.remove("think");
     if (e.code === "cancelled") { bubble.textContent = (e.text || "") + "\n[stopped]"; trace("agent", "stopped", "by " + ME); }
-    else { bubble.textContent = (e.text ? e.text + "\n\n" : "") + copyFor(e.code); trace("err", e.code || "error", e.message || ""); if (e.text) turns.push({ role: "assistant", content: e.text }); }
+    else { const detail = e.message && !["cancelled", "not_granted", "sampling_disabled"].includes(e.code) ? "\nDetail: " + String(e.message).slice(0, 300) : ""; bubble.textContent = (e.text ? e.text + "\n\n" : "") + copyFor(e.code) + detail; trace("err", e.code || "error", e.message || ""); if (e.text) turns.push({ role: "assistant", content: e.text }); }
     if (["not_granted", "sampling_disabled", "tools_unavailable", "not_declared", "capability_disabled"].includes(e.code)) dead = true;
     if (e.code === "auth" || e.code === "no_proxy") { $("connect").hidden = false; $("connect-hint").textContent = e.code === "auth" ? "not accepted, try again" : "no /api/agent on this site"; }
     setStatus(dead ? "off" : "", dead ? "Claude not available" : "agent idle");
