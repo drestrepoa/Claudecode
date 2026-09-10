@@ -24,6 +24,15 @@ viewer's account.
 
 ### Deploy to Netlify (recommended for the session)
 
+**One-click, if this repository is public:**
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/drestrepoa/Claudecode)
+
+Netlify copies the repository into your GitHub account, asks for the two
+values below, builds, and gives you a URL. Then skip to step 4.
+
+**By hand, in either case:**
+
 1. Push this repository to your GitHub account (or fork it).
 2. In Netlify: **Add new site → Import an existing project → GitHub → this
    repo**. The `netlify.toml` already sets the publish folder (`site/`) and the

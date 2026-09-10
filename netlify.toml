@@ -13,3 +13,9 @@
   [headers.values]
     X-Frame-Options = "DENY"
     Referrer-Policy = "no-referrer"
+
+# Used by the "Deploy to Netlify" button: Netlify asks for these values during the click-through
+# and stores them as the new site's environment variables.
+[template.environment]
+  ANTHROPIC_API_KEY = "Anthropic API key from console.anthropic.com (starts with sk-ant-)"
+  WORKSHOP_CODE = "The code participants type to use the agent, e.g. harbor42"
