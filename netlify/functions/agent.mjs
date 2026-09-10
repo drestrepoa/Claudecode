@@ -9,6 +9,8 @@
 //   ANTHROPIC_API_KEY   required
 //   WORKSHOP_CODE       recommended; if unset, anyone with the URL can spend the key
 //   DEFAULT_TIER        optional: quick | default | complex (default: "default")
+//   ANTHROPIC_WORKSPACE_ID  only if the key is an organisation-level key that Anthropic says
+//                       "is not scoped to a workspace"; the wrkspc_... id from the console
 
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -36,7 +38,7 @@ export default async (req) => {
   };
   if (tier !== "quick") params.output_config = { effort: "medium" }; // Haiku 4.5 does not take effort
 
-  const client = new Anthropic();
+  const client = new Anthropic(process.env.ANTHROPIC_WORKSPACE_ID ? { defaultHeaders: { "anthropic-workspace-id": process.env.ANTHROPIC_WORKSPACE_ID } } : {});
   try {
     // Wait for the API to accept the request (bad key, bad model, rate limit surface here as JSON errors),
     // then hand the page the raw stream events as JSON lines; the page rebuilds the message from them.

@@ -42,6 +42,10 @@ values below, builds, and gives you a URL. Then skip to step 4.
    - `WORKSHOP_CODE`: any word you will say out loud in the room, e.g. `harbor42`
    - `DEFAULT_TIER` (optional): `quick`, `default` or `complex` if the page's
      tier is missing
+   - `ANTHROPIC_WORKSPACE_ID` (only if needed): if the trace says the key "is not
+     scoped to a workspace", either create the key inside a workspace in the
+     console, or set this to the workspace id (`wrkspc_…`) from Settings →
+     Workspaces
 4. Deploy. Open the site, enter the code, send "What needs my attention
    today?". Delete or rotate the API key after the session.
 
