@@ -1,0 +1,15 @@
+# Netlify configuration for the Inbox Agent workshop site.
+# The built page lives in site/ (run `python3 build.py`); the function in netlify/functions/.
+[build]
+  publish = "site"
+  command = "npm install --omit=dev"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"

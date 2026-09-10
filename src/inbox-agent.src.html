@@ -177,6 +177,8 @@ textarea#brief{width:100%;min-height:210px;resize:vertical;font-family:"IBM Plex
 /* chat */
 .chat{display:flex;flex-direction:column;min-height:420px}
 .chat-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.connect{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);font-size:12.5px}
+.connect input{flex:1;min-width:160px}
 .msgs{flex:1;overflow:auto;max-height:440px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .msg{max-width:92%;padding:9px 12px;border-radius:10px;white-space:pre-wrap;word-wrap:break-word}
 .msg.user{align-self:flex-end;background:var(--agent-soft);border:1px solid var(--agent)}
@@ -223,7 +225,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
   <div class="hcontrols">
     <label class="select" for="model">model
-      <select id="model"><option value="quick">quick (cheap)</option><option value="default" selected>default (smarter)</option></select>
+      <select id="model"><option value="quick">quick (cheap)</option><option value="default" selected>default (smarter)</option><option value="complex">best (slowest)</option></select>
     </label>
     <span class="pill" id="status"><i></i><span>agent idle</span></span>
     <button class="btn" id="reset">Reset inbox</button>
@@ -346,6 +348,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
     </div>
     <div class="panel chat">
       <div class="chat-head"><div><h3 id="chat-title">Inbox assistant</h3><span class="hint" id="cost">live Claude calls on your account · a few cents per turn</span></div><button class="btn small" id="clear">Clear chat</button></div>
+      <div class="connect" id="connect" hidden><label for="secret" id="secret-label">Workshop code</label><input type="password" id="secret" autocomplete="off" placeholder="ask the facilitator"><button class="btn small primary" id="connect-btn">Connect</button><span class="hint" id="connect-hint"></span></div>
       <div class="msgs" id="msgs"></div>
       <div class="suggest" id="suggest"></div>
       <div class="compose"><input type="text" id="say" placeholder="Ask the agent…" autocomplete="off"><button class="btn primary" id="send">Send</button><button class="btn" id="stop" hidden>Stop</button></div>
@@ -703,10 +706,97 @@ function briefTurn() {
 function copyFor(code) {
   return ({ not_granted: "You declined to let this page use Claude. Reload to be asked again.", sampling_disabled: "Claude is not available on this account.", rate_limited: "Too many calls for now. Wait a moment and try again.",
     prompt_too_large: "The conversation grew too long. Clear the chat and ask again.", refused: "Claude declined that request. Rephrase and try again.", tools_unavailable: "This viewer cannot run page tools, so the agent cannot act. Try the claude.ai web or desktop app.",
-    empty_completion: "Claude returned nothing. Try asking for less.", upstream_error: "A transient error interrupted the answer. Try again." })[code] || `Something went wrong (${code}).`;
+    empty_completion: "Claude returned nothing. Try asking for less.", upstream_error: "A transient error interrupted the answer. Try again.", auth: "The workshop code or API key was not accepted.", no_proxy: "This site has no agent endpoint. Enter an API key instead.", invalid_request: "The request was rejected. Clear the chat and try again." })[code] || `Something went wrong (${code}).`;
+}
+// Three ways to reach Claude, same loop from the page's point of view:
+//   artifact  the claude.ai viewer's `sample` capability (viewer's own account)
+//   proxy     POST /api/agent on this site: a Netlify function holding the facilitator's key behind a workshop code
+//   direct    the Messages API from the browser with the participant's own API key
+let backend = null; // "artifact" | "proxy" | "direct"
+const SS = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ sessionStorage.setItem(k, v); }catch(e){} } };
+const API_MODELS = { quick: "claude-haiku-4-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
+const MAX_ROUNDS = 10;
+const fail = (code, message, text) => Object.assign({ code, message }, text ? { text } : {});
+
+function apiTools(tools) {
+  return tools.map((t) => ({ name: t.name, description: t.description, input_schema: t.inputSchema || { type: "object", properties: {} } }));
+}
+// Read a streamed Messages API response (SSE from the API, or JSON lines from the proxy) and rebuild the message.
+async function readStream(resp, signal, onTextDelta) {
+  const msg = { content: [], stop_reason: null };
+  const ndjson = (resp.headers.get("content-type") || "").includes("ndjson");
+  const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = "";
+  const handle = (ev) => {
+    if (ev.type === "error") throw fail(ev.error?.type === "rate_limit_error" ? "rate_limited" : "upstream_error", ev.error?.message || "stream error");
+    if (ev.type === "content_block_start") { const b = { ...ev.content_block }; if (b.type === "tool_use") b._json = ""; msg.content[ev.index] = b; }
+    else if (ev.type === "content_block_delta") {
+      const b = msg.content[ev.index], d = ev.delta;
+      if (d.type === "text_delta") { b.text += d.text; onTextDelta(d.text); }
+      else if (d.type === "input_json_delta") b._json += d.partial_json;
+      else if (d.type === "thinking_delta") b.thinking += d.thinking;
+      else if (d.type === "signature_delta") b.signature = d.signature;
+    }
+    else if (ev.type === "content_block_stop") { const b = msg.content[ev.index]; if (b.type === "tool_use") { try { b.input = b._json.trim() ? JSON.parse(b._json) : {}; } catch (e) { b.input = {}; } delete b._json; } }
+    else if (ev.type === "message_delta") { if (ev.delta?.stop_reason) msg.stop_reason = ev.delta.stop_reason; }
+  };
+  while (true) {
+    const { value, done } = await reader.read(); if (done) break;
+    if (signal.aborted) { reader.cancel(); throw fail("cancelled", "stopped"); }
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split("\n"); buf = lines.pop();
+    for (const line of lines) {
+      const t = line.trim(); if (!t) continue;
+      if (ndjson) handle(JSON.parse(t)); else if (t.startsWith("data:")) handle(JSON.parse(t.slice(5)));
+    }
+  }
+  return msg;
+}
+async function callModel(system, messages, tools, tier, signal) {
+  let resp;
+  try {
+    if (backend === "proxy") {
+      resp = await fetch("/api/agent", { method: "POST", signal, headers: { "content-type": "application/json", "x-workshop-code": SS.get("workshop.code") || "" },
+        body: JSON.stringify({ tier, system, messages, tools: apiTools(tools) }) });
+    } else {
+      const model = API_MODELS[tier] || API_MODELS.default;
+      const body = { model, max_tokens: 4000, stream: true, system, messages, tools: apiTools(tools) };
+      if (tier !== "quick") body.output_config = { effort: "medium" };
+      resp = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", signal, headers: { "content-type": "application/json", "x-api-key": SS.get("api.key") || "", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify(body) });
+    }
+  } catch (e) { if (signal.aborted) throw fail("cancelled", "stopped"); throw fail("upstream_error", e.message || "network error"); }
+  if (!resp.ok) {
+    let detail = ""; try { const j = await resp.json(); detail = j.error?.message || j.error || JSON.stringify(j); } catch (e) { detail = await resp.text().catch(() => ""); }
+    if (resp.status === 401 || resp.status === 403) throw fail("auth", detail);
+    if (resp.status === 429) throw fail("rate_limited", detail);
+    if (resp.status === 404 && backend === "proxy") throw fail("no_proxy", detail);
+    throw fail(resp.status >= 500 ? "upstream_error" : "invalid_request", `${resp.status} ${detail}`);
+  }
+  return resp;
+}
+// The agentic loop, the same shape the artifact runtime runs for us: model → tool calls → results → model, until it answers.
+async function runLoop(system, history, tools, tier, signal, onText) {
+  const messages = history.map((t) => ({ role: t.role, content: t.content }));
+  let shown = ""; const say = (t) => { shown += t; onText(shown); };
+  for (let round = 1; round <= MAX_ROUNDS; round++) {
+    const resp = await callModel(system, messages, tools, tier, signal);
+    const msg = await readStream(resp, signal, say);
+    if (msg.stop_reason === "refusal") throw fail("refused", "declined", shown);
+    const calls = msg.content.filter((b) => b.type === "tool_use");
+    messages.push({ role: "assistant", content: msg.content });
+    if (msg.stop_reason !== "tool_use" || !calls.length) return { text: shown.trim(), truncated: msg.stop_reason === "max_tokens" };
+    const results = await Promise.all(calls.map(async (c) => {
+      const tool = tools.find((t) => t.name === c.name);
+      try { const out = tool ? await tool.execute(c.input || {}, { signal }) : (() => { throw new Error(`unknown tool ${c.name}`); })(); return { type: "tool_result", tool_use_id: c.id, content: typeof out === "string" ? out : JSON.stringify(out) }; }
+      catch (err) { return { type: "tool_result", tool_use_id: c.id, content: "Error: " + (err.message || String(err)), is_error: true }; }
+    }));
+    if (signal.aborted) throw fail("cancelled", "stopped", shown);
+    messages.push({ role: "user", content: results });
+    if (shown && !shown.endsWith("\n\n")) say("\n\n");
+    if (round === MAX_ROUNDS) return { text: (shown + `\n[stopped after ${MAX_ROUNDS} tool rounds]`).trim(), truncated: true };
+  }
 }
 async function ask(text) {
-  if (!sample || currentCtl) return;
+  if (!backend || currentCtl || dead) return;
   addMsg("user", text); turns.push({ role: "user", content: text });
   const bubble = addMsg("agent think", "Thinking…");
   currentCtl = new AbortController();
@@ -718,23 +808,28 @@ async function ask(text) {
       try { const out = await t.execute(input, ctx); trace("call", "↳ result", compact(out)); return out; }
       catch (err) { trace("err", "↳ error", err.message); throw err; }
     } }));
-  const input = [{ role: "user", content: briefTurn() }, ...turns.slice(-8)];
-  let rounds = 0;
+  const onText = (t) => { bubble.classList.remove("think"); bubble.textContent = t; $("msgs").scrollTop = $("msgs").scrollHeight; };
+  const tier = $("model").value;
   try {
-    const { text: out, truncated, modelTierApplied } = await sample(input, {
-      tools, modelTier: $("model").value, cache: false, signal: currentCtl.signal,
-      onText: ({ text: t }) => { bubble.classList.remove("think"); bubble.textContent = t; $("msgs").scrollTop = $("msgs").scrollHeight; },
-    });
+    let out, truncated, served = "";
+    if (backend === "artifact") {
+      const r = await sample([{ role: "user", content: briefTurn() }, ...turns.slice(-8)], { tools, modelTier: tier, cache: false, signal: currentCtl.signal, onText: ({ text: t }) => onText(t) });
+      out = r.text; truncated = r.truncated; if (r.modelTierApplied !== tier) served = ` · served on ${r.modelTierApplied}`;
+    } else {
+      const r = await runLoop(briefTurn(), turns.slice(-8), tools, tier, currentCtl.signal, onText);
+      out = r.text; truncated = r.truncated; served = ` · ${backend === "proxy" ? tier : API_MODELS[tier]}`;
+    }
     bubble.classList.remove("think"); bubble.textContent = out + (truncated ? "\n\n[cut short: ask for less at a time]" : "");
-    turns.push({ role: "assistant", content: out });
-    trace("agent", "reply", compact(out, 400) + (modelTierApplied !== $("model").value ? ` · served on ${modelTierApplied}` : ""));
+    turns.push({ role: "assistant", content: out || "(no reply)" });
+    trace("agent", "reply", compact(out, 400) + served);
     setStatus("", "agent idle");
   } catch (e) {
     bubble.classList.remove("think");
     if (e.code === "cancelled") { bubble.textContent = (e.text || "") + "\n[stopped]"; trace("agent", "stopped", "by " + ME); }
     else { bubble.textContent = (e.text ? e.text + "\n\n" : "") + copyFor(e.code); trace("err", e.code || "error", e.message || ""); if (e.text) turns.push({ role: "assistant", content: e.text }); }
-    setStatus(e.code === "not_granted" || e.code === "sampling_disabled" ? "off" : "", e.code === "not_granted" ? "Claude not allowed" : "agent idle");
     if (["not_granted", "sampling_disabled", "tools_unavailable", "not_declared", "capability_disabled"].includes(e.code)) dead = true;
+    if (e.code === "auth" || e.code === "no_proxy") { $("connect").hidden = false; $("connect-hint").textContent = e.code === "auth" ? "not accepted, try again" : "no /api/agent on this site"; }
+    setStatus(dead ? "off" : "", dead ? "Claude not available" : "agent idle");
   } finally {
     currentCtl = null; $("stop").hidden = true; $("send").disabled = dead;
     if (turns.length > 16) turns.splice(0, turns.length - 16);
@@ -764,14 +859,43 @@ trace("rules", "loaded", `${S.emails.length} emails · today is ${TODAY} · ${S.
 addMsg("sys", "Ask in plain language. The agent works with the tools above and shows every step in the trace.");
 $("send").disabled = true;
 
+function labelModels(mode) {
+  const names = mode === "artifact" ? { quick: "quick (cheap)", default: "default (smarter)", complex: "best (slowest)" } : { quick: "quick · Haiku 4.5", default: "default · Sonnet 5", complex: "best · Opus 5" };
+  for (const o of $("model").options) o.textContent = names[o.value];
+}
+function ready(mode, costText) {
+  backend = mode; labelModels(mode); $("connect").hidden = true; $("cost").textContent = costText; $("send").disabled = false; setStatus("", "agent idle");
+}
+async function detectProxy() {
+  try { const r = await fetch("/api/agent", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }); return r.status !== 404; } catch (e) { return false; }
+}
 (async () => {
   sample = await window.claude?.use?.("sample");
-  if (!sample) { setStatus("off", "live agent unavailable here"); $("cost").textContent = "open this page in claude.ai to run the agent live · rules and inbox still work"; addMsg("sys", "The live agent needs the claude.ai viewer. The rules engine, the inbox and the answer key still work here."); return; }
-  const lim = await sample.limits().catch(() => null);
-  toolsSupported = !!(lim && lim.tools);
-  if (!toolsSupported) { setStatus("off", "tools unavailable in this viewer"); $("cost").textContent = "this viewer cannot run page tools · try the claude.ai web or desktop app"; addMsg("sys", "This viewer cannot run page tools, so the agent cannot act on the inbox here. Try the claude.ai web or desktop app."); return; }
-  if (lim.tools.maxCount < TOOLS.length) addMsg("sys", `This viewer allows ${lim.tools.maxCount} tools per call; untick some in block 4.`);
-  $("send").disabled = false; setStatus("", "agent idle");
+  if (sample) {
+    const lim = await sample.limits().catch(() => null);
+    if (!lim || !lim.tools) { setStatus("off", "tools unavailable in this viewer"); $("cost").textContent = "this viewer cannot run page tools · try the claude.ai web or desktop app"; addMsg("sys", "This viewer cannot run page tools, so the agent cannot act on the inbox here. Try the claude.ai web or desktop app."); return; }
+    if (lim.tools.maxCount < TOOLS.length) addMsg("sys", `This viewer allows ${lim.tools.maxCount} tools per call; untick some in block 4.`);
+    ready("artifact", "live Claude calls on your account · a few cents per turn");
+    return;
+  }
+  if (window.claude) { setStatus("off", "live agent unavailable here"); $("cost").textContent = "the rules engine and inbox work here; the agent needs the claude.ai app or the hosted version"; return; }
+  // Hosted copy (Netlify or any static host): a proxy with a workshop code, or the participant's own key.
+  const hasProxy = location.protocol.startsWith("http") && await detectProxy();
+  const mode = hasProxy ? "proxy" : "direct";
+  labelModels(mode);
+  $("secret-label").textContent = hasProxy ? "Workshop code" : "Anthropic API key";
+  $("secret").placeholder = hasProxy ? "ask the facilitator" : "sk-ant-…  stays in this tab only";
+  $("connect-hint").textContent = hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic";
+  const connect = () => {
+    const v = $("secret").value.trim(); if (!v) return;
+    SS.set(hasProxy ? "workshop.code" : "api.key", v);
+    ready(mode, hasProxy ? "calls run on the facilitator's account through this site" : "calls run on your own API key, straight from this browser");
+    addMsg("sys", "Connected. Ask in plain language.");
+  };
+  $("connect-btn").addEventListener("click", connect);
+  $("secret").addEventListener("keydown", (ev) => { if (ev.key === "Enter") connect(); });
+  const saved = SS.get(hasProxy ? "workshop.code" : "api.key");
+  if (saved) { $("secret").value = saved; connect(); } else { $("connect").hidden = false; setStatus("off", hasProxy ? "enter the workshop code" : "enter an API key"); $("cost").textContent = hasProxy ? "enter the workshop code to start" : "enter an Anthropic API key to start"; }
 })();
 })();
 </script>

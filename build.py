@@ -10,4 +10,10 @@ src = (root / "src" / "inbox-agent.src.html").read_text()
 assert "__INBOX_DATA__" in src
 out = src.replace("__INBOX_DATA__", payload)
 (root / "inbox-agent.html").write_text(out)
-print(f"wrote inbox-agent.html ({len(out) // 1024} KB, {len(data['emails'])} emails)")
+(root / "site").mkdir(exist_ok=True)
+cut = out.index("</style>") + len("</style>")
+head, body = out[:cut], out[cut:]
+(root / "site" / "index.html").write_text(
+    "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+    + head + "\n</head>\n<body>" + body + "\n</body>\n</html>\n")
+print(f"wrote inbox-agent.html and site/index.html ({len(out) // 1024} KB, {len(data['emails'])} emails)")
