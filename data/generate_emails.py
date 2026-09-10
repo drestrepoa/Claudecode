@@ -339,13 +339,13 @@ emails.sort(key=lambda e: e["date"], reverse=True)
 for i, e in enumerate(emails):
     e["id"] = f"E{i + 1:03d}"
 
-with open(HERE / "emails.json", "w") as f:
+with open(HERE / "emails.harrowvance.json", "w") as f:
     json.dump({"today": TODAY.isoformat(), "owner": ME, "firm_domain": FIRM_DOMAIN, "labels": LABELS,
                "matters": [{"code": m["code"], "name": m["name"], "client": m["client"], "type": m["type"]} for m in MATTERS],
                "emails": emails}, f, ensure_ascii=False, indent=1)
 
 cols = ["id", "date", "from_name", "from_email", "to", "subject", "body", "matter", "attachments", "read", "expected", "priority", "deadline", "privileged"]
-with open(HERE / "emails.csv", "w", newline="") as f:
+with open(HERE / "emails.harrowvance.csv", "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(cols)
     for e in emails:
