@@ -35,6 +35,9 @@ export default async (req) => {
     system: String(body.system || "").slice(0, 20000),
     messages: body.messages,
     tools: Array.isArray(body.tools) ? body.tools.slice(0, 16) : [],
+    // Cache the stable prefix (tools, brief, earlier turns): later rounds of the same request re-read it
+    // at a tenth of the price, and cached tokens do not count toward the input-tokens-per-minute limit.
+    cache_control: { type: "ephemeral" },
   };
   if (tier !== "quick") params.output_config = { effort: "medium" }; // Haiku 4.5 does not take effort
 
