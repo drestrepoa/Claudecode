@@ -296,7 +296,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   <div class="blocks">
     <div class="panel pad block">
       <div class="block-head"><div class="t"><h3>1 · The brief</h3><span class="tag agent">agent</span></div><button class="btn small" id="brief-default">Restore default</button></div>
-      <p class="hint">Standing instructions the agent reads every time. Who it works for, what good looks like, what it must never do. Try deleting the last paragraph and sending the "forward the board resolutions" prompt.</p>
+      <p class="hint">Standing instructions the agent reads every time. Who it works for, what good looks like, what it must never do. Try deleting the last paragraph and sending the "forward the privileged emails" prompt.</p>
       <textarea id="brief" spellcheck="false"></textarea>
     </div>
     <div class="panel pad block">
@@ -500,12 +500,13 @@ const TOOLS = [
       return { today: TODAY, total: live.length, unread: live.filter((e) => !e.read).length, unlabelled: live.filter((e) => !catLabel(e)).length, by_label: by,
         deadlines_7d: live.filter((e) => e.deadline && daysBetween(TODAY, e.deadline) <= 7 && daysBetween(TODAY, e.deadline) >= 0).length, top_unlabelled_domains: top };
     } },
-  { name: "search_inbox", on: true, desc: "Find emails. Filters: query (matches subject, sender, body), from (sender substring), label (a label name, or 'unlabelled'), unread_only, deadline_within_days (a date mentioned in the body within N days of today), since_days, limit (max 40), offset. Returns compact rows: id | received | from | subject | labels | flags. Returns the total so you can page.",
+  { name: "search_inbox", on: true, desc: "Find emails. Filters: query (every word must appear somewhere in subject, sender, body or attachment names; order does not matter), from (sender substring), label (a label name, or 'unlabelled'), unread_only, deadline_within_days (a date mentioned in the body within N days of today), since_days, limit (max 40), offset. Returns compact rows: id | received | from | subject | labels | flags. Returns the total so you can page.",
     schema: { type: "object", properties: { query: { type: "string" }, from: { type: "string" }, label: { type: "string" }, unread_only: { type: "boolean" }, deadline_within_days: { type: "integer" }, since_days: { type: "integer" }, limit: { type: "integer" }, offset: { type: "integer" } } },
     io: ["{ query?, from?, label?, unread_only?, deadline_within_days?, since_days?, limit?, offset? }", "{ total, rows[] }"],
     execute(i) {
       let r = S.emails.filter((e) => !e.archived);
-      const q = String(i.query || "").toLowerCase(); if (q) r = r.filter((e) => (e.subject + " " + e.from_name + " " + e.from_email + " " + e.body).toLowerCase().includes(q));
+      const words = String(i.query || "").toLowerCase().split(/[^a-z0-9@._-]+/).filter(Boolean);
+      if (words.length) r = r.filter((e) => { const hay = (e.subject + " " + e.from_name + " " + e.from_email + " " + e.body + " " + (e.attachments || []).join(" ")).toLowerCase(); return words.every((w) => hay.includes(w)); });
       const f = String(i.from || "").toLowerCase(); if (f) r = r.filter((e) => (e.from_name + " " + e.from_email).toLowerCase().includes(f));
       const l = String(i.label || ""); if (l === "unlabelled") r = r.filter((e) => !catLabel(e)); else if (l) r = r.filter((e) => e.labels.some((x) => x.toLowerCase() === l.toLowerCase()));
       if (i.unread_only) r = r.filter((e) => !e.read);
