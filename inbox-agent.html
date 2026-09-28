@@ -181,8 +181,16 @@ textarea#brief{width:100%;min-height:210px;resize:vertical;font-family:"IBM Plex
 /* chat */
 .chat{display:flex;flex-direction:column;min-height:420px}
 .chat-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.connect{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);font-size:12.5px}
-.connect input{flex:1;min-width:160px}
+.connect{display:flex;flex-direction:column;gap:6px;padding:16px 20px;border:2px solid var(--agent);border-radius:12px;background:var(--agent-soft);font-size:14px}
+.connect-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.connect label{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:20px;color:var(--agent);white-space:nowrap}
+.connect input{flex:1;min-width:220px;font-size:18px;padding:10px 12px;border:1px solid var(--agent);letter-spacing:.08em}
+.connect .btn.primary{font-size:16px;padding:10px 20px}
+.connect .hint{font-size:13px}
+.connect.done{border-style:dashed;background:var(--panel-2);padding:10px 20px}
+.connect.done label{font-size:15px}
+.connect.done input{max-width:180px;font-size:14px;padding:6px 10px}
+.connect.done .btn.primary{font-size:13px;padding:6px 12px;background:var(--panel);color:var(--ink);border-color:var(--line)}
 .msgs{flex:1;overflow:auto;max-height:440px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .msg{max-width:92%;padding:9px 12px;border-radius:10px;white-space:pre-wrap;word-wrap:break-word}
 .msg.user{align-self:flex-end;background:var(--agent-soft);border:1px solid var(--agent)}
@@ -235,6 +243,15 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
     <button class="btn" id="reset">Reset inbox</button>
   </div>
 </header>
+
+<div class="connect" id="connect" hidden>
+  <div class="connect-row">
+    <label for="secret" id="secret-label">Workshop code</label>
+    <input type="password" id="secret" autocomplete="off" placeholder="type the code the facilitator gave you">
+    <button class="btn primary" id="connect-btn">Connect</button>
+  </div>
+  <span class="hint" id="connect-hint"></span>
+</div>
 
 <section>
   <div class="sec-head"><h2>Agentic structure — one request, end to end</h2><p>One agent node. Everything else is deterministic code or a human.</p></div>
@@ -361,7 +378,6 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
     </div>
     <div class="panel chat">
       <div class="chat-head"><div><h3 id="chat-title">Inbox assistant</h3><span class="hint" id="cost">live Claude calls on your account · a few cents per turn</span></div><button class="btn small" id="clear">Clear chat</button></div>
-      <div class="connect" id="connect" hidden><label for="secret" id="secret-label">Workshop code</label><input type="password" id="secret" autocomplete="off" placeholder="ask the facilitator"><button class="btn small primary" id="connect-btn">Connect</button><span class="hint" id="connect-hint"></span></div>
       <div class="msgs" id="msgs"></div>
       <div class="suggest" id="suggest"></div>
       <div class="compose"><input type="text" id="say" placeholder="Ask the agent…" autocomplete="off"><button class="btn primary" id="send">Send</button><button class="btn" id="stop" hidden>Stop</button></div>
@@ -905,7 +921,8 @@ function labelModels(mode) {
   sel.value = current;
 }
 function ready(mode, costText) {
-  backend = mode; labelModels(mode); $("connect").hidden = true; $("cost").textContent = costText; $("send").disabled = false; setStatus("", "agent idle");
+  backend = mode; labelModels(mode); $("cost").textContent = costText; $("send").disabled = false; setStatus("", "agent idle");
+  if (mode !== "artifact") { const c = $("connect"); c.hidden = false; c.classList.add("done"); $("secret").disabled = true; $("connect-btn").textContent = "Change"; $("connect-hint").textContent = "Connected. Everyone can watch this screen; only this one talks to the agent."; }
 }
 async function detectProxy() {
   try { const r = await fetch("/api/agent", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }); return r.status !== 404; } catch (e) { return false; }
@@ -928,6 +945,7 @@ async function detectProxy() {
   $("secret").placeholder = hasProxy ? "ask the facilitator" : "sk-ant-…  stays in this tab only";
   $("connect-hint").textContent = hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic";
   const connect = () => {
+    if ($("connect").classList.contains("done")) { $("connect").classList.remove("done"); $("secret").disabled = false; $("secret").value = ""; $("connect-btn").textContent = "Connect"; $("connect-hint").textContent = hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic"; $("secret").focus(); return; }
     const v = $("secret").value.trim(); if (!v) return;
     SS.set(hasProxy ? "workshop.code" : "api.key", v);
     ready(mode, hasProxy ? "calls run on the facilitator's account through this site" : "calls run on your own API key, straight from this browser");
