@@ -403,6 +403,7 @@ const PROTECTED = DATA.court_label;
 const ROLE = DATA.escalation_role || "the supervising partner";
 const SENS = DATA.sensitive_word || "Privileged";
 const OWNER_ROLE = DATA.owner_role || "Lawyer";
+const EX = Object.assign({ triage: "label everything from courts and registries", triage2: "label all unread mail from the last 3 days", deadline: "court and regulator emails with a date in the next 14 days" }, DATA.examples || {});
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
@@ -634,10 +635,10 @@ const TOOLS = [
 ];
 const SUBAGENTS = [
   { name: "triage_agent", label: "Triage agent", on: true, tools: ["search_inbox", "read_email", "label_emails", "archive_emails"],
-    desc: "Delegate labelling and archiving. Give it one clear instruction, e.g. 'label everything from courts and registries' or 'label all unread mail from the last 3 days'. It searches, reads only when the subject is not enough, labels whole batches, and returns a short report.",
+    desc: `Delegate labelling and archiving. Give it one clear instruction, e.g. '${EX.triage}' or '${EX.triage2}'. It searches, reads only when the subject is not enough, labels whole batches, and returns a short report.`,
     brief: () => `You are the triage sub-agent for ${ME_FULL}'s inbox at ${FIRM_NAME}. Today is ${TODAY}. You label and archive; you never draft or forward.\nLabels you may apply: ${LABELS.join(" · ")} · plus "Urgent" on top.\n${DATA.brief_phishing || ""}\nWork in batches: one search, one label call for the whole batch. Finish with a two-line report: what you labelled, and anything suspicious.` },
   { name: "deadline_agent", label: "Deadline agent", on: true, tools: ["search_inbox", "read_email", "create_task"],
-    desc: "Delegate deadline hunting. Give it a scope, e.g. 'court and regulator emails with a date in the next 14 days'. It finds dated emails, reads the ones that matter, creates tasks with due dates, and returns the list.",
+    desc: `Delegate deadline hunting. Give it a scope, e.g. '${EX.deadline}'. It finds dated emails, reads the ones that matter, creates tasks with due dates, and returns the list.`,
     brief: () => `You are the deadline sub-agent for ${ME_FULL}'s inbox at ${FIRM_NAME}. Today is ${TODAY}. You find dates and create tasks; you never label, draft or forward.\nUse search_inbox with deadline_within_days, read the email when the date or the ask is unclear, then create_task with a precise title and due date (YYYY-MM-DD). Finish with a short list of the tasks you created and who they were assigned to.` },
   { name: "reply_agent", label: "Reply agent", on: true, tools: ["read_email", "draft_reply", "forward_email"],
     desc: "Delegate one reply or forward. Give it the email id and what to say. It reads the email, drafts in ${ME}'s voice, and sends or waits for approval as the rules require. Returns what happened, including a rejection or a block.",
