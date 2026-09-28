@@ -68,7 +68,7 @@ section{display:flex;flex-direction:column;gap:12px}
 .diagram .n-human rect{fill:var(--human-soft);stroke:var(--human)}
 .diagram .n-guard rect{fill:var(--guard-soft);stroke:var(--guard);stroke-dasharray:4 3}
 .diagram .n-ok rect{fill:var(--ok-soft);stroke:var(--ok)}
-.diagram .n-mem rect{fill:var(--panel-2);stroke:var(--muted);stroke-dasharray:4 3}
+.diagram .n-mem rect{fill:var(--human-soft);stroke:var(--human);stroke-dasharray:5 3;stroke-width:1.8}
 .diagram .n-skill rect{fill:var(--agent-soft);stroke:var(--agent);stroke-dasharray:4 3}
 .diagram rect{stroke-width:1.4;rx:6}
 .diagram .edge{fill:none;stroke:var(--muted);stroke-width:1.3}
@@ -83,7 +83,7 @@ section{display:flex;flex-direction:column;gap:12px}
 .sw.det{background:var(--det-soft);border-color:var(--det)} .sw.agent{background:var(--agent-soft);border-color:var(--agent)}
 .sw.human{background:var(--human-soft);border-color:var(--human)} .sw.guard{background:var(--guard-soft);border-color:var(--guard);border-style:dashed}
 .sw.ok{background:var(--ok-soft);border-color:var(--ok)}
-.sw.mem{background:var(--panel-2);border-color:var(--muted);border-style:dashed}
+.sw.mem{background:var(--human-soft);border-color:var(--human);border-style:dashed}
 .sw.skill{background:var(--agent-soft);border-color:var(--agent);border-style:dashed}
 .caption{color:var(--muted);max-width:80ch}
 
@@ -179,19 +179,14 @@ textarea#brief{width:100%;min-height:210px;resize:vertical;font-family:"IBM Plex
 .item.blocked{border-color:var(--guard)}
 
 /* chat */
-.chat{display:flex;flex-direction:column;min-height:420px}
+.chat{display:flex;flex-direction:column;min-height:360px}
 .chat-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.connect{display:flex;flex-direction:column;gap:6px;padding:16px 20px;border:2px solid var(--agent);border-radius:12px;background:var(--agent-soft);font-size:14px}
-.connect-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-.connect label{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:20px;color:var(--agent);white-space:nowrap}
-.connect input{flex:1;min-width:220px;font-size:18px;padding:10px 12px;border:1px solid var(--agent);letter-spacing:.08em}
-.connect .btn.primary{font-size:16px;padding:10px 20px}
-.connect .hint{font-size:13px}
-.connect.done{border-style:dashed;background:var(--panel-2);padding:10px 20px}
-.connect.done label{font-size:15px}
-.connect.done input{max-width:180px;font-size:14px;padding:6px 10px}
-.connect.done .btn.primary{font-size:13px;padding:6px 12px;background:var(--panel);color:var(--ink);border-color:var(--line)}
-.msgs{flex:1;overflow:auto;max-height:440px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.connect{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.connect input{width:130px;font-size:13px;padding:5px 8px}
+.connect .hint{display:none}
+.connect.done input{width:80px}
+.connect.done .btn.primary{background:var(--panel);color:var(--muted);border-color:var(--line)}
+.msgs{flex:1;overflow:auto;max-height:380px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .msg{max-width:92%;padding:9px 12px;border-radius:10px;white-space:pre-wrap;word-wrap:break-word}
 .msg.user{align-self:flex-end;background:var(--agent-soft);border:1px solid var(--agent)}
 .msg.agent{align-self:flex-start;background:var(--panel-2);border:1px solid var(--line)}
@@ -236,6 +231,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
     <p class="sub" id="subline">Simulated law-firm inbox · 500 emails</p>
   </div>
   <div class="hcontrols">
+    <span class="connect" id="connect" hidden><label for="secret" id="secret-label">code</label><input type="password" id="secret" autocomplete="off" placeholder="workshop code"><button class="btn small primary" id="connect-btn">Connect</button><span class="hint" id="connect-hint"></span></span>
     <label class="select" for="model">model
       <select id="model"><option value="quick" selected>quick</option></select>
     </label>
@@ -244,19 +240,11 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
 </header>
 
-<div class="connect" id="connect" hidden>
-  <div class="connect-row">
-    <label for="secret" id="secret-label">Workshop code</label>
-    <input type="password" id="secret" autocomplete="off" placeholder="type the code the facilitator gave you">
-    <button class="btn primary" id="connect-btn">Connect</button>
-  </div>
-  <span class="hint" id="connect-hint"></span>
-</div>
 
 <section>
   <div class="sec-head"><h2>Agentic structure — one request, end to end</h2><p>An orchestrator and three sub-agents. Everything else is deterministic code or a human.</p></div>
   <div class="panel pad diagram">
-    <svg viewBox="0 0 1100 500" role="img" aria-label="Diagram: the human user asks the orchestrator agent; a brief and skills and a rules engine feed it; it delegates to a triage agent, a deadline agent and a reply agent, each with its own tools; tools that change the world pass a coded guardrail that executes, asks the human, or returns an error; the inbox is the long-term memory reached only through tools.">
+    <svg viewBox="0 0 1100 540" role="img" aria-label="Diagram: the human user asks the orchestrator agent; a brief and skills and a rules engine feed it; it delegates to a triage agent, a deadline agent and a reply agent, each with its own tools; tools that change the world pass a coded guardrail that executes, asks the human, or returns an error; the inbox is the long-term memory reached only through tools.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
         <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ok)"/></marker>
@@ -270,10 +258,10 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
       <g class="n-human"><rect x="18" y="196" width="150" height="58"/><text x="93" y="220" text-anchor="middle" font-weight="600" id="dia-owner">Human user</text><text x="93" y="237" text-anchor="middle" class="small">asks in plain language</text></g>
       <path class="edge agent" d="M168 216 H232" marker-end="url(#ar-a)"/><text x="200" y="210" text-anchor="middle" class="small">request</text>
       <path class="edge agent result" d="M232 240 H168" marker-end="url(#ar-a)"/><text x="200" y="254" text-anchor="middle" class="small">reply</text>
-      <g class="n-mem"><rect x="18" y="300" width="172" height="72"/><text x="104" y="321" text-anchor="middle" font-weight="600">Working memory</text><text x="104" y="338" text-anchor="middle" class="small">this request only: the brief,</text><text x="104" y="351" text-anchor="middle" class="small">the turns, every result</text><text x="104" y="364" text-anchor="middle" class="small">rebuilt each time</text></g>
-      <path class="edge result" d="M190 330 C215 330 215 262 232 262" marker-end="url(#ar)"/>
+      <g class="n-mem"><rect x="18" y="296" width="172" height="86"/><text x="104" y="317" text-anchor="middle" font-weight="600">Working memory</text><text x="104" y="334" text-anchor="middle" class="small">the brief, the last turns of</text><text x="104" y="347" text-anchor="middle" class="small">this chat, every tool result</text><text x="104" y="360" text-anchor="middle" class="small">rebuilt for every call</text><text x="104" y="373" text-anchor="middle" class="small">sub-agents start empty</text></g>
+      <path class="edge result" d="M190 330 C215 330 215 262 232 262" marker-end="url(#ar)"/><path class="edge result" d="M232 268 C215 268 215 340 190 340"/>
       <!-- rules engine -->
-      <g class="n-det"><rect x="232" y="24" width="168" height="52"/><text x="316" y="45" text-anchor="middle" font-weight="600">Rules engine</text><text x="316" y="62" text-anchor="middle" class="small">deterministic · runs on everything first</text></g>
+      <g class="n-det"><rect x="232" y="24" width="200" height="52"/><text x="332" y="45" text-anchor="middle" font-weight="600">Rules engine</text><text x="332" y="62" text-anchor="middle" class="small">deterministic · runs before the agents</text></g>
       <path class="edge" d="M316 76 V178" marker-end="url(#ar)"/><text x="328" y="130" class="small">labels</text>
       <!-- orchestrator -->
       <g class="n-agent"><rect x="232" y="180" width="168" height="92"/><text x="316" y="206" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="224" text-anchor="middle" class="small">plans, delegates, reports</text><text x="316" y="238" text-anchor="middle" class="small">never labels or drafts itself</text><text x="316" y="256" text-anchor="middle" class="small">own tools: stats · search · read</text></g>
@@ -303,22 +291,32 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
       <!-- guardrail and outcomes -->
       <g class="n-guard"><rect x="850" y="206" width="130" height="60"/><text x="915" y="230" text-anchor="middle" font-weight="600">Guardrail</text><text x="915" y="248" text-anchor="middle" class="small">code, not persuasion</text></g>
       <path class="edge" d="M800 91 C830 91 830 236 848 236" marker-end="url(#ar)"/><path class="edge" d="M800 123 C830 123 830 236 848 236"/><path class="edge" d="M800 257 C830 257 830 236 848 236"/><path class="edge" d="M800 381 C830 381 830 236 848 236"/><path class="edge" d="M800 413 C830 413 830 236 848 236"/>
-      <g class="n-ok"><rect x="984" y="150" width="112" height="44"/><text x="1040" y="169" text-anchor="middle" font-weight="600">Executed</text><text x="1040" y="184" text-anchor="middle" class="small">within limits</text></g>
-      <g class="n-human"><rect x="984" y="280" width="112" height="44"/><text x="1040" y="299" text-anchor="middle" font-weight="600">Human approval</text><text x="1040" y="314" text-anchor="middle" class="small">above the line</text></g>
-      <path class="edge ok" d="M980 224 C1000 224 1000 172 982 172" marker-end="url(#ar-ok)"/><text x="1040" y="142" text-anchor="middle" class="small">≤ limit</text>
-      <path class="edge human" d="M980 248 C1000 248 1000 302 982 302" marker-end="url(#ar-h)"/><text x="1040" y="340" text-anchor="middle" class="small">&gt; limit</text>
+      <g class="n-ok"><rect x="978" y="150" width="120" height="44"/><text x="1040" y="169" text-anchor="middle" font-weight="600">Executed</text><text x="1040" y="184" text-anchor="middle" class="small">within limits</text></g>
+      <g class="n-human"><rect x="978" y="280" width="120" height="44"/><text x="1040" y="299" text-anchor="middle" font-weight="600">Human approval</text><text x="1040" y="314" text-anchor="middle" class="small">above the line</text></g>
+      <path class="edge ok" d="M980 224 C1000 224 1000 172 976 172" marker-end="url(#ar-ok)"/><text x="1040" y="142" text-anchor="middle" class="small">≤ limit</text>
+      <path class="edge human" d="M980 248 C1000 248 1000 302 976 302" marker-end="url(#ar-h)"/><text x="1040" y="340" text-anchor="middle" class="small">&gt; limit</text>
       <path class="edge human result" d="M1040 346 V370 H960" marker-end="url(#ar-h)"/><text x="1030" y="384" text-anchor="middle" class="small">approve / reject</text>
       <!-- long-term memory -->
-      <g class="n-mem"><rect x="640" y="432" width="180" height="40"/><text x="730" y="449" text-anchor="middle" font-weight="600">Long-term memory</text><text x="730" y="464" text-anchor="middle" class="small">the inbox itself · only through tools</text></g>
-      <path class="edge" d="M722 426 V431" marker-end="url(#ar)"/><path class="edge result" d="M738 431 V427" marker-end="url(#ar)"/>
+      <g class="n-mem"><rect x="560" y="434" width="340" height="74"/><text x="730" y="453" text-anchor="middle" font-weight="600">Long-term memory</text><text x="730" y="470" text-anchor="middle" class="small">the inbox state: labels, tasks, drafts</text><text x="730" y="484" text-anchor="middle" class="small">read and written only through tools</text><text x="730" y="498" text-anchor="middle" class="small">plus what you saved in the blocks: brief, rules, switches</text></g>
+      <path class="edge" d="M722 426 V432" marker-end="url(#ar)"/><path class="edge result" d="M738 432 V427" marker-end="url(#ar)"/>
       <!-- return path -->
-      <path class="edge guard result" d="M915 266 V300 H840 V490 H316 V272" marker-end="url(#ar-g)"/><text x="600" y="485" text-anchor="middle" class="small" style="fill:var(--guard)">blocked or rejected ⇢ tool error to the sub-agent, which reports it up</text>
+      <path class="edge guard result" d="M915 266 V300 H940 V520 H316 V272" marker-end="url(#ar-g)"/><text x="600" y="534" text-anchor="middle" class="small" style="fill:var(--guard)">blocked or rejected ⇢ tool error to the sub-agent, which reports it up</text>
     </svg>
     <div class="legend" style="margin-top:10px">
       <span><i class="sw det"></i>deterministic</span><span><i class="sw agent"></i>agent (orchestrator and sub-agents)</span><span><i class="sw skill"></i>brief &amp; skills</span><span><i class="sw mem"></i>memory</span><span><i class="sw human"></i>human</span><span><i class="sw guard"></i>guardrail</span><span><i class="sw ok"></i>executed</span>
     </div>
-    <p class="caption" style="margin-top:10px">The orchestrator reads the brief, plans, and delegates: the triage agent labels in batches, the deadline agent creates tasks, the reply agent drafts. Each sub-agent is its own model call with its own small set of tools, and reports back in words. The inbox is the long-term memory, reached only through tools, and the tools that change the world pass through a guardrail written in code. Below the line the action executes. Above it, a person decides. Either way the outcome, including a rejection, goes back to the agent as a tool result, and it carries on.</p>
+    <p class="caption" style="margin-top:10px">The orchestrator reads the brief, plans, and delegates: the triage agent labels in batches, the deadline agent creates tasks, the reply agent drafts. Each sub-agent is its own model call with its own small set of tools, and reports back in words. The model itself remembers nothing between calls: what it "knows" is either re-sent in the working memory (the brief, the last turns, the tool results) or written into the inbox through a tool. The tools that change the world pass through a guardrail written in code. Below the line the action executes. Above it, a person decides. Either way the outcome, including a rejection, goes back to the agent as a tool result, and it carries on.</p>
   </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2 id="assistant-head">Inbox assistant — ask in plain language</h2><p>Every request runs through the structure above. The trace at the bottom of the page shows each step.</p></div>
+  <div class="panel chat">
+      <div class="chat-head"><div><h3 id="chat-title">Inbox assistant</h3><span class="hint" id="cost">live Claude calls on your account · a few cents per turn</span></div><button class="btn small" id="clear">Clear chat</button></div>
+      <div class="msgs" id="msgs"></div>
+      <div class="suggest" id="suggest"></div>
+      <div class="compose"><input type="text" id="say" placeholder="Ask the agent…" autocomplete="off"><button class="btn primary" id="send">Send</button><button class="btn" id="stop" hidden>Stop</button></div>
+    </div>
 </section>
 
 <section>
@@ -354,9 +352,8 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 </section>
 
 <section>
-  <div class="sec-head"><h2>Workspace — the inbox, the assistant, the score</h2><p>Ask in plain language. Watch labels, tasks and drafts appear as the tools run.</p></div>
+  <div class="sec-head"><h2>Workspace — the inbox and the score</h2><p>Labels, tasks and drafts appear here as the tools run.</p></div>
   <div class="work">
-    <div class="side">
       <div class="panel inbox">
         <div class="inbox-top">
           <div class="search"><input type="text" id="q" placeholder="Search subject, sender, body…"><label class="chip" style="cursor:pointer"><input type="checkbox" id="showkey" style="margin:0"> answer key</label></div>
@@ -364,6 +361,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
         </div>
         <div class="list" id="list"></div>
       </div>
+    <div class="side">
       <div class="panel pad">
         <div class="block-head"><h3>Scorecard</h3><span class="hint">against the hidden answer key</span></div>
         <div class="score" style="margin-top:8px">
@@ -376,12 +374,6 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
       <div class="panel pad"><div class="block-head"><h3>Tasks</h3><span class="hint" id="tasks-n">none yet</span></div><div class="tasks" id="tasks" style="margin-top:8px"></div></div>
       <div class="panel pad"><div class="block-head"><h3>Outbox</h3><span class="hint" id="outbox-n">none yet</span></div><div class="outbox" id="outbox" style="margin-top:8px"></div></div>
     </div>
-    <div class="panel chat">
-      <div class="chat-head"><div><h3 id="chat-title">Inbox assistant</h3><span class="hint" id="cost">live Claude calls on your account · a few cents per turn</span></div><button class="btn small" id="clear">Clear chat</button></div>
-      <div class="msgs" id="msgs"></div>
-      <div class="suggest" id="suggest"></div>
-      <div class="compose"><input type="text" id="say" placeholder="Ask the agent…" autocomplete="off"><button class="btn primary" id="send">Send</button><button class="btn" id="stop" hidden>Stop</button></div>
-    </div>
   </div>
 </section>
 
@@ -390,7 +382,6 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   <div class="panel trace" id="trace"></div>
 </section>
 
-<footer>Real agent, simulated inbox: the reasoning and tool choices are live Claude calls on the viewer's account (a few cents per turn, consent asked once). The firm, the lawyer, the clients, the matters, the courts and every email are fictional and reset on reload. A build-your-own-agent training concept demo.</footer>
 </div>
 
 <dialog id="reader"><div class="reader" id="reader-body"></div></dialog>
