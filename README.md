@@ -1,9 +1,4 @@
-# Nordvik Industrial HR Inbox Agent
-
-> **This branch builds the HR exercise.** `site/index.html` and `inbox-agent.html` embed
-> the 100-email Nordvik Industrial inbox (`data/hr/emails.json`). The law-firm exercise
-> lives unchanged on branch `claude/legal-agent-demo-tdt0y8`; the code is identical, only
-> the embedded inbox differs. Rebuild here with `python3 build.py hr`.
+# Cedarstone & Vale Inbox Agent
 
 A hands-on demo for a "build your own agent" training session for lawyers.
 Participants get Alexandra Reed's inbox, 500 emails at Cedarstone & Vale LLP,
