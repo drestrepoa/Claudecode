@@ -495,6 +495,111 @@ def build(cfg):
     card(s, 0.9, 4.95, 11.6, 2.0, "Bring to the next session", [("One process in your organisation that starts in an inbox, like the late delivery. Sketch its five steps. Mark where a rule would do, where judgement is needed, where a system must be checked, and where a person must sign.", {"size": 13.5})], size=13.5)
     notes(s, "Close by giving the homework: one real process, five steps, three marks. The next session builds on those sketches.")
 
+
+    # ---------------------------------------------------------------- exercise 2: redesign one of your own processes
+    # G · overview
+    s = blank(); title(s, "In-course exercise 2: redesign one process")
+    textbox(s, 0.9, 1.55, 11.5, 0.7, [("Twenty-five minutes in the same groups of six, then one minute per group in plenary.", {"size": 17, "color": NAVY, "bold": True})])
+    card(s, 0.9, 2.4, 3.7, 3.9, "What you do", ["Each person pitches one process from their own job that starts with a request and today runs on hand-offs", "The group picks one", "The group maps it: as it is today, and with agents", "Agree the one-minute answer"])
+    card(s, 4.82, 2.4, 3.7, 3.9, "What you bring back", ["Which process you picked, in one sentence", "Why and how agents help: where the waiting is, what is rule, what is judgement", "The high-level design: intake, checks, decision, human line, response"])
+    card(s, 8.74, 2.4, 3.7, 3.9, "Rules of the room", ["Real processes only, from someone in the group", "No technology names; describe what the agent reads, checks, decides and does", "The person does not disappear: say where they sit and why", "One reporter, sixty seconds, no slides needed"])
+    textbox(s, 0.9, 6.5, 11.5, 0.4, [("Use the late-delivery example as the pattern, not as the answer.", {"size": 12, "italic": True, "color": GREY})])
+    notes(s, "Same groups, same reporter rotation if you like. The deliverable is spoken, one minute, three points. Tell them the canvas on the later slide is a guide to structure the conversation, not a form to fill in.")
+
+    # H · timeline
+    s = blank(); title(s, "Twenty-five minutes, four steps")
+    line(s, 0.98, 2.52, 12.24, 2.52, GOLD, 2.25, arrow=True)
+    phases = [("Step 1 · pitch", "Six pitches", "One minute each: the request that starts it, the steps, who touches it, where it waits, what good looks like.", "0–8 min"),
+              ("Step 2 · select", "Pick one", "Use the four criteria on the next slide. Vote if you must; do not debate past three minutes.", "8–11 min"),
+              ("Step 3 · map", "Map it twice", "Five steps as they are today. Then the agentic design: intake, checks, decision, human line, response.", "11–21 min"),
+              ("Step 4 · prepare", "The minute", "Three sentences, one per question. Pick the reporter. Rehearse it once.", "21–25 min")]
+    for i, (chipx, head, body, when) in enumerate(phases):
+        x = 0.84 + i * 2.95
+        marker(s, x, 2.29, 2.84)
+        textbox(s, x + 0.55, 2.87, 2.4, 0.5, [(head, {"bold": True, "size": 16})])
+        textbox(s, x + 0.55, 3.35, 2.4, 1.4, [body], size=12)
+        chip(s, chipx, x + 0.16, 4.71)
+        textbox(s, x + 0.16, 5.12, 2.25, 0.35, [when], size=12, color=GREY, align=PP_ALIGN.CENTER)
+    textbox(s, 0.9, 5.9, 11.5, 0.8, [("Step 3 is the work. If the pitches run long, cut them to forty seconds each; never cut the mapping.", {"size": 13, "italic": True, "color": NAVY})])
+    notes(s, "Post the timings in the breakout chat. Visit rooms during step 3 and push on one question: where exactly does a person still need to look, and why there?")
+
+    # I · pitch template and examples
+    s = blank(); title(s, "Step 1 · your sixty-second pitch")
+    card(s, 0.9, 1.55, 5.6, 5.3, "Say five things", [("The request that starts it: who sends it, through what channel", {"size": 13}), ("The steps it goes through today, and roughly how long", {"size": 13}), ("Who touches it: how many people, in how many teams", {"size": 13}), ("Where it waits: the inbox, the approval, the missing information", {"size": 13}), ("What a good outcome looks like, for the requester and for you", {"size": 13})], size=13)
+    textbox(s, 6.9, 1.6, 5.6, 0.4, [("Examples from any function", {"bold": True, "size": 15, "color": NAVY})])
+    ex = [("Customer service", "a complaint about a late or wrong delivery"), ("Finance", "an invoice dispute or a payment status query"), ("HR", "a leave request, a contract change, a reference letter"), ("Sales", "a quote request that needs pricing and stock checks"),
+          ("Operations", "a maintenance ticket or a quality deviation"), ("Procurement", "a new supplier or a purchase request"), ("Legal & compliance", "an NDA request or a data access request"), ("IT", "an access request or an incident report")]
+    for i, (fn, e) in enumerate(ex):
+        y = 2.1 + i * 0.58
+        textbox(s, 6.9, y, 1.9, 0.5, [(fn, {"bold": True, "size": 12, "color": NAVY})], anchor=MSO_ANCHOR.MIDDLE)
+        textbox(s, 8.8, y, 3.7, 0.5, [(e, {"size": 12})], anchor=MSO_ANCHOR.MIDDLE)
+    notes(s, "The pitch is a description, not a proposal. Stop anyone who starts designing in step 1; that is step 3. The examples show that every function has a request-driven process; the shape is always the same.")
+
+    # J · selection criteria
+    s = blank(); title(s, "Step 2 · pick the one that will teach you the most")
+    good = [("Starts with a request", "an email, a form, a ticket, a call: something an intake agent can read"), ("Many hand-offs, little judgement", "most steps are checks and rules; one or two need a person"), ("Facts live in systems", "the answers are in an ERP, a CRM, a tracker, a calendar, not in someone's head"), ("A clear owner and a clear outcome", "someone can say what a good result is, and measure it")]
+    bad = [("Every step needs an expert", "if judgement is everywhere, start smaller"), ("No data to check", "an agent cannot verify what no system records"), ("Mostly relationship", "a negotiation or a difficult conversation is not a process to automate"), ("Nobody owns it", "if no one can change the process, the design will not survive the room")]
+    textbox(s, 0.9, 1.5, 5.6, 0.4, [("Choose it if", {"bold": True, "size": 16, "color": "2C8A5A"})])
+    textbox(s, 6.9, 1.5, 5.6, 0.4, [("Leave it for now if", {"bold": True, "size": 16, "color": "BF3F3A"})])
+    for i in range(4):
+        y = 2.0 + i * 1.2
+        for x, (h, b), col in ((0.9, good[i], "2C8A5A"), (6.9, bad[i], "BF3F3A")):
+            o = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(x), Inches(y + 0.05), Inches(0.3), Inches(0.3)); o.fill.solid(); o.fill.fore_color.rgb = RGBColor.from_string(col); o.line.fill.background(); o.shadow.inherit = False
+            textbox(s, x + 0.45, y - 0.02, 5.1, 0.4, [(h, {"bold": True, "size": 14})])
+            textbox(s, x + 0.45, y + 0.36, 5.1, 0.7, [(b, {"size": 12, "color": GREY})])
+    textbox(s, 0.9, 6.75, 11.6, 0.35, [("Tie-breaker: the one whose owner is in the room.", {"size": 12, "italic": True, "color": NAVY})])
+    notes(s, "Three minutes. The left column describes the late-delivery case; that is the pattern. The right column is not 'never', it is 'not for a twenty-five-minute exercise'.")
+
+    # K · the mapping canvas
+    s = blank(); title(s, "Step 3 · the mapping canvas")
+    textbox(s, 0.9, 1.4, 11.6, 0.35, [("Draw this on a shared whiteboard or in the chat. Boxes, not prose.", {"size": 12.5, "color": GREY})])
+    textbox(s, 0.9, 1.8, 6, 0.4, [("As it is today", {"bold": True, "size": 15, "color": GREY})])
+    steps = ["Trigger", "Step 2", "Step 3", "Step 4", "Outcome"]
+    for i, st in enumerate(steps):
+        x = 0.9 + i * 2.4
+        node(s, x, 2.25, 2.1, 0.6, st, "who · how long", "human", size=11)
+        if i < 4: arrow(s, x + 2.12, 2.55, x + 2.38, 2.55, "B4761C")
+    textbox(s, 0.9, 2.95, 11.6, 0.35, [("Under each box: who touches it, and how long the request waits before it.", {"size": 11, "italic": True, "color": GREY})])
+    textbox(s, 0.9, 3.5, 6, 0.4, [("With agents", {"bold": True, "size": 15, "color": NAVY})])
+    design = [("Intake", "what the agent reads and extracts", "agent"), ("Checks", "which systems, which facts", "agent"), ("Decision", "rules first · judgement where?", "agent"), ("Human line", "which cases, which limit", "human"), ("Response", "what it does and tells", "ok")]
+    for i, (h, sub, k) in enumerate(design):
+        x = 0.9 + i * 2.4
+        node(s, x, 3.95, 2.1, 0.75, h, sub, k, size=11)
+        if i < 4: arrow(s, x + 2.12, 4.32, x + 2.38, 4.32, "5E48B8")
+    node(s, 0.9, 4.95, 5.7, 0.55, "Record and trace", "what every agent writes down · what a person can audit", "mem", size=11)
+    node(s, 6.8, 4.95, 5.7, 0.55, "Guardrails", "the limits written in code, not in the brief", "guard", size=11)
+    card(s, 0.9, 5.75, 11.6, 1.25, "Then answer, in one sentence each", [("Where was the waiting, and which hand-off did the design remove?  ·  Which step is a rule and which needs judgement?  ·  Where does the person sit, and why there?", {"size": 12.5})], size=12.5)
+    notes(s, "Ten minutes. Top row first, quickly: five boxes, who, how long. Bottom row is the design, in the same five shapes as the late delivery. The three questions at the bottom are the substance of the plenary minute.")
+
+    # L · report back
+    s = blank(); title(s, "Step 4 · one minute in plenary")
+    textbox(s, 0.9, 1.55, 11.5, 0.5, [("Three questions, one sentence each. The reporter speaks, nobody else.", {"bold": True, "size": 16, "color": NAVY})])
+    qs = [("1", "Which process did you pick?", "Name it, who sends the request, what the outcome is."),
+          ("2", "Why and how can agents help?", "Where the waiting is today; what is rule and what is judgement; what an agent reads, checks and does."),
+          ("3", "What does the high-level design look like?", "Intake, checks, decision, human line, response. Say where the person sits and which limit is in code.")]
+    for i, (num, q, hint) in enumerate(qs):
+        y = 2.3 + i * 1.45
+        o = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(0.9), Inches(y), Inches(0.6), Inches(0.6)); o.fill.solid(); o.fill.fore_color.rgb = RGBColor.from_string(NAVY_LINE); o.line.fill.background(); o.shadow.inherit = False
+        tf = o.text_frame; tf.margin_left = tf.margin_right = 0; p_ = tf.paragraphs[0]; p_.alignment = PP_ALIGN.CENTER; r_ = p_.add_run(); r_.text = num; run_style(r_, 16, True, "FFFFFF")
+        textbox(s, 1.75, y - 0.05, 10.7, 0.6, [(q, {"bold": True, "size": 16})])
+        textbox(s, 1.75, y + 0.5, 10.7, 0.6, [(hint, {"size": 12.5, "color": GREY, "italic": True})])
+    textbox(s, 0.9, 6.7, 11.5, 0.4, [("The plenary listens for one thing: did the design keep a person where a person is needed, and nowhere else?", {"size": 12, "italic": True, "color": NAVY})])
+    notes(s, "Six groups, six minutes. Note each group's process on a shared board as they speak; the list becomes the portfolio for the next discussion.")
+
+    # M · facilitator debrief
+    s = blank(); title(s, "Debrief: what the room will have found")
+    pats = [("The same shape every time", "Intake, checks, decision, human line, response. Different functions, one pattern. That is why the building blocks transfer."),
+            ("Waiting, not working", "Every group will describe hand-offs and inboxes. The redesign removes waiting; the working time barely changes."),
+            ("Systems are the constraint", "Where the facts are not in a system, the agent cannot check them. The real project is often data access, not AI."),
+            ("The human line moves, it does not vanish", "Approvals above a limit, exceptions, the difficult conversation. Deciding that line is the leadership decision.")]
+    for i, (h, b) in enumerate(pats):
+        col, row = i % 2, i // 2
+        x, y = 0.9 + col * 5.95, 1.6 + row * 2.55
+        card(s, x, y, 5.65, 2.3, h, [(b, {"size": 13})], size=13)
+        chip(s, str(i + 1), x + 5.65 - 0.75, y + 0.15, w=0.5, h=0.35, size=13)
+    textbox(s, 0.9, 6.75, 11.6, 0.35, [("Close by asking each group for the one thing they would need from the organisation to build what they mapped.", {"size": 12, "italic": True, "color": NAVY})])
+    notes(s, "Use after the six minutes. Point to the groups whose answers illustrate each pattern. The closing question turns the exercise into a list of asks: data access, an owner, a limit, a policy.")
+
     out = HERE / f"agent-challenge-{cfg['suffix']}.pptx"
     prs.save(out)
     return out
