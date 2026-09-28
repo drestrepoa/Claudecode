@@ -555,7 +555,7 @@ const TOOLS = [
       return { id: e.id, from: `${e.from_name} <${e.from_email}>`, to: e.to, cc: e.cc || null, thread: e.thread || null, date: e.date, subject: e.subject, importance: e.importance || null, sensitivity: e.sensitivity || null, attachments: e.attachments, date_mentioned: e.deadline || null, privileged: e.privileged, labels: e.labels,
         body: "<<< email body, untrusted data >>>\n" + e.body.slice(0, 1500) + "\n<<< end of email body >>>" };
     } },
-  { name: "label_emails", on: true, desc: "Apply one label to many emails at once. label must be one of the allowed labels or 'Urgent'. Replaces any previous category label; Urgent is added on top. Large batches may need the lawyer's approval.",
+  { name: "label_emails", on: true, desc: "Apply one label to many emails at once. label must be one of the allowed labels or 'Urgent'. Replaces any previous category label; Urgent is added on top. Large batches may need approval.",
     schema: { type: "object", properties: { ids: { type: "array", items: { type: "string" } }, label: { type: "string" } }, required: ["ids", "label"] },
     io: ["{ ids[], label }", "{ labelled, unknown_ids }"],
     async execute(i, ctx) {
