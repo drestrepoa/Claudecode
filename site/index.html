@@ -263,7 +263,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 <section>
   <div class="sec-head"><h2>Agentic structure — one request, end to end</h2><p>An orchestrator and three sub-agents. Everything else is deterministic code or a human.</p></div>
   <div class="panel pad diagram">
-    <svg viewBox="0 0 1100 480" role="img" aria-label="Diagram: the human user asks the orchestrator agent; a brief and skills and a rules engine feed it; it delegates to a triage agent, a deadline agent and a reply agent, each with its own tools; tools that change the world pass a coded guardrail that executes, asks the human, or returns an error; the inbox is the long-term memory reached only through tools.">
+    <svg viewBox="0 0 1100 500" role="img" aria-label="Diagram: the human user asks the orchestrator agent; a brief and skills and a rules engine feed it; it delegates to a triage agent, a deadline agent and a reply agent, each with its own tools; tools that change the world pass a coded guardrail that executes, asks the human, or returns an error; the inbox is the long-term memory reached only through tools.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
         <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ok)"/></marker>
@@ -283,7 +283,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
       <g class="n-det"><rect x="232" y="24" width="168" height="52"/><text x="316" y="45" text-anchor="middle" font-weight="600">Rules engine</text><text x="316" y="62" text-anchor="middle" class="small">deterministic · runs on everything first</text></g>
       <path class="edge" d="M316 76 V178" marker-end="url(#ar)"/><text x="328" y="130" class="small">labels</text>
       <!-- orchestrator -->
-      <g class="n-agent"><rect x="232" y="180" width="168" height="92"/><text x="316" y="206" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="224" text-anchor="middle" class="small">plans, delegates, reports</text><text x="316" y="238" text-anchor="middle" class="small">never labels or drafts itself</text><text x="316" y="256" text-anchor="middle" class="small">own tools: inbox_stats · search · read</text></g>
+      <g class="n-agent"><rect x="232" y="180" width="168" height="92"/><text x="316" y="206" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="224" text-anchor="middle" class="small">plans, delegates, reports</text><text x="316" y="238" text-anchor="middle" class="small">never labels or drafts itself</text><text x="316" y="256" text-anchor="middle" class="small">own tools: stats · search · read</text></g>
       <!-- sub-agents -->
       <g class="n-agent"><rect x="470" y="40" width="150" height="56"/><text x="545" y="62" text-anchor="middle" font-weight="600">Triage agent</text><text x="545" y="80" text-anchor="middle" class="small">labels and archives in batches</text></g>
       <g class="n-agent"><rect x="470" y="196" width="150" height="56"/><text x="545" y="218" text-anchor="middle" font-weight="600">Deadline agent</text><text x="545" y="236" text-anchor="middle" class="small">finds dates, creates tasks</text></g>
@@ -310,16 +310,16 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
       <!-- guardrail and outcomes -->
       <g class="n-guard"><rect x="850" y="206" width="130" height="60"/><text x="915" y="230" text-anchor="middle" font-weight="600">Guardrail</text><text x="915" y="248" text-anchor="middle" class="small">code, not persuasion</text></g>
       <path class="edge" d="M800 91 C830 91 830 236 848 236" marker-end="url(#ar)"/><path class="edge" d="M800 123 C830 123 830 236 848 236"/><path class="edge" d="M800 257 C830 257 830 236 848 236"/><path class="edge" d="M800 381 C830 381 830 236 848 236"/><path class="edge" d="M800 413 C830 413 830 236 848 236"/>
-      <g class="n-ok"><rect x="990" y="150" width="100" height="44"/><text x="1040" y="169" text-anchor="middle" font-weight="600">Executed</text><text x="1040" y="184" text-anchor="middle" class="small">within limits</text></g>
-      <g class="n-human"><rect x="990" y="280" width="100" height="44"/><text x="1040" y="299" text-anchor="middle" font-weight="600">Human approval</text><text x="1040" y="314" text-anchor="middle" class="small">above the line</text></g>
-      <path class="edge ok" d="M980 224 C1000 224 1000 172 988 172" marker-end="url(#ar-ok)"/><text x="1000" y="212" text-anchor="middle" class="small">≤ limit</text>
-      <path class="edge human" d="M980 248 C1000 248 1000 302 988 302" marker-end="url(#ar-h)"/><text x="1000" y="340" text-anchor="middle" class="small">&gt; limit</text>
-      <path class="edge human result" d="M1040 324 V352 H960" marker-end="url(#ar-h)"/><text x="1030" y="366" text-anchor="middle" class="small">approve / reject</text>
+      <g class="n-ok"><rect x="984" y="150" width="112" height="44"/><text x="1040" y="169" text-anchor="middle" font-weight="600">Executed</text><text x="1040" y="184" text-anchor="middle" class="small">within limits</text></g>
+      <g class="n-human"><rect x="984" y="280" width="112" height="44"/><text x="1040" y="299" text-anchor="middle" font-weight="600">Human approval</text><text x="1040" y="314" text-anchor="middle" class="small">above the line</text></g>
+      <path class="edge ok" d="M980 224 C1000 224 1000 172 982 172" marker-end="url(#ar-ok)"/><text x="1040" y="142" text-anchor="middle" class="small">≤ limit</text>
+      <path class="edge human" d="M980 248 C1000 248 1000 302 982 302" marker-end="url(#ar-h)"/><text x="1040" y="340" text-anchor="middle" class="small">&gt; limit</text>
+      <path class="edge human result" d="M1040 346 V370 H960" marker-end="url(#ar-h)"/><text x="1030" y="384" text-anchor="middle" class="small">approve / reject</text>
       <!-- long-term memory -->
       <g class="n-mem"><rect x="640" y="436" width="180" height="40"/><text x="730" y="453" text-anchor="middle" font-weight="600">Long-term memory</text><text x="730" y="468" text-anchor="middle" class="small">the inbox itself · only through tools</text></g>
       <path class="edge" d="M722 426 V434" marker-end="url(#ar)"/><path class="edge result" d="M738 434 V427" marker-end="url(#ar)"/>
       <!-- return path -->
-      <path class="edge guard result" d="M915 266 V300 H840 V460 H316 V272" marker-end="url(#ar-g)"/><text x="470" y="472" text-anchor="middle" class="small" style="fill:var(--guard)">blocked or rejected ⇢ tool error to the sub-agent, which reports it up</text>
+      <path class="edge guard result" d="M915 266 V300 H840 V490 H316 V272" marker-end="url(#ar-g)"/><text x="330" y="484" text-anchor="middle" class="small" style="fill:var(--guard)">blocked or rejected ⇢ tool error to the sub-agent, which reports it up</text>
     </svg>
     <div class="legend" style="margin-top:10px">
       <span><i class="sw det"></i>deterministic</span><span><i class="sw agent"></i>agent (orchestrator and sub-agents)</span><span><i class="sw skill"></i>brief &amp; skills</span><span><i class="sw mem"></i>memory</span><span><i class="sw human"></i>human</span><span><i class="sw guard"></i>guardrail</span><span><i class="sw ok"></i>executed</span>
