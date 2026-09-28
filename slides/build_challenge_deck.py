@@ -12,7 +12,10 @@ from pathlib import Path
 
 from lxml import etree
 from pptx import Presentation
+from pptx.chart.data import CategoryChartData
 from pptx.dml.color import RGBColor
+from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION, XL_TICK_LABEL_POSITION
+from pptx.enum.dml import MSO_LINE
 from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
@@ -137,6 +140,50 @@ def notes(slide, text):
     slide.notes_slide.notes_text_frame.text = text
 
 
+
+# ---------------------------------------------------------------- diagram helpers (page colour code)
+KIND = {"det": ("E6F0F7", "2C6C9C", False), "agent": ("EEEAF9", "5E48B8", False), "human": ("FBF1E0", "B4761C", False),
+        "guard": ("FBE8E7", "BF3F3A", True), "ok": ("E4F3EB", "2C8A5A", False), "mem": ("F3F4F7", "6B7280", True)}
+
+
+def node(slide, x, y, w, h, label, sub, kind, mono=False, size=12):
+    fill, ln, dashed = KIND[kind]
+    r = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
+    r.adjustments[0] = 0.12
+    r.fill.solid(); r.fill.fore_color.rgb = RGBColor.from_string(fill); r.line.color.rgb = RGBColor.from_string(ln); r.line.width = Pt(1.25); r.shadow.inherit = False
+    if dashed: r.line.dash_style = MSO_LINE.DASH
+    tf = r.text_frame; tf.word_wrap = True; tf.margin_left = tf.margin_right = Inches(0.06); tf.margin_top = tf.margin_bottom = Inches(0.03); tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p0 = tf.paragraphs[0]; p0.alignment = PP_ALIGN.CENTER; r0 = p0.add_run(); r0.text = label; run_style(r0, size, True, BLACK)
+    if mono: r0.font.name = "Courier New"; r0.font.bold = False
+    if sub:
+        p1 = tf.add_paragraph(); p1.alignment = PP_ALIGN.CENTER; r1 = p1.add_run(); r1.text = sub; run_style(r1, max(size - 3, 8.5), False, GREY)
+    return r
+
+
+def arrow(slide, x1, y1, x2, y2, color="6B7280", dashed=False, width=1.25, head=True):
+    c = line(slide, x1, y1, x2, y2, color, width, arrow=head)
+    if dashed: c.line.dash_style = MSO_LINE.DASH
+    return c
+
+
+def callout(slide, x, y, w, h, head, body, color=GOLD):
+    r = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
+    r.fill.solid(); r.fill.fore_color.rgb = RGBColor.from_string("FFFFFF"); r.line.color.rgb = RGBColor.from_string(color); r.line.width = Pt(1.5); r.shadow.inherit = False
+    textbox(slide, x + 0.12, y + 0.08, w - 0.24, 0.32, [(head.upper(), {"bold": True, "size": 10.5, "color": "8A6A2E"})])
+    textbox(slide, x + 0.12, y + 0.38, w - 0.24, h - 0.45, [(body, {"size": 10.5})], space_after=2)
+    return r
+
+
+def legend(slide, x, y, items):
+    for i, (kind, label) in enumerate(items):
+        fill, ln, dashed = KIND[kind]
+        xx = x + i * 1.55
+        sw = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(xx), Inches(y + 0.06), Inches(0.28), Inches(0.18))
+        sw.fill.solid(); sw.fill.fore_color.rgb = RGBColor.from_string(fill); sw.line.color.rgb = RGBColor.from_string(ln); sw.line.width = Pt(1); sw.shadow.inherit = False
+        if dashed: sw.line.dash_style = MSO_LINE.DASH
+        textbox(slide, xx + 0.34, y, 1.2, 0.3, [label], size=10.5, color=GREY)
+
+
 # ---------------------------------------------------------------- deck
 def build(cfg):
     prs = fresh()
@@ -206,6 +253,41 @@ def build(cfg):
     card(s, 6.6, 1.55, 5.9, 2.35, "Connecting", ["Everyone can open the page and read it", "Only one person per group clicks Connect and enters the session code", "That person shares their screen. The group decides what to type"])
     card(s, 6.6, 4.1, 5.9, 2.4, "Cost and pace", ["Each prompt is a few model calls on the course account. Do not spam it", "Leave the model on \"quick\". It answers in seconds", "\"Too many calls\"? Wait ten seconds and send again"])
     notes(s, "Show the page live for 60 seconds before opening breakouts: scroll from the diagram to the trace. Do not connect on screen; the code is for the groups.")
+
+
+    # A · anatomy of the agent
+    s = blank(); title(s, "Anatomy of the agent")
+    textbox(s, 0.9, 1.35, 11.5, 0.35, [("One agent node. Everything else is deterministic code, a system of record, or a person.", {"size": 13, "color": GREY})])
+    node(s, 0.7, 3.25, 1.75, 0.9, "HR partner", "asks in plain language", "human")
+    node(s, 3.0, 1.75, 2.3, 0.75, "Rules engine", "deterministic · runs first", "det")
+    node(s, 3.0, 3.05, 2.3, 1.3, "Inbox agent", "the only agent node · reason, act, a few rounds", "agent")
+    tools = ["inbox_stats", "search_inbox", "read_email", "label_emails", "create_task", "draft_reply", "forward_email"]
+    ty = [1.55 + i * 0.6 for i in range(7)]
+    for t, y in zip(tools, ty):
+        node(s, 6.4, y, 1.9, 0.42, t, None, "det", mono=True, size=11)
+        arrow(s, 5.32, 3.7, 6.38, y + 0.21)
+    textbox(s, 5.95, 5.78, 2.8, 0.3, [("read only ↑  ·  change the world ↓", {"size": 9, "color": GREY})], align=PP_ALIGN.CENTER)
+    node(s, 9.1, 3.75, 1.8, 0.9, "Guardrail", "code, not persuasion", "guard")
+    for y in ty[3:]:
+        arrow(s, 8.32, y + 0.21, 9.08, 4.2)
+    node(s, 11.3, 2.75, 1.8, 0.75, "Executed", "within limits", "ok")
+    node(s, 11.3, 4.75, 1.8, 0.75, "Human approval", "above the line", "human")
+    arrow(s, 10.92, 4.0, 11.28, 3.15, "2C8A5A"); textbox(s, 10.85, 3.3, 0.9, 0.3, [("≤ limit", {"size": 9.5, "color": "2C8A5A"})])
+    arrow(s, 10.92, 4.4, 11.28, 5.1, "B4761C"); textbox(s, 10.85, 4.75, 0.9, 0.3, [("> limit", {"size": 9.5, "color": "B4761C"})])
+    arrow(s, 2.47, 3.5, 2.98, 3.5, "5E48B8"); textbox(s, 2.35, 3.15, 0.8, 0.3, [("request", {"size": 9.5, "color": GREY})], align=PP_ALIGN.CENTER)
+    arrow(s, 2.98, 3.9, 2.47, 3.9, "5E48B8", dashed=True); textbox(s, 2.35, 3.95, 0.8, 0.3, [("reply", {"size": 9.5, "color": GREY})], align=PP_ALIGN.CENTER)
+    arrow(s, 4.15, 2.52, 4.15, 3.03); textbox(s, 4.25, 2.6, 0.8, 0.3, [("labels", {"size": 9.5, "color": GREY})])
+    # return path: blocked or rejected goes back to the agent as a tool error
+    arrow(s, 10.0, 4.67, 10.0, 6.05, "BF3F3A", dashed=True, head=False); arrow(s, 10.0, 6.05, 4.15, 6.05, "BF3F3A", dashed=True, head=False); arrow(s, 4.15, 6.05, 4.15, 4.37, "BF3F3A", dashed=True)
+    textbox(s, 4.4, 6.08, 5.5, 0.3, [("blocked or rejected → returned to the agent as a tool error", {"size": 9.5, "color": "BF3F3A"})])
+    # memory and tools callouts
+    callout(s, 0.6, 4.6, 2.6, 1.55, "Memory, short term", "The context of one request: the brief, the conversation so far, every tool result. Rebuilt for every request; nothing is remembered between them unless it is written down.")
+    arrow(s, 3.2, 4.85, 3.35, 4.37, GOLD, width=1.5)
+    callout(s, 0.6, 1.5, 2.2, 1.5, "Memory, long term", "The inbox itself: labels, tasks, drafts. It lives outside the model and is reached only through tools.")
+    arrow(s, 2.82, 2.2, 6.38, 1.76, GOLD, width=1.5)
+    callout(s, 6.9, 6.25, 5.5, 0.85, "Tools", "Typed inputs and outputs. The first three only read; the last four change the world and pass the guardrail first.")
+    legend(s, 0.6, 6.5, [("det", "deterministic"), ("agent", "agent"), ("human", "human"), ("guard", "guardrail")])
+    notes(s, "Walk it left to right, then add the two memory arrows. Short-term memory is the context window: the brief, the turns, the tool results, rebuilt every request. Long-term memory is the inbox state, outside the model, reached through tools. That is why the agent can be trusted with an inbox it cannot touch directly. Tools split into read-only and change-the-world; only the second group passes the guardrail.")
 
     # 5 · exercise 1
     s = blank(); title(s, "Part 1 · chatbot first (8 minutes, alone)")
@@ -299,6 +381,108 @@ def build(cfg):
     line(s, 6.45, 4.5, 6.85, 4.5, GOLD, 2.25, arrow=True)
     notes(s, "This is the bridge to the next topic. The exercise showed a personal assistant with hands. The value multiplies when the same building blocks are applied to the process the inbox feeds: intake, triage, assignment, action, review. Ask: in your organisation, what happens to an email after it is triaged? That chain is the next session.")
 
+
+    # B · one request, end to end
+    s = blank(); title(s, "One request, end to end: a late delivery")
+    textbox(s, 0.9, 1.35, 11.5, 0.35, [("The email is only the intake. The value is in the chain behind it, and no person touches the normal case.", {"size": 13, "color": GREY})])
+    node(s, 0.6, 3.3, 1.7, 1.0, "Customer", "\"My delivery is late and nobody answers\"", "human")
+    node(s, 2.7, 3.2, 2.0, 1.2, "Intake agent", "reads the email · extracts order, issue, tone · opens a case", "agent")
+    arrow(s, 2.32, 3.8, 2.68, 3.8, "5E48B8")
+    checks = [("Order agent", "was it shipped, when, by whom?", "ERP", "order record", 1.6), ("Delivery agent", "where is the parcel now?", "Carrier API", "tracking events", 3.1), ("Root-cause agent", "picking error, stock, address?", "Warehouse", "WMS + returns", 4.6)]
+    for lab, sub, sysn, syss, y in checks:
+        node(s, 5.3, y, 2.0, 1.05, lab, sub, "agent")
+        node(s, 7.6, y + 0.2, 1.5, 0.65, sysn, syss, "det")
+        arrow(s, 4.72, 3.8, 5.28, y + 0.52, "5E48B8"); arrow(s, 7.32, y + 0.52, 7.58, y + 0.52); arrow(s, 9.12, y + 0.52, 9.68, 3.6)
+    node(s, 9.7, 3.05, 1.8, 1.1, "Policy agent", "refund, resend or voucher? rules first, judgement second", "agent")
+    node(s, 9.7, 4.6, 1.8, 0.8, "Guardrail", "compensation limit · data boundary", "guard")
+    arrow(s, 10.6, 4.17, 10.6, 4.58, "BF3F3A")
+    node(s, 11.8, 4.65, 1.35, 0.75, "Person", "approves above the limit", "human")
+    arrow(s, 11.52, 5.0, 11.78, 5.0, "B4761C"); textbox(s, 11.45, 5.42, 1.8, 0.3, [("> limit only", {"size": 9, "color": "B4761C"})])
+    node(s, 11.8, 2.05, 1.35, 1.1, "Response agent", "answers · updates CRM · files the carrier claim", "agent")
+    arrow(s, 10.6, 3.03, 11.78, 2.6, "2C8A5A"); textbox(s, 10.7, 2.35, 1.1, 0.3, [("≤ limit", {"size": 9, "color": "2C8A5A"})])
+    arrow(s, 11.8, 2.2, 1.45, 3.28, "5E48B8", dashed=True); textbox(s, 4.0, 2.1, 3.0, 0.3, [("reply to the customer, in minutes", {"size": 9.5, "color": "5E48B8"})])
+    node(s, 2.7, 5.55, 6.4, 0.75, "Case record: shared memory", "everything every agent learned, one audit trail, one place a person can look", "mem")
+    for x in (3.7, 6.3, 8.35): arrow(s, x, 5.0 if x != 3.7 else 4.42, x, 5.53, "6B7280", dashed=True)
+    legend(s, 0.6, 6.6, [("agent", "agent"), ("det", "system"), ("human", "person"), ("guard", "guardrail"), ("mem", "memory")])
+    textbox(s, 8.5, 6.55, 4.6, 0.5, [("Each agent has the same anatomy as the one you ran today. What changed is that they hand work to each other.", {"size": 10.5, "italic": True, "color": NAVY})])
+    notes(s, "Tell it as a story. A customer writes that a delivery is late. The intake agent does what the inbox agent did today: reads, extracts, opens a case. Three specialist agents check three systems at once. A policy agent applies the compensation rules; above the limit a person approves, below it the response agent answers, updates the CRM and files the claim with the carrier. The case record is the shared memory and the audit trail. Nobody forwarded an email.")
+
+    # C · before and after
+    s = blank(); title(s, "The same complaint, before and after")
+    textbox(s, 0.9, 1.4, 7, 0.4, [("Today: five hand-offs, three days", {"bold": True, "size": 15, "color": GREY})])
+    today = [("Customer emails", "day 0"), ("Service desk reads it", "next morning"), ("Emails logistics", "+1 day"), ("Logistics asks carrier", "+½ day"), ("Logistics replies", "+½ day"), ("Customer answered", "day 3")]
+    for i, (h, w) in enumerate(today):
+        x = 0.9 + i * 2.0
+        node(s, x, 1.95, 1.75, 0.7, h, w, "human", size=11)
+        if i < len(today) - 1: arrow(s, x + 1.77, 2.3, x + 1.98, 2.3, "B4761C")
+    textbox(s, 0.9, 3.15, 7, 0.4, [("With agents: one hand-off, ten minutes", {"bold": True, "size": 15, "color": NAVY})])
+    after = [("Customer emails", "minute 0", "human"), ("Intake + three checks", "minute 2, in parallel", "agent"), ("Policy decision", "minute 3, rules first", "agent"), ("Person approves", "exceptions only", "human"), ("Customer answered", "minute 10", "ok")]
+    for i, (h, w, k) in enumerate(after):
+        x = 0.9 + i * 2.4
+        node(s, x, 3.7, 2.1, 0.7, h, w, k, size=11)
+        if i < len(after) - 1: arrow(s, x + 2.12, 4.05, x + 2.38, 4.05, "5E48B8")
+    stats = [("5 → 1", "hand-offs between people"), ("3 days → 10 min", "time to a first real answer"), ("all → exceptions", "what a person looks at")]
+    for i, (v, l) in enumerate(stats):
+        x = 0.9 + i * 3.95
+        r = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(4.9), Inches(3.7), Inches(1.5)); r.fill.solid(); r.fill.fore_color.rgb = RGBColor.from_string(LIGHT); r.line.fill.background(); r.shadow.inherit = False
+        textbox(s, x + 0.2, 5.0, 3.3, 0.7, [(v, {"bold": True, "size": 24, "color": NAVY})], align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        textbox(s, x + 0.2, 5.7, 3.3, 0.5, [l], size=12, color=GREY, align=PP_ALIGN.CENTER)
+    textbox(s, 0.9, 6.55, 11.6, 0.4, [("Illustrative figures for a typical service desk; replace with your own process data.", {"size": 10.5, "italic": True, "color": GREY})])
+    notes(s, "The top row is how most organisations handle it today: people forwarding emails and waiting for each other. The bottom row is the same case with the chain from the previous slide. The person did not disappear; they moved from every case to the exceptions.")
+
+    # D · where the time goes (native chart)
+    s = blank(); title(s, "Where the time goes")
+    textbox(s, 0.9, 1.4, 11.5, 0.5, [("Cycle time of one complaint, in hours. Waiting between people is the cost; working time barely changes.", {"size": 14, "color": NAVY, "bold": True})])
+    cd = CategoryChartData(); cd.categories = ["Today", "With agents"]
+    cd.add_series("Waiting between people", (62.0, 0.5)); cd.add_series("Working the case", (7.0, 0.4)); cd.add_series("Rework and chasing", (3.0, 0.1))
+    gf = s.shapes.add_chart(XL_CHART_TYPE.BAR_STACKED, Inches(0.9), Inches(2.0), Inches(8.2), Inches(4.2), cd); ch = gf.chart
+    ch.has_legend = True; ch.legend.position = XL_LEGEND_POSITION.BOTTOM; ch.legend.include_in_layout = False; ch.legend.font.size = Pt(11); ch.legend.font.name = "Arial"
+    plot = ch.plots[0]; plot.gap_width = 55; plot.overlap = 100
+    for ser, col in zip(plot.series, ("2C6C9C", "D28B1E", "5E48B8")):
+        ser.format.fill.solid(); ser.format.fill.fore_color.rgb = RGBColor.from_string(col); ser.format.line.color.rgb = RGBColor.from_string("FFFFFF"); ser.format.line.width = Pt(1.5)
+    va = ch.value_axis; va.has_major_gridlines = True; va.major_gridlines.format.line.color.rgb = RGBColor.from_string("E3E7EC"); va.tick_labels.font.size = Pt(10); va.tick_labels.font.name = "Arial"; va.tick_labels.font.color.rgb = RGBColor.from_string(GREY); va.format.line.fill.background(); va.maximum_scale = 80
+    ca = ch.category_axis; ca.tick_labels.font.size = Pt(12); ca.tick_labels.font.name = "Arial"; ca.tick_labels.font.bold = True; ca.format.line.color.rgb = RGBColor.from_string("E3E7EC"); ca.reverse_order = True
+    # direct labels: the segments for Today, and one total for the agentic bar
+    for ser, txt in zip(plot.series, ("62 h", "7 h", "3 h")):
+        dl = ser.points[0].data_label; dl.has_text_frame = True; dl.text_frame.text = txt
+        for p_ in dl.text_frame.paragraphs:
+            for r_ in p_.runs: run_style(r_, 11, True, "FFFFFF")
+    textbox(s, 2.2, 4.62, 4.4, 0.4, [("≈ 1 h in total, most of it the one approval", {"size": 11, "bold": True, "color": NAVY})])
+    card(s, 9.4, 2.0, 3.1, 4.2, "Reading the chart", [("72 hours today, about one with agents", {"size": 12}), ("The working time was never the problem", {"size": 12}), ("Waiting is what hand-offs cost, and hand-offs are what agents remove", {"size": 12}), ("Illustrative; measure your own", {"size": 11, "italic": True, "color": GREY})], size=12)
+    notes(s, "Illustrative numbers. The shape is what matters: waiting dominates, and waiting is the cost of hand-offs between people. Agents that pass work to each other through tools remove the waiting without removing the person from the decisions that need one.")
+
+    # E · same four blocks at process scale
+    s = blank(); title(s, "The same building blocks, at process scale")
+    rows = [("The brief", "How to treat Sofia's inbox", "The case policy: what a good resolution is, in plain language"),
+            ("Rules engine", "Label mail from known senders", "Routing: which cases go to which agent, which always go to a person"),
+            ("Tools", "Search, read, label, draft", "Systems of record: ERP, carrier, warehouse, CRM, and the actions on them"),
+            ("Guardrails", "Confidential data never leaves", "Compensation limits, data boundaries, no promise without a checked fact"),
+            ("The human line", "Approve a draft to the outside", "Exceptions, money above a limit, anything the policy does not cover"),
+            ("Memory and trace", "The inbox and the trace panel", "The case record and the audit trail, shared by every agent and every person")]
+    textbox(s, 3.5, 1.45, 4.3, 0.4, [("Today's exercise: one inbox", {"bold": True, "size": 14, "color": GREY})], align=PP_ALIGN.CENTER)
+    textbox(s, 8.0, 1.45, 4.5, 0.4, [("The process: one complaint, end to end", {"bold": True, "size": 14, "color": NAVY})], align=PP_ALIGN.CENTER)
+    for i, (k, a, b) in enumerate(rows):
+        y = 1.95 + i * 0.82
+        line(s, 0.9, y - 0.06, 12.5, y - 0.06, "D5DBE2", 0.75)
+        textbox(s, 0.9, y, 2.5, 0.7, [(k, {"bold": True, "size": 14, "color": NAVY})], anchor=MSO_ANCHOR.MIDDLE)
+        textbox(s, 3.5, y, 4.3, 0.7, [(a, {"size": 12.5})], anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.CENTER)
+        textbox(s, 8.0, y, 4.5, 0.7, [(b, {"size": 12.5, "bold": True})], anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.CENTER)
+    line(s, 0.9, 6.85, 12.5, 6.85, "D5DBE2", 0.75)
+    notes(s, "Nothing new is needed to go from the inbox to the process; the six blocks are the same. What changes is who owns them: the brief becomes policy owned by the process owner, the rules are shared, the tools are the company's systems, and the human line is a design decision, not a habit.")
+
+    # F · what changes
+    s = blank(); title(s, "What changes when agents run the process")
+    tiles = [("3 days → 10 min", "time to a first real answer"), ("5 → 1", "people who touch a normal case"), ("100% → 15%", "cases a person reads"), ("every step → one record", "where the audit trail lives")]
+    for i, (v, l) in enumerate(tiles):
+        x = 0.9 + i * 2.95
+        r = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(1.6), Inches(2.75), Inches(1.6)); r.fill.solid(); r.fill.fore_color.rgb = RGBColor.from_string(LIGHT); r.line.fill.background(); r.shadow.inherit = False
+        textbox(s, x + 0.15, 1.7, 2.45, 0.8, [(v, {"bold": True, "size": 20, "color": NAVY})], align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+        textbox(s, x + 0.15, 2.5, 2.45, 0.6, [l], size=11.5, color=GREY, align=PP_ALIGN.CENTER)
+    textbox(s, 0.9, 3.25, 11.6, 0.3, [("Illustrative; the shape of the change is what to take away.", {"size": 10.5, "italic": True, "color": GREY})])
+    card(s, 0.9, 3.7, 5.65, 3.2, "Roles change", ["The service desk stops forwarding and starts owning the policy and the exceptions", "Logistics answers a system call, not an email", "Someone owns the rules, someone reviews the trace, someone signs above the limit", "The process owner becomes the agent's manager"], size=12.5)
+    card(s, 6.85, 3.7, 5.65, 3.2, "What leaders decide", ["Which processes start in an inbox and end in a system", "Where the human line sits, per action, and who may move it", "Which limits are code and which are guidance", "What is measured: cycle time, first-time-right, exceptions, cost per case"], size=12.5)
+    notes(s, "Close the section on decisions rather than technology. The four tiles are illustrative. The two cards are the agenda for the next session: roles and decisions.")
+
     # 12 · next
     s = blank(); title(s, "Next: reshaping end-to-end processes")
     line(s, 0.98, 2.4, 12.24, 2.4, GOLD, 2.25, arrow=True)
@@ -308,7 +492,7 @@ def build(cfg):
         marker(s, x, 2.17, 2.4)
         textbox(s, x + 0.55, 2.72, 1.9, 0.45, [(h, {"bold": True, "size": 15})])
         textbox(s, x + 0.55, 3.15, 1.9, 1.4, [(b, {"size": 11.5})])
-    card(s, 0.9, 4.95, 11.6, 2.0, "Bring to the next session", [("One process in your organisation that starts in an inbox. Sketch its five steps. Mark where a rule would do, where judgement is needed, and where a person must sign.", {"size": 13.5})], size=13.5)
+    card(s, 0.9, 4.95, 11.6, 2.0, "Bring to the next session", [("One process in your organisation that starts in an inbox, like the late delivery. Sketch its five steps. Mark where a rule would do, where judgement is needed, where a system must be checked, and where a person must sign.", {"size": 13.5})], size=13.5)
     notes(s, "Close by giving the homework: one real process, five steps, three marks. The next session builds on those sketches.")
 
     out = HERE / f"agent-challenge-{cfg['suffix']}.pptx"
