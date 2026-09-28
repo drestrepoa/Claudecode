@@ -327,6 +327,32 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 </section>
 
 <section>
+  <div class="sec-head"><h2>Workspace — the inbox and the score</h2><p>Labels, tasks and drafts appear here as the tools run.</p></div>
+  <div class="work">
+      <div class="panel inbox">
+        <div class="inbox-top">
+          <div class="search"><input type="text" id="q" placeholder="Search subject, sender, body…"><label class="chip" style="cursor:pointer"><input type="checkbox" id="showkey" style="margin:0"> answer key</label></div>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="list" id="list"></div>
+      </div>
+    <div class="side">
+      <div class="panel pad">
+        <div class="block-head"><h3>Scorecard</h3><span class="hint">against the hidden answer key</span></div>
+        <div class="score" style="margin-top:8px">
+          <div><div class="k">labelled</div><div class="v" id="s-lab">0</div></div>
+          <div><div class="k">agree with key</div><div class="v" id="s-acc">—</div></div>
+          <div><div class="k">critical flagged</div><div class="v" id="s-crit">—</div></div>
+          <div><div class="k">injections caught</div><div class="v" id="s-inj">0 <small>/ 3</small></div></div>
+        </div>
+      </div>
+      <div class="panel pad"><div class="block-head"><h3>Tasks</h3><span class="hint" id="tasks-n">none yet</span></div><div class="tasks" id="tasks" style="margin-top:8px"></div></div>
+      <div class="panel pad"><div class="block-head"><h3>Outbox</h3><span class="hint" id="outbox-n">none yet</span></div><div class="outbox" id="outbox" style="margin-top:8px"></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
   <div class="sec-head"><h2>Building blocks — edit me</h2><p>Four things participants change. Edit, then ask the agent again and watch the trace.</p></div>
   <div class="blocks">
     <div class="panel pad block">
@@ -358,31 +384,6 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
 </section>
 
-<section>
-  <div class="sec-head"><h2>Workspace — the inbox and the score</h2><p>Labels, tasks and drafts appear here as the tools run.</p></div>
-  <div class="work">
-      <div class="panel inbox">
-        <div class="inbox-top">
-          <div class="search"><input type="text" id="q" placeholder="Search subject, sender, body…"><label class="chip" style="cursor:pointer"><input type="checkbox" id="showkey" style="margin:0"> answer key</label></div>
-          <div class="chips" id="chips"></div>
-        </div>
-        <div class="list" id="list"></div>
-      </div>
-    <div class="side">
-      <div class="panel pad">
-        <div class="block-head"><h3>Scorecard</h3><span class="hint">against the hidden answer key</span></div>
-        <div class="score" style="margin-top:8px">
-          <div><div class="k">labelled</div><div class="v" id="s-lab">0</div></div>
-          <div><div class="k">agree with key</div><div class="v" id="s-acc">—</div></div>
-          <div><div class="k">critical flagged</div><div class="v" id="s-crit">—</div></div>
-          <div><div class="k">injections caught</div><div class="v" id="s-inj">0 <small>/ 3</small></div></div>
-        </div>
-      </div>
-      <div class="panel pad"><div class="block-head"><h3>Tasks</h3><span class="hint" id="tasks-n">none yet</span></div><div class="tasks" id="tasks" style="margin-top:8px"></div></div>
-      <div class="panel pad"><div class="block-head"><h3>Outbox</h3><span class="hint" id="outbox-n">none yet</span></div><div class="outbox" id="outbox" style="margin-top:8px"></div></div>
-    </div>
-  </div>
-</section>
 
 <section>
   <div class="sec-head"><h2>Trace — watch it decide</h2><p>Every tool call, every guardrail decision, every human answer, in order.</p></div>
