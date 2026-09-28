@@ -600,6 +600,29 @@ def build(cfg):
     textbox(s, 0.9, 6.75, 11.6, 0.35, [("Close by asking each group for the one thing they would need from the organisation to build what they mapped.", {"size": 12, "italic": True, "color": NAVY})])
     notes(s, "Use after the six minutes. Point to the groups whose answers illustrate each pattern. The closing question turns the exercise into a list of asks: data access, an owner, a limit, a policy.")
 
+
+    # N · conclusion, in the two-tone style
+    s = blank()
+    DEEP, GOLD2, CARD, INKG = "1F2A5C", "CE9A2B", "F2F2F2", "3A3F47"
+    tb = s.shapes.add_textbox(Inches(0.8), Inches(0.55), Inches(11.8), Inches(1.2)); tf = tb.text_frame; tf.word_wrap = True; tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    pp = tf.paragraphs[0]; r1 = pp.add_run(); r1.text = "AI IS NOT A "; run_style(r1, 44, True, DEEP); r2 = pp.add_run(); r2.text = "TECHNOLOGY PROJECT"; run_style(r2, 44, True, GOLD2)
+    textbox(s, 0.8, 1.95, 11.6, 1.0, [("The real question isn't which tool to buy, but who owns it, how to govern it, and how to change the way thousands of people work. Adoption at scale is an operating-model problem, not a technology one.", {"size": 17, "color": DEEP})])
+    # left card
+    l = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(3.25), Inches(5.35), Inches(2.6)); l.adjustments[0] = 0.04
+    l.fill.solid(); l.fill.fore_color.rgb = RGBColor.from_string(CARD); l.line.fill.background(); l.shadow.inherit = False
+    textbox(s, 1.15, 3.5, 4.8, 0.45, [("TREATING AI AS A TOOL", {"bold": True, "size": 17, "color": INKG})])
+    textbox(s, 1.15, 4.05, 4.8, 1.7, [(t, {"bullet": True, "size": 14, "color": INKG}) for t in ["Buy tools, multiply licences", "Train en masse, tick the box", "Count prompts and logins", "Assume adoption follows"]], space_after=5)
+    # arrow in a gold circle
+    o = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(6.28), Inches(4.13), Inches(0.85), Inches(0.85)); o.fill.solid(); o.fill.fore_color.rgb = RGBColor.from_string(GOLD2); o.line.fill.background(); o.shadow.inherit = False
+    a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, Inches(6.5), Inches(4.38), Inches(0.42), Inches(0.36)); a.fill.solid(); a.fill.fore_color.rgb = RGBColor.from_string("FFFFFF"); a.line.fill.background(); a.shadow.inherit = False
+    # right card
+    rt = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.25), Inches(3.25), Inches(5.35), Inches(2.6)); rt.adjustments[0] = 0.04
+    rt.fill.solid(); rt.fill.fore_color.rgb = RGBColor.from_string(DEEP); rt.line.fill.background(); rt.shadow.inherit = False
+    textbox(s, 7.6, 3.45, 4.8, 0.7, [("MAKING IT AN OPERATING-MODEL QUESTION", {"bold": True, "size": 17, "color": GOLD2})])
+    textbox(s, 7.6, 4.15, 4.8, 1.6, [(t, {"bullet": True, "size": 14, "color": "FFFFFF"}) for t in ["Define who owns it and how to govern it", "Evolve working behaviours", "Keep humans in the loop", "Measure impact, not usage"]], space_after=5)
+    textbox(s, 0.8, 6.2, 11.6, 0.7, [("Today you built one agent and redesigned one process. Neither needed a purchase. Both needed an owner, a limit in code, and a decision about where the person sits.", {"size": 13, "italic": True, "color": DEEP})])
+    notes(s, "Close on the operating model. Everything in the session came back to ownership, governance and behaviour: who writes the brief, who owns the rules, who signs above the limit, what is measured. The tools were the least of it.")
+
     out = HERE / f"agent-challenge-{cfg['suffix']}.pptx"
     prs.save(out)
     return out
