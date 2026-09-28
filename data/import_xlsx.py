@@ -125,7 +125,7 @@ out = {
     "owner": OWNER,
     "partner": PARTNER,
     "eyebrow": "Build your own agent · legal training · simulated inbox",
-    "owner_role": "Lawyer",
+    "owner_role": "Human user",
     "escalation_role": "the supervising partner",
     "sensitive_word": "Privileged",
     "brief_priorities": "Priorities: court and registry notices with a date, regulators, opposing counsel with a deadline, and anything a client calls critical. Newsletters, IT notices and scheduling never need attention today.",

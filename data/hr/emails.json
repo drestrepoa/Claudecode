@@ -9,7 +9,7 @@
  },
  "partner": "Karin Ahlgren",
  "eyebrow": "Build your own agent · HR training · simulated inbox",
- "owner_role": "HR partner",
+ "owner_role": "Human user",
  "escalation_role": "HR Director",
  "sensitive_word": "Confidential",
  "labels": [
