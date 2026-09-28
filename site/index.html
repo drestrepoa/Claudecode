@@ -863,6 +863,7 @@ $("rules-run").addEventListener("click", runRules);
 $("q").addEventListener("input", () => { S.q = $("q").value; renderAll(); });
 $("showkey").addEventListener("change", renderAll);
 for (const id of ["g-ext", "g-priv", "g-days", "g-bulk", "g-court"]) { const el = $(id); const saved = LS.get(LSK + id); if (saved !== null && saved !== undefined) { if (el.type === "checkbox") el.checked = saved; else el.value = saved; } el.addEventListener("change", () => LS.set(LSK + id, el.type === "checkbox" ? el.checked : el.value)); }
+$("model").addEventListener("change", () => { if (!ALLOWED_TIERS.includes($("model").value)) $("model").value = ALLOWED_TIERS[0]; });
 $("reset").addEventListener("click", () => { S = freshState(); $("q").value = ""; traceEl.innerHTML = ""; trace("rules", "reset", "inbox restored: 500 emails, no labels, no tasks, no drafts"); renderAll(); });
 
 $("subline").textContent = `${FIRM_NAME} · ${ME_FULL}, ${DATA.owner.title || "lawyer"} · ${DATA.emails.length} emails · today is ${TODAY}`;
