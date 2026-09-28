@@ -232,7 +232,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
   <div class="hcontrols">
     <label class="select" for="model">model
-      <select id="model"><option value="quick">quick (cheap)</option><option value="default" selected>default (smarter)</option><option value="complex">best (slowest)</option></select>
+      <select id="model"><option value="quick" selected>quick (cheap)</option><option value="default">default (smarter)</option><option value="complex">best (slowest)</option></select>
     </label>
     <span class="pill" id="status"><i></i><span>agent idle</span></span>
     <button class="btn" id="reset">Reset inbox</button>
@@ -728,6 +728,7 @@ let backend = null; // "artifact" | "proxy" | "direct"
 const SS = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ sessionStorage.setItem(k, v); }catch(e){} } };
 const API_MODELS = { quick: "claude-haiku-4-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
 const MAX_ROUNDS = 10;
+const ALLOWED_TIERS = ["quick"]; // the other tiers stay visible but cannot be chosen; the Netlify function enforces the same list
 const fail = (code, message, text) => Object.assign({ code, message }, text ? { text } : {});
 
 function apiTools(tools) {
@@ -873,7 +874,8 @@ $("send").disabled = true;
 
 function labelModels(mode) {
   const names = mode === "artifact" ? { quick: "quick (cheap)", default: "default (smarter)", complex: "best (slowest)" } : { quick: "quick · Haiku 4.5", default: "default · Sonnet 5", complex: "best · Opus 5" };
-  for (const o of $("model").options) o.textContent = names[o.value];
+  for (const o of $("model").options) { o.textContent = names[o.value] + (ALLOWED_TIERS.includes(o.value) ? "" : " · locked"); o.disabled = !ALLOWED_TIERS.includes(o.value); }
+  if (!ALLOWED_TIERS.includes($("model").value)) $("model").value = ALLOWED_TIERS[0];
 }
 function ready(mode, costText) {
   backend = mode; labelModels(mode); $("connect").hidden = true; $("cost").textContent = costText; $("send").disabled = false; setStatus("", "agent idle");

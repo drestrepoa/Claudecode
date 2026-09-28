@@ -8,7 +8,7 @@
 // Environment variables (Site settings → Environment variables):
 //   ANTHROPIC_API_KEY   required
 //   WORKSHOP_CODE       recommended; if unset, anyone with the URL can spend the key
-//   DEFAULT_TIER        optional: quick | default | complex (default: "default")
+//   ALLOWED_TIERS       optional, comma-separated: quick | default | complex (default: "quick" only)
 //   ANTHROPIC_WORKSPACE_ID  only if the key is an organisation-level key that Anthropic says
 //                       "is not scoped to a workspace"; the wrkspc_... id from the console
 
@@ -27,7 +27,9 @@ export default async (req) => {
   try { body = await req.json(); } catch (e) { return json({ error: "body must be JSON" }, 400); }
   if (!Array.isArray(body.messages) || !body.messages.length) return json({ error: "messages required" }, 400);
 
-  const tier = MODELS[body.tier] ? body.tier : (MODELS[process.env.DEFAULT_TIER] ? process.env.DEFAULT_TIER : "default");
+  // Tiers the room may use. Default: quick only. Set ALLOWED_TIERS="quick,default,complex" to open them up.
+  const allowed = (process.env.ALLOWED_TIERS || "quick").split(",").map((t) => t.trim()).filter((t) => MODELS[t]);
+  const tier = allowed.includes(body.tier) ? body.tier : allowed[0];
   const model = MODELS[tier];
   const params = {
     model,
