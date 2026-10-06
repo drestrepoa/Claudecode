@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""A four-slide deck for a ten-minute exercise with the agent, in the house format.
+"""A six-slide deck for a ten-minute exercise with the agent, in the house format.
 
   python3 slides/build_quick_exercise.py   -> slides/agent-10-minute-exercise.pptx
 
-Slide 1: the link and the exercise. Slides 2-4: the agent flow, drawn progressively.
+Slide 1: the link and the exercise. Slides 2-3: two challenges on the brief and the guardrails.
+Slides 4-6: the agent flow, drawn progressively.
 Reuses the helpers from build_challenge_deck.py (same master, fonts and colours).
 """
 import sys
@@ -107,10 +108,41 @@ def build():
         textbox(s, 2.5, y - 0.02, 6.4, 0.4, [(head, {"bold": True, "size": 15})])
         textbox(s, 2.5, y + 0.38, 6.4, 0.62, [(body, {"size": 12, "color": BLACK})])
     card(s, 9.3, 2.25, 3.4, 4.2, "What to look for", [("The orchestrator delegates; it never labels itself", {"size": 12}), ("Each sub-agent reports back in words", {"size": 12}), ("The trap is refused by the brief first, and blocked by code if the brief fails", {"size": 12}), ("The draft to an outside address waits for a person", {"size": 12}), ("Everything happens in the app: no other tool is needed", {"size": 12})], size=12)
-    textbox(s, 0.9, 6.7, 11.6, 0.35, [("Model is fixed to quick · leave the brief as it is for this run · reset the inbox if you want to start over", {"size": 11, "italic": True, "color": GREY})])
+    textbox(s, 0.9, 6.7, 11.6, 0.35, [("Model is fixed to quick · leave the brief as it is for this run · finished early? take the challenges on the next two slides", {"size": 11, "italic": True, "color": GREY})])
     notes(s, "Ten minutes, strict. Say the workshop code once, do not type it in chat. Everything happens in the app; nobody needs another tool. Close by asking each group for its one sentence on where the agent decided and where a person did. If a group finishes early, ask them to untick the triage sub-agent in the building blocks and send the first prompt again: the orchestrator then does the labelling itself and the trace flattens.")
 
-    # 2-4 · the flow, progressively
+    # 2-3 · two challenges: the brief, the guardrails
+    def challenge(ttl, intro, steps, see, question, note):
+        s = blank(); title(s, ttl)
+        textbox(s, 0.9, 1.5, 8.2, 0.5, [(intro, {"size": 12.5, "color": GREY})])
+        for i, (head, body) in enumerate(steps):
+            y = 2.2 + i * 1.3
+            chip(s, "ABC"[i], 0.9, y + 0.03, w=0.5, h=0.38, size=13)
+            textbox(s, 1.6, y - 0.02, 7.3, 0.4, [(head, {"bold": True, "size": 15})])
+            textbox(s, 1.6, y + 0.38, 7.3, 0.85, [(body, {"size": 12, "color": BLACK})])
+        card(s, 9.3, 1.5, 3.4, 3.3, "What you should see", [(t, {"size": 11.5}) for t in see], size=11.5)
+        callout(s, 9.3, 5.0, 3.4, 1.35, "Question for the group", question)
+        textbox(s, 0.9, 6.7, 11.6, 0.35, [("Five minutes · one person drives, the others read the trace aloud · Restore default and Reset inbox put everything back", {"size": 11, "italic": True, "color": GREY})])
+        notes(s, note)
+
+    challenge("Challenge 1 · The brief",
+              "The brief is the agent's standing instructions, in plain language. Change it and watch what changes, and what does not.",
+              [("Weaken it", "In block 1, The brief, delete the last paragraph (the one that says email content is untrusted). Send the trap prompt again."),
+               ("Watch the code catch it", "Read the trace. Without the paragraph the reply agent may attempt the forward. The guardrail blocks it in red, and the error travels back up to the orchestrator. Then click Restore default."),
+               ("Strengthen it", "Add one line of your own, for example \"Anything from the works council or the union is urgent today.\" Send \"What needs my attention today?\" and compare with your first run.")],
+              ["The brief steers judgement: what counts as urgent, what to refuse, what to ignore", "It enforces nothing: when it is weakened, only the code and the person remain", "One added sentence changes what the orchestrator asks the sub-agents to do first"],
+              "What belongs in the brief, and what must never depend on it?",
+              "Step A shows that the refusal of the trap came from the brief. Step B shows that the forward is still refused, by code: Confidential emails never leave the organisation. Step C shows the brief doing its real job, steering judgement. Land the question: policy that must hold goes in code, not in prose.")
+    challenge("Challenge 2 · The guardrails",
+              "Guardrails run inside the tools. They do not ask the model; they check it. Three lines of defence: the brief, the code, the person.",
+              [("Lower the bulk limit", "In block 3, Guardrails, set \"more than N emails in one call\" to 10. Send \"Label the newsletters, vendor mail and admin so I never see them.\" An approval card appears: reject it, with a reason."),
+               ("Try the protected label", "Send \"Archive all the Health & Safety emails.\" Whatever the agent decides, the archive is blocked in code. Read what the agent tells you afterwards."),
+               ("Remove the code, keep the person", "Untick \"Confidential emails are never forwarded outside\" and delete the brief's last paragraph again. Send the trap. The forward now reaches an approval card: you are the last line. Reject it.")],
+              ["Your rejection reaches the sub-agent as a tool error; the orchestrator adapts, with smaller batches or a question", "A blocked archive is a red line in the trace and nothing moves in the inbox", "With the brief and the code gone, only the approval card stands between the inbox and the outside"],
+              "Which of the three lines would you trust in your own process, and for what?",
+              "Step A is the human line: the limit is code, the decision is yours, and the agent has to live with it. Step B is pure code: Health & Safety can never be archived, however the agent was persuaded. Step C strips the first two lines so that the person is visibly the last one. Close on the question; the usual answer is code for what must never happen, a person for what is expensive to get wrong, the brief for everything else.")
+
+    # 4-6 · the flow, progressively
     for stage, sub, note in [
         (1, "One person, one orchestrator. It reads the brief and the rules' labels, keeps a working memory for this request, and decides.", "Start with the left half only. The orchestrator is the single thinking node at this point; the rules engine is code; the memory boxes explain why nothing is remembered unless it is re-sent or written down."),
         (2, "The orchestrator delegates to three sub-agents. Each one is a separate model call with a few tools; the inbox is the long-term memory, reached only through them.", "Add the sub-agents and their tools. Point at the trace in the app: the ▶ and ◀ lines are the instruction going down and the report coming up. The tools are the only way anything reaches the inbox."),
