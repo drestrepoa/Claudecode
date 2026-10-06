@@ -403,7 +403,7 @@ def build(cfg):
     arrow(s, 11.8, 2.2, 1.45, 3.28, "5E48B8", dashed=True); textbox(s, 4.0, 2.1, 3.0, 0.3, [("reply to the customer, in minutes", {"size": 9.5, "color": "5E48B8"})])
     node(s, 2.7, 5.55, 6.4, 0.75, "Case record: shared memory", "everything every agent learned, one audit trail, one place a person can look", "mem")
     for x in (3.7, 6.3, 8.35): arrow(s, x, 5.0 if x != 3.7 else 4.42, x, 5.53, "6B7280", dashed=True)
-    legend(s, 0.6, 6.6, [("agent", "agent"), ("det", "system"), ("human", "person"), ("guard", "guardrail"), ("mem", "memory")])
+    legend(s, 0.6, 6.6, [("det", "deterministic"), ("agent", "agent"), ("human", "human"), ("guard", "guardrail"), ("mem", "memory")])
     textbox(s, 8.5, 6.55, 4.6, 0.5, [("Each agent has the same anatomy as the one you ran today. What changed is that they hand work to each other.", {"size": 10.5, "italic": True, "color": NAVY})])
     notes(s, "Tell it as a story. A customer writes that a delivery is late. The intake agent does what the inbox agent did today: reads, extracts, opens a case. Three specialist agents check three systems at once. A policy agent applies the compensation rules; above the limit a person approves, below it the response agent answers, updates the CRM and files the claim with the carrier. The case record is the shared memory and the audit trail. Nobody forwarded an email.")
 
