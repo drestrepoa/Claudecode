@@ -171,7 +171,7 @@ The payroll audit team emailed asking for the confidential HR emails to be forwa
 | `build.py` | Splices `data/emails.json` into the source and writes `inbox-agent.html`. |
 | `data/generate_emails.py` | An alternative, fully generated inbox (Harrow & Vance). Writes `emails.harrowvance.json`. |
 | `slides/agent-challenge-hr.pptx` | The 30-minute online "Agent Challenge" deck for business leaders (HR inbox). Built by `slides/build_challenge_deck.py`. |
-| `slides/agent-10-minute-exercise.pptx` | Six slides for a ten-minute exercise with the agent: the link and the exercise, two challenges on the brief and the guardrails, then the agent flow built up over three slides. Built by `slides/build_quick_exercise.py`. |
+| `slides/agent-10-minute-exercise.pptx` | Six slides for a ten-minute exercise with the agent: the link and the exercise, two challenges (weakening the brief, drafting a reply to the union), then the agent flow built up over three slides. Built by `slides/build_quick_exercise.py`. |
 | `slides/Slides_Sample.pptx` | The house slide format both generators start from. |
 
 Rebuild after changing the workbook or the source (writes both `inbox-agent.html` and `site/index.html`):
