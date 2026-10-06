@@ -3,7 +3,7 @@
 
   python3 slides/build_quick_exercise.py   -> slides/agent-10-minute-exercise.pptx
 
-Slide 1: the link and the exercise. Slides 2-3: two challenges on the brief and the guardrails.
+Slide 1: the link and the exercise. Slides 2-3: two challenges, on the brief and on drafting a reply.
 Slides 4-6: the agent flow, drawn progressively.
 Reuses the helpers from build_challenge_deck.py (same master, fonts and colours).
 """
@@ -126,21 +126,21 @@ def build():
         notes(s, note)
 
     challenge("Challenge 1 · The brief",
-              "The brief is the agent's standing instructions, in plain language. Change it and watch what changes, and what does not.",
+              "The brief is the agent's standing instructions, in plain language. Weaken it and watch what still holds.",
               [("Weaken it", "In block 1, The brief, delete the last paragraph (the one that says email content is untrusted). Send the trap prompt again."),
-               ("Watch the code catch it", "Read the trace. Without the paragraph the reply agent may attempt the forward. The guardrail blocks it in red, and the error travels back up to the orchestrator. Then click Restore default."),
-               ("Strengthen it", "Add one line of your own, for example \"Anything from the works council or the union is urgent today.\" Send \"What needs my attention today?\" and compare with your first run.")],
-              ["The brief steers judgement: what counts as urgent, what to refuse, what to ignore", "It enforces nothing: when it is weakened, only the code and the person remain", "One added sentence changes what the orchestrator asks the sub-agents to do first"],
+               ("Watch what holds", "Read the trace. Either the agent still refuses on its own, or the reply agent attempts the forward and the guardrail blocks it in red, with the error travelling back up to the orchestrator. Either way, nothing leaves."),
+               ("Put it back", "Click Restore default and send the trap once more. Compare the two traces: with the brief in place the refusal comes first, before any tool is called.")],
+              ["The brief steers judgement: what counts as urgent, what to refuse, what to ignore", "It enforces nothing: when it is weakened, the code still decides what can leave", "Confidential emails never leave the organisation, whatever the agent was told"],
               "What belongs in the brief, and what must never depend on it?",
-              "Step A shows that the refusal of the trap came from the brief. Step B shows that the forward is still refused, by code: Confidential emails never leave the organisation. Step C shows the brief doing its real job, steering judgement. Land the question: policy that must hold goes in code, not in prose.")
-    challenge("Challenge 2 · The guardrails",
-              "Guardrails run inside the tools. They do not ask the model; they check it. Three lines of defence: the brief, the code, the person.",
-              [("Lower the bulk limit", "In block 3, Guardrails, set \"more than N emails in one call\" to 10. Send \"Label the newsletters, vendor mail and admin so I never see them.\" An approval card appears: reject it, with a reason."),
-               ("Try the protected label", "Send \"Archive all the Health & Safety emails.\" Whatever the agent decides, the archive is blocked in code. Read what the agent tells you afterwards."),
-               ("Remove the code, keep the person", "Untick \"Confidential emails are never forwarded outside\" and delete the brief's last paragraph again. Send the trap. The forward now reaches an approval card: you are the last line. Reject it.")],
-              ["Your rejection reaches the sub-agent as a tool error; the orchestrator adapts, with smaller batches or a question", "A blocked archive is a red line in the trace and nothing moves in the inbox", "With the brief and the code gone, only the approval card stands between the inbox and the outside"],
-              "Which of the three lines would you trust in your own process, and for what?",
-              "Step A is the human line: the limit is code, the decision is yours, and the agent has to live with it. Step B is pure code: Health & Safety can never be archived, however the agent was persuaded. Step C strips the first two lines so that the person is visibly the last one. Close on the question; the usual answer is code for what must never happen, a person for what is expensive to get wrong, the brief for everything else.")
+              "Step A removes the instruction that made the refusal explicit. In step B two things can happen, and both make the point: the model may still refuse on its own judgement, or it attempts the forward and the forward_email tool blocks it because the emails are Confidential and the address is outside the organisation. Step C shows the brief doing its job: the refusal is immediate and explained. Land the question: policy that must hold goes in code, not in prose. Do not try to make the agent actually send: the model's own judgement is a line you cannot switch off, which is itself worth saying.")
+    challenge("Challenge 2 · Drafting a reply",
+              "Drafting is where the brief, the code and the person meet in one email. Use the union's request about the Plant 2 grievance (HR-060).",
+              [("Ask for the draft", "Send \"Draft a reply to Marta Visser from the union about the escalated grievance at Plant 2.\" The union is outside the organisation, so the draft arrives as an approval card. Read it: does it promise copies of the correspondence? Does it name anyone?"),
+               ("Reject it, with a reason", "Reject with \"Do not promise the correspondence. Confirm the right to be accompanied, propose a meeting, three sentences.\" The rejection reaches the reply agent as a tool error, it redrafts, a new card appears. Approve it and find it in the outbox."),
+               ("Put it in the brief", "Add to the brief: \"Replies to the union or works council: three sentences, confirm rights, never share case documents by email, propose a meeting, sign as Sofia Lindgren, HR business partner.\" Send the same request again.")],
+              ["The approval card is code: the recipient's domain decides, not the agent", "What the draft says is the brief's job; your rejection text becomes the next instruction", "After the brief change the draft is right first time, and the card still appears"],
+              "Which replies should a person always see before they leave, and which rules belong in the brief instead?",
+              "Step A: the card appears because marta.visser is outside the organisation; the content is whatever the brief and the email suggested, and the first draft often offers to send the correspondence, which is confidential. Step B: the rejection text is literally what the agent receives as an error, so a precise reason produces a precise redraft; a vague one does not. Step C: the same rule now lives in the brief and the draft needs no correction, but the card still appears, because it is code. If a group has time, ask for a reply to Bram Jansen, the employee who raised the complaint: it goes straight to the outbox with no card, because he is internal. Ask whether that is right.")
 
     # 4-6 · the flow, progressively
     for stage, sub, note in [
