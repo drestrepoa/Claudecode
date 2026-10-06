@@ -68,7 +68,7 @@ def flow(s, stage):
     if stage == 2:
         callout(s, 10.3, 1.5, 2.4, 2.0, "Delegation", "The orchestrator never labels or drafts. It gives one sub-agent one instruction and reads the report. Each sub-agent is a fresh model call with a few tools.")
         callout(s, 10.3, 3.8, 2.4, 1.5, "Tools", "Typed functions. The first ones only read; the ones that change the inbox come next.")
-        legend2(s, [("det", "tool"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human")])
+        legend2(s, [("det", "deterministic"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human")])
         return
     # stage 3: guardrail, executed, human approval, return path
     node(s, 10.25, 3.35, 1.45, 0.85, "Guardrail", "code, not persuasion", "guard")
@@ -81,7 +81,7 @@ def flow(s, stage):
     arrow(s, 10.98, 4.22, 10.98, 6.82, "BF3F3A", dashed=True, head=False); arrow(s, 10.98, 6.82, 5.6, 6.82, "BF3F3A", dashed=True, head=False)
     arrow(s, 5.6, 6.82, 5.6, 4.2, "BF3F3A", dashed=True, head=False); arrow(s, 5.6, 4.2, 5.24, 4.2, "BF3F3A", dashed=True)
     textbox(s, 11.08, 5.45, 2.2, 0.5, [("blocked or rejected → tool error to the sub-agent, which reports it up", {"size": 9, "color": "BF3F3A"})])
-    legend2(s, [("det", "tool"), ("agent", "agent"), ("mem", "memory"), ("human", "human"), ("guard", "guardrail"), ("ok", "executed")])
+    legend2(s, [("det", "deterministic"), ("agent", "agent"), ("mem", "memory"), ("human", "human"), ("guard", "guardrail"), ("ok", "executed")])
 
 
 def build():
@@ -100,15 +100,15 @@ def build():
     steps = [("0–2 min", "Open the link, connect, click Run rules", "Read the scorecard: how much did rules alone label, and how well?"),
              ("2–5 min", f"Send \"{PROMPT_1}\"", "Read the trace: which sub-agent did what, and what the orchestrator decided after each report."),
              ("5–8 min", "Send the trap, then read the red line", f"\"{PROMPT_2}\""),
-             ("8–10 min", "Agree one sentence", "What did the agent do that a chatbot could not, and where did a person stay in the loop?")]
+             ("8–10 min", "Prepare one point to present", "Where did the agent decide on its own, and where did a person still have to decide? One sentence per group, read out at the end.")]
     for i, (when, head, body) in enumerate(steps):
         y = 2.25 + i * 1.08
         chip(s, when, 0.9, y + 0.05, w=1.35, h=0.35, size=12)
         textbox(s, 2.5, y - 0.02, 6.4, 0.4, [(head, {"bold": True, "size": 15})])
         textbox(s, 2.5, y + 0.38, 6.4, 0.62, [(body, {"size": 12, "color": BLACK})])
-    card(s, 9.3, 2.25, 3.4, 4.2, "What to look for", [("The orchestrator delegates; it never labels itself", {"size": 12}), ("Each sub-agent reports back in words", {"size": 12}), ("The trap is refused by the brief first, and blocked by code if the brief fails", {"size": 12}), ("The draft to an outside address waits for a person", {"size": 12})], size=12)
+    card(s, 9.3, 2.25, 3.4, 4.2, "What to look for", [("The orchestrator delegates; it never labels itself", {"size": 12}), ("Each sub-agent reports back in words", {"size": 12}), ("The trap is refused by the brief first, and blocked by code if the brief fails", {"size": 12}), ("The draft to an outside address waits for a person", {"size": 12}), ("Everything happens in the app: no other tool is needed", {"size": 12})], size=12)
     textbox(s, 0.9, 6.7, 11.6, 0.35, [("Model is fixed to quick · leave the brief as it is for this run · reset the inbox if you want to start over", {"size": 11, "italic": True, "color": GREY})])
-    notes(s, "Ten minutes, strict. Say the workshop code once, do not type it in chat. If a group finishes early, ask them to untick the triage sub-agent in the building blocks and send the first prompt again: the orchestrator then does the labelling itself and the trace flattens.")
+    notes(s, "Ten minutes, strict. Say the workshop code once, do not type it in chat. Everything happens in the app; nobody needs another tool. Close by asking each group for its one sentence on where the agent decided and where a person did. If a group finishes early, ask them to untick the triage sub-agent in the building blocks and send the first prompt again: the orchestrator then does the labelling itself and the trace flattens.")
 
     # 2-4 · the flow, progressively
     for stage, sub, note in [
