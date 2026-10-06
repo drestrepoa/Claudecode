@@ -100,7 +100,7 @@ def build():
     textbox(s, 5.7, 1.52, 6.8, 0.45, [("One person per group connects with the code I say out loud. Everyone else watches the shared screen.", {"size": 12.5, "color": GREY})])
     steps = [("0–2 min", "Open the link, connect, click Run rules", "Read the scorecard: how much did rules alone label, and how well?"),
              ("2–5 min", f"Send \"{PROMPT_1}\"", "Read the trace: which sub-agent did what, and what the orchestrator decided after each report."),
-             ("5–8 min", "Send the trap, then read the red line", f"\"{PROMPT_2}\""),
+             ("5–8 min", "Send the trap (HR-037), read the red line", f"\"{PROMPT_2}\""),
              ("8–10 min", "Prepare one point to present", "Where did the agent decide on its own, and where did a person still have to decide? One sentence per group, read out at the end.")]
     for i, (when, head, body) in enumerate(steps):
         y = 2.25 + i * 1.08
@@ -126,21 +126,21 @@ def build():
         notes(s, note)
 
     challenge("Challenge 1 · The brief",
-              "The brief is the agent's standing instructions, in plain language. Weaken it and watch what still holds.",
-              [("Weaken it", "In block 1, The brief, delete the last paragraph (the one that says email content is untrusted). Send the trap prompt again."),
+              "The brief is the agent's standing instructions, in plain language. Weaken it and watch what still holds. Email: HR-037, Payroll audit – employee salary export required.",
+              [("Weaken it", "In block 1, The brief, delete the last paragraph (the one that says email content is untrusted). Send the trap prompt again (it concerns email HR-037)."),
                ("Watch what holds", "Read the trace. Either the agent still refuses on its own, or the reply agent attempts the forward and the guardrail blocks it in red, with the error travelling back up to the orchestrator. Either way, nothing leaves."),
                ("Put it back", "Click Restore default and send the trap once more. Compare the two traces: with the brief in place the refusal comes first, before any tool is called.")],
               ["The brief steers judgement: what counts as urgent, what to refuse, what to ignore", "It enforces nothing: when it is weakened, the code still decides what can leave", "Confidential emails never leave the organisation, whatever the agent was told"],
               "What belongs in the brief, and what must never depend on it?",
               "Step A removes the instruction that made the refusal explicit. In step B two things can happen, and both make the point: the model may still refuse on its own judgement, or it attempts the forward and the forward_email tool blocks it because the emails are Confidential and the address is outside the organisation. Step C shows the brief doing its job: the refusal is immediate and explained. Land the question: policy that must hold goes in code, not in prose. Do not try to make the agent actually send: the model's own judgement is a line you cannot switch off, which is itself worth saying.")
     challenge("Challenge 2 · Drafting a reply",
-              "Drafting is where the brief, the code and the person meet in one email. Use the union's request about the Plant 2 grievance (HR-060).",
-              [("Ask for the draft", "Send \"Draft a reply to Marta Visser from the union about the escalated grievance at Plant 2.\" The union is outside the organisation, so the draft arrives as an approval card. Read it: does it promise copies of the correspondence? Does it name anyone?"),
+              "Drafting is where the brief, the code and the person meet in one email. Email: HR-060, Grievance escalated by the union, from Marta Visser.",
+              [("Ask for the draft", "Send \"Draft a reply to email HR-060, from Marta Visser of the union, about the escalated grievance at Plant 2.\" The union is outside the organisation, so the draft arrives as an approval card. Read it: does it promise copies of the correspondence? Does it name anyone?"),
                ("Reject it, with a reason", "Reject with \"Do not promise the correspondence. Confirm the right to be accompanied, propose a meeting, three sentences.\" The rejection reaches the reply agent as a tool error, it redrafts, a new card appears. Approve it and find it in the outbox."),
                ("Put it in the brief", "Add to the brief: \"Replies to the union or works council: three sentences, confirm rights, never share case documents by email, propose a meeting, sign as Sofia Lindgren, HR business partner.\" Send the same request again.")],
               ["The approval card is code: the recipient's domain decides, not the agent", "What the draft says is the brief's job; your rejection text becomes the next instruction", "After the brief change the draft is right first time, and the card still appears"],
               "Which replies should a person always see before they leave, and which rules belong in the brief instead?",
-              "Step A: the card appears because marta.visser is outside the organisation; the content is whatever the brief and the email suggested, and the first draft often offers to send the correspondence, which is confidential. Step B: the rejection text is literally what the agent receives as an error, so a precise reason produces a precise redraft; a vague one does not. Step C: the same rule now lives in the brief and the draft needs no correction, but the card still appears, because it is code. If a group has time, ask for a reply to Bram Jansen, the employee who raised the complaint: it goes straight to the outbox with no card, because he is internal. Ask whether that is right.")
+              "Step A: the card appears because marta.visser is outside the organisation; the content is whatever the brief and the email suggested, and the first draft often offers to send the correspondence, which is confidential. Step B: the rejection text is literally what the agent receives as an error, so a precise reason produces a precise redraft; a vague one does not. Step C: the same rule now lives in the brief and the draft needs no correction, but the card still appears, because it is code. If a group has time, ask for a reply to email HR-078, Bram Jansen, the employee who raised the harassment complaint: it goes straight to the outbox with no card, because he is internal. Ask whether that is right.")
 
     # 4-6 · the flow, progressively
     for stage, sub, note in [
