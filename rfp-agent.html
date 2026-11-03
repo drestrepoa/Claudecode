@@ -247,7 +247,7 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 </header>
 
 <section>
-  <div class="sec-head"><h2>Agentic structure — one RFP, end to end</h2><p>An orchestrator and three sub-agents. Everything else is deterministic code, a knowledge base, or a person.</p></div>
+  <div class="sec-head"><h2>Agentic structure — one RFP, end to end</h2><p>One orchestrator, three sub-agents, tools, a guardrail, and people where it matters.</p></div>
   <div class="panel pad diagram">
     <svg viewBox="0 0 1100 680" role="img" aria-label="Diagram: the bid manager asks the orchestrator agent; a brief and skills and intake rules feed it; it delegates to a qualification agent, a pricing agent and a writer agent, each with its own tools; tools that commit the company pass a coded guardrail that executes, asks a person, or returns an error; the knowledge base and the pipeline are the long-term memory reached only through tools.">
       <defs>
@@ -257,23 +257,23 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
         <marker id="ar-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--guard)"/></marker>
         <marker id="ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--agent)"/></marker>
       </defs>
-      <g class="n-skill"><rect x="18" y="24" width="172" height="62"/><text x="104" y="45" text-anchor="middle" font-weight="600">Brief &amp; skills</text><text x="104" y="62" text-anchor="middle" class="small">how to qualify, when to</text><text x="104" y="75" text-anchor="middle" class="small">escalate, what never to do</text></g>
+      <g class="n-skill"><rect x="18" y="24" width="172" height="62"/><text x="104" y="52" text-anchor="middle" font-weight="600">Brief &amp; skills</text><text x="104" y="70" text-anchor="middle" class="small">standing instructions</text></g>
       <path class="edge agent" d="M190 60 C215 60 215 250 232 250" marker-end="url(#ar-a)"/>
-      <g class="n-human"><rect x="18" y="256" width="150" height="58"/><text x="93" y="280" text-anchor="middle" font-weight="600" id="dia-owner">Human user</text><text x="93" y="297" text-anchor="middle" class="small">the bid manager asks</text></g>
+      <g class="n-human"><rect x="18" y="256" width="150" height="58"/><text x="93" y="280" text-anchor="middle" font-weight="600" id="dia-owner">Human user</text><text x="93" y="297" text-anchor="middle" class="small">asks, decides</text></g>
       <path class="edge agent" d="M168 276 H232" marker-end="url(#ar-a)"/><text x="200" y="270" text-anchor="middle" class="small">request</text>
       <path class="edge agent result" d="M232 300 H168" marker-end="url(#ar-a)"/><text x="200" y="314" text-anchor="middle" class="small">reply</text>
-      <g class="n-mem"><rect x="18" y="356" width="172" height="86"/><text x="104" y="377" text-anchor="middle" font-weight="600">Working memory</text><text x="104" y="394" text-anchor="middle" class="small">the brief, the last turns of</text><text x="104" y="407" text-anchor="middle" class="small">this chat, every tool result</text><text x="104" y="420" text-anchor="middle" class="small">rebuilt for every call</text><text x="104" y="433" text-anchor="middle" class="small">sub-agents start empty</text></g>
+      <g class="n-mem"><rect x="18" y="356" width="172" height="56"/><text x="104" y="380" text-anchor="middle" font-weight="600">Working memory</text><text x="104" y="398" text-anchor="middle" class="small">this conversation</text></g>
       <path class="edge result" d="M190 390 C215 390 215 322 232 322" marker-end="url(#ar)"/><path class="edge result" d="M232 328 C215 328 215 400 190 400"/>
-      <g class="n-det"><rect x="232" y="24" width="200" height="52"/><text x="332" y="45" text-anchor="middle" font-weight="600">Intake rules</text><text x="332" y="62" text-anchor="middle" class="small">deterministic · flags before the agents</text></g>
+      <g class="n-det"><rect x="232" y="24" width="200" height="52"/><text x="332" y="45" text-anchor="middle" font-weight="600">Intake rules</text><text x="332" y="62" text-anchor="middle" class="small">flags RFPs · code</text></g>
       <path class="edge" d="M316 76 V238" marker-end="url(#ar)"/><text x="328" y="160" class="small">flags</text>
-      <g class="n-agent"><rect x="232" y="240" width="168" height="92"/><text x="316" y="266" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="284" text-anchor="middle" class="small">plans, delegates, reports</text><text x="316" y="298" text-anchor="middle" class="small">never prices or writes itself</text><text x="316" y="316" text-anchor="middle" class="small">own tools: list · read · submit</text></g>
-      <g class="n-agent"><rect x="470" y="78" width="150" height="56"/><text x="545" y="100" text-anchor="middle" font-weight="600">Qualification agent</text><text x="545" y="118" text-anchor="middle" class="small">fit, compliance, bid / no-bid</text></g>
-      <g class="n-agent"><rect x="470" y="276" width="150" height="56"/><text x="545" y="298" text-anchor="middle" font-weight="600">Pricing agent</text><text x="545" y="316" text-anchor="middle" class="small">catalogue lines, discounts</text></g>
-      <g class="n-agent"><rect x="470" y="436" width="150" height="56"/><text x="545" y="458" text-anchor="middle" font-weight="600">Writer agent</text><text x="545" y="476" text-anchor="middle" class="small">drafts, asks the customer</text></g>
+      <g class="n-agent"><rect x="232" y="240" width="168" height="92"/><text x="316" y="282" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="300" text-anchor="middle" class="small">plans and delegates</text></g>
+      <g class="n-agent"><rect x="470" y="78" width="150" height="56"/><text x="545" y="100" text-anchor="middle" font-weight="600">Qualification agent</text><text x="545" y="118" text-anchor="middle" class="small">bid or no-bid</text></g>
+      <g class="n-agent"><rect x="470" y="276" width="150" height="56"/><text x="545" y="298" text-anchor="middle" font-weight="600">Pricing agent</text><text x="545" y="316" text-anchor="middle" class="small">the price</text></g>
+      <g class="n-agent"><rect x="470" y="436" width="150" height="56"/><text x="545" y="458" text-anchor="middle" font-weight="600">Writer agent</text><text x="545" y="476" text-anchor="middle" class="small">the proposal</text></g>
       <path class="edge agent" d="M400 270 C440 270 430 106 468 106" marker-end="url(#ar-a)"/>
       <path class="edge agent" d="M400 290 C440 290 430 304 468 304" marker-end="url(#ar-a)"/>
       <path class="edge agent" d="M400 310 C440 310 430 464 468 464" marker-end="url(#ar-a)"/>
-      <text x="436" y="200" text-anchor="middle" class="small">instruction ⇄ report</text>
+      <text x="436" y="200" text-anchor="middle" class="small">task ⇄ report</text>
       <g class="n-det"><rect x="660" y="14" width="150" height="26"/><text x="735" y="32" text-anchor="middle" class="mono">read_rfp</text></g>
       <g class="n-det"><rect x="660" y="46" width="150" height="26"/><text x="735" y="64" text-anchor="middle" class="mono">company_profile</text></g>
       <g class="n-det"><rect x="660" y="78" width="150" height="26"/><text x="735" y="96" text-anchor="middle" class="mono">check_capacity</text></g>
@@ -291,23 +291,23 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
       <path class="edge" d="M620 98 C640 98 640 27 658 27" marker-end="url(#ar)"/><path class="edge" d="M620 101 C640 101 640 59 658 59" marker-end="url(#ar)"/><path class="edge" d="M620 104 C640 104 640 91 658 91" marker-end="url(#ar)"/><path class="edge" d="M620 107 C640 107 640 123 658 123" marker-end="url(#ar)"/><path class="edge" d="M620 110 C640 110 640 155 658 155" marker-end="url(#ar)"/><path class="edge" d="M620 113 C640 113 640 187 658 187" marker-end="url(#ar)"/>
       <path class="edge" d="M620 298 C640 298 640 265 658 265" marker-end="url(#ar)"/><path class="edge" d="M620 302 C640 302 640 297 658 297" marker-end="url(#ar)"/><path class="edge" d="M620 306 C640 306 640 329 658 329" marker-end="url(#ar)"/><path class="edge" d="M620 310 C640 310 640 361 658 361" marker-end="url(#ar)"/>
       <path class="edge" d="M620 458 C640 458 640 425 658 425" marker-end="url(#ar)"/><path class="edge" d="M620 462 C640 462 640 457 658 457" marker-end="url(#ar)"/><path class="edge" d="M620 466 C640 466 640 489 658 489" marker-end="url(#ar)"/><path class="edge" d="M620 470 C640 470 640 521 658 521" marker-end="url(#ar)"/>
-      <text x="735" y="226" text-anchor="middle" class="small">read only · commit the company ↓</text>
-      <g class="n-guard"><rect x="850" y="266" width="130" height="60"/><text x="915" y="290" text-anchor="middle" font-weight="600">Guardrail</text><text x="915" y="308" text-anchor="middle" class="small">code, not persuasion</text></g>
+      <text x="735" y="226" text-anchor="middle" class="small">tools</text>
+      <g class="n-guard"><rect x="850" y="266" width="130" height="60"/><text x="915" y="290" text-anchor="middle" font-weight="600">Guardrail</text><text x="915" y="308" text-anchor="middle" class="small">rules in code</text></g>
       <path class="edge" d="M810 187 C830 187 830 296 848 296" marker-end="url(#ar)"/><path class="edge" d="M810 361 C830 361 830 296 848 296"/><path class="edge" d="M810 489 C830 489 830 296 848 296"/><path class="edge" d="M810 521 C830 521 830 296 848 296"/>
       <path class="edge" d="M400 326 H420 V640 H900 V330" marker-end="url(#ar)"/><text x="890" y="636" text-anchor="end" class="small">submit_proposal</text>
       <g class="n-ok"><rect x="955" y="210" width="145" height="44"/><text x="1027" y="229" text-anchor="middle" font-weight="600">Executed</text><text x="1027" y="244" text-anchor="middle" class="small">within limits</text></g>
-      <g class="n-human"><rect x="955" y="340" width="145" height="58"/><text x="1027" y="359" text-anchor="middle" font-weight="600">Human approval</text><text x="1027" y="374" text-anchor="middle" class="small">bid manager · Head of</text><text x="1027" y="388" text-anchor="middle" class="small">Sales · Legal · CFO</text></g>
+      <g class="n-human"><rect x="955" y="340" width="145" height="58"/><text x="1027" y="359" text-anchor="middle" font-weight="600">Human approval</text><text x="1027" y="381" text-anchor="middle" class="small">above the line</text></g>
       <path class="edge ok" d="M980 284 C1000 284 1000 232 953 232" marker-end="url(#ar-ok)"/><text x="1027" y="202" text-anchor="middle" class="small">≤ limit</text>
       <path class="edge human" d="M980 308 C1000 308 1000 369 953 369" marker-end="url(#ar-h)"/><text x="1027" y="414" text-anchor="middle" class="small">&gt; limit</text>
       <path class="edge human result" d="M1027 420 V440 H960" marker-end="url(#ar-h)"/><text x="1027" y="456" text-anchor="middle" class="small">approve / reject</text>
-      <g class="n-mem"><rect x="455" y="548" width="370" height="70"/><text x="640" y="566" text-anchor="middle" font-weight="600">Long-term memory</text><text x="640" y="582" text-anchor="middle" class="small">knowledge base: catalogue, certifications, terms, capacity, past bids</text><text x="640" y="596" text-anchor="middle" class="small">and the pipeline: decisions, matrices, prices, drafts, submissions</text><text x="640" y="610" text-anchor="middle" class="small">read and written only through tools</text></g>
+      <g class="n-mem"><rect x="455" y="548" width="370" height="70"/><text x="640" y="578" text-anchor="middle" font-weight="600">Long-term memory</text><text x="640" y="596" text-anchor="middle" class="small">knowledge base and pipeline · through tools only</text></g>
       <path class="edge" d="M735 534 V546" marker-end="url(#ar)"/><path class="edge result" d="M750 546 V536" marker-end="url(#ar)"/>
-      <path class="edge guard result" d="M915 326 V380 H940 V658 H316 V332" marker-end="url(#ar-g)"/><text x="600" y="672" text-anchor="middle" class="small" style="fill:var(--guard)">blocked or rejected ⇢ tool error to the sub-agent, which reports it up</text>
+      <path class="edge guard result" d="M915 326 V380 H940 V658 H316 V332" marker-end="url(#ar-g)"/><text x="600" y="672" text-anchor="middle" class="small" style="fill:var(--guard)">blocked or rejected ⇢ error back to the agent</text>
     </svg>
     <div class="legend" style="margin-top:10px">
       <span><i class="sw det"></i>deterministic</span><span><i class="sw agent"></i>agent (orchestrator and sub-agents)</span><span><i class="sw skill"></i>brief &amp; skills</span><span><i class="sw mem"></i>memory</span><span><i class="sw human"></i>human</span><span><i class="sw guard"></i>guardrail</span><span><i class="sw ok"></i>executed</span>
     </div>
-    <p class="caption" style="margin-top:10px">The orchestrator reads the brief, plans, and delegates: the qualification agent builds the compliance matrix and recommends bid or no-bid, the pricing agent maps the request to the catalogue and prices it, the writer agent drafts the proposal and the questions to the customer. Each sub-agent is its own model call with its own small set of tools, and reports back in words. The tools that commit the company (a decision, a price, a draft, a submission, a question to a customer) pass through a guardrail written in code: below the line the action executes; above it a person decides. Unit costs and margins live in the knowledge base and never come back out of a tool.</p>
+    <p class="caption" style="margin-top:10px">The orchestrator plans and delegates; three sub-agents do the work with their tools. Anything that commits the company passes a guardrail in code: within limits it runs, above the line a person decides.</p>
   </div>
 </section>
 

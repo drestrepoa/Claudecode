@@ -89,15 +89,15 @@ def build():
 
     # 4 · anatomy
     s = blank(); title(s, "How the agent works")
-    node(s, 0.6, 1.5, 1.9, 0.78, "Brief & skills", "how to qualify, when to escalate, what never to do", "skill")
-    node(s, 0.6, 3.3, 1.7, 0.85, "Human user", "the bid manager asks", "human")
-    node(s, 0.6, 4.8, 1.9, 0.95, "Working memory", "the brief, the last turns, every tool result · rebuilt each call", "mem")
-    node(s, 3.0, 1.5, 2.2, 0.7, "Intake rules", "deterministic · flags before the agents", "det")
-    node(s, 3.0, 3.0, 2.2, 1.35, "Orchestrator agent", "plans, delegates, reports · own tools: list, read, submit", "agent")
+    node(s, 0.6, 1.5, 1.9, 0.78, "Brief & skills", "standing instructions", "skill")
+    node(s, 0.6, 3.3, 1.7, 0.85, "Human user", "asks, decides", "human")
+    node(s, 0.6, 4.8, 1.9, 0.95, "Working memory", "this conversation", "mem")
+    node(s, 3.0, 1.5, 2.2, 0.7, "Intake rules", "flags RFPs · code", "det")
+    node(s, 3.0, 3.0, 2.2, 1.35, "Orchestrator agent", "plans and delegates", "agent")
     arrow(s, 2.52, 1.95, 3.0, 3.1, "5E48B8"); arrow(s, 2.32, 3.6, 2.98, 3.6, "5E48B8"); arrow(s, 2.98, 3.95, 2.32, 3.95, "5E48B8", dashed=True); arrow(s, 4.1, 2.22, 4.1, 2.98); arrow(s, 2.52, 5.25, 3.3, 4.37, "6B7280", dashed=True)
-    subs = [("Qualification agent", "matrix, bid / no-bid", 1.45, ["read_rfp", "company_profile", "check_capacity", "past_bids", "save_requirements", "set_decision"]),
-            ("Pricing agent", "catalogue lines, discounts", 3.3, ["read_rfp", "search_catalogue", "check_capacity", "price_proposal"]),
-            ("Writer agent", "drafts, asks the customer", 4.9, ["read_rfp", "company_profile", "draft_proposal", "ask_customer"])]
+    subs = [("Qualification agent", "bid or no-bid", 1.45, ["read_rfp", "company_profile", "check_capacity", "past_bids", "save_requirements", "set_decision"]),
+            ("Pricing agent", "the price", 3.3, ["read_rfp", "search_catalogue", "check_capacity", "price_proposal"]),
+            ("Writer agent", "the proposal", 4.9, ["read_rfp", "company_profile", "draft_proposal", "ask_customer"])]
     world = {"set_decision", "price_proposal", "draft_proposal", "ask_customer"}; world_pos = []
     for name, sub, y, tools in subs:
         node(s, 6.0, y, 1.8, 0.75, name, sub, "agent"); arrow(s, 5.22, 3.65, 5.98, y + 0.37, "5E48B8")
@@ -106,16 +106,16 @@ def build():
             node(s, 8.3, ty, 1.6, 0.27 if len(tools) > 4 else 0.33, t, None, "det", mono=True, size=9.5)
             arrow(s, 7.82, y + 0.37, 8.28, ty + 0.14, "6B7280")
             if t in world: world_pos.append(ty + 0.14)
-    node(s, 6.0, 6.25, 3.9, 0.5, "Long-term memory", "knowledge base and pipeline · only through tools", "mem", size=11)
-    node(s, 10.25, 3.35, 1.45, 0.85, "Guardrail", "code, not persuasion", "guard")
+    node(s, 6.0, 6.25, 3.9, 0.5, "Long-term memory", "knowledge base and pipeline", "mem", size=11)
+    node(s, 10.25, 3.35, 1.45, 0.85, "Guardrail", "rules in code", "guard")
     for py in world_pos: arrow(s, 9.92, py, 10.23, 3.77, "6B7280")
-    node(s, 11.95, 2.3, 1.25, 0.7, "Executed", "within limits", "ok"); node(s, 11.95, 4.4, 1.25, 0.9, "Human approval", "bid manager · HoS · Legal · CFO", "human", size=10)
+    node(s, 11.95, 2.3, 1.25, 0.7, "Executed", "within limits", "ok"); node(s, 11.95, 4.4, 1.25, 0.9, "Human approval", "above the line", "human", size=10)
     arrow(s, 11.72, 3.6, 11.93, 2.75, "2C8A5A"); textbox(s, 11.45, 2.95, 0.6, 0.3, [("≤ limit", {"size": 9, "color": "2C8A5A"})])
     arrow(s, 11.72, 4.0, 11.93, 4.75, "B4761C"); textbox(s, 11.45, 4.3, 0.6, 0.3, [("> limit", {"size": 9, "color": "B4761C"})])
     arrow(s, 10.98, 4.22, 10.98, 6.82, "BF3F3A", dashed=True, head=False); arrow(s, 10.98, 6.82, 5.6, 6.82, "BF3F3A", dashed=True, head=False); arrow(s, 5.6, 6.82, 5.6, 4.2, "BF3F3A", dashed=True, head=False); arrow(s, 5.6, 4.2, 5.24, 4.2, "BF3F3A", dashed=True)
-    textbox(s, 11.08, 5.45, 2.2, 0.5, [("blocked or rejected → tool error to the sub-agent, which reports it up", {"size": 9, "color": "BF3F3A"})])
+    textbox(s, 11.08, 5.45, 2.2, 0.5, [("blocked or rejected → error back to the agent", {"size": 9, "color": "BF3F3A"})])
     legend2(s, [("det", "deterministic"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human"), ("guard", "guardrail")])
-    textbox(s, 0.9, 6.92, 10.6, 0.5, [("One orchestrator, three sub-agents, each a separate model call with a few tools. The tools that commit the company pass a guardrail in code; unit costs and margins never leave the knowledge base.", {"size": 10.5, "italic": True, "color": NAVY})])
+    textbox(s, 0.9, 6.92, 10.6, 0.5, [("The orchestrator plans and delegates; three sub-agents do the work with their tools. Anything that commits the company passes a guardrail in code.", {"size": 10.5, "italic": True, "color": NAVY})])
     notes(s, "Same anatomy as the inbox agent, new job. Point at the four tools that commit the company: a decision, a price, a draft, a question. Everything else only reads. The pricing tool knows the unit costs and returns a margin band, never the cost: the agent cannot leak what it never sees.")
 
     # 5 · where people decide
