@@ -1,25 +1,48 @@
 #!/usr/bin/env python3
-"""Splice data/emails.json into src/inbox-agent.src.html and write inbox-agent.html."""
+"""Build the single-file pages.
+
+  python3 build.py            law-firm inbox (data/emails.json)        -> inbox-agent.html, site/index.html
+  python3 build.py hr         HR inbox (data/hr/emails.json)           -> inbox-agent.html, site/index.html
+  python3 build.py rfp        RFP response agent (data/rfp/rfps.json)  -> rfp-agent.html, site/index.html
+
+The RFP page shares the inbox page's stylesheet: its source is src/rfp-agent.body.html, and the build
+prepends the <title> and <style> block of src/inbox-agent.src.html plus a few extra rules.
+"""
 import json
 import os
 import sys
 from pathlib import Path
 
 root = Path(__file__).parent
-# Which inbox to embed: `python3 build.py` (law firm, data/emails.json) or `python3 build.py hr` / DATASET=hr (data/hr/emails.json)
-DATASETS = {"law": root / "data" / "emails.json", "hr": root / "data" / "hr" / "emails.json"}
+DATASETS = {
+    "law": {"json": root / "data" / "emails.json", "src": root / "src" / "inbox-agent.src.html", "placeholder": "__INBOX_DATA__", "out": "inbox-agent.html", "title": lambda d: d.get("firm", "Inbox") + " Inbox Agent"},
+    "hr": {"json": root / "data" / "hr" / "emails.json", "src": root / "src" / "inbox-agent.src.html", "placeholder": "__INBOX_DATA__", "out": "inbox-agent.html", "title": lambda d: d.get("firm", "Inbox") + " Inbox Agent"},
+    "rfp": {"json": root / "data" / "rfp" / "rfps.json", "src": root / "src" / "rfp-agent.body.html", "placeholder": "__RFP_DATA__", "out": "rfp-agent.html", "title": lambda d: d.get("firm", "Bid desk") + " RFP Agent"},
+}
+EXTRA_CSS = """
+.lab.Billing{color:var(--muted);border-style:dashed}
+.lab.Scheduling{color:#fff;background:var(--ok);border-color:var(--ok)}
+.lab.Employment{color:var(--det);border-color:var(--det)}
+.lab.Corporate{color:#8A4B12;border-color:#C98A45}
+.row .when{min-width:60px}
+"""
 choice = (sys.argv[1] if len(sys.argv) > 1 else os.environ.get("DATASET", "law")).lower()
-src_json = DATASETS.get(choice) or Path(choice)
-data = json.loads(src_json.read_text())
+cfg = DATASETS[choice]
+data = json.loads(cfg["json"].read_text())
 payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-src = (root / "src" / "inbox-agent.src.html").read_text()
-assert "__INBOX_DATA__" in src
-out = src.replace("__INBOX_DATA__", payload).replace("__TITLE__", (data.get("firm", "Inbox") + " Inbox Agent").replace("&", "&amp;"))
-(root / "inbox-agent.html").write_text(out)
+src = cfg["src"].read_text()
+if choice == "rfp":
+    head = (root / "src" / "inbox-agent.src.html").read_text()
+    head = head[: head.index("</style>")] + EXTRA_CSS + "</style>\n"
+    src = head + src
+assert cfg["placeholder"] in src
+out = src.replace(cfg["placeholder"], payload).replace("__TITLE__", cfg["title"](data).replace("&", "&amp;"))
+(root / cfg["out"]).write_text(out)
 (root / "site").mkdir(exist_ok=True)
 cut = out.index("</style>") + len("</style>")
 head, body = out[:cut], out[cut:]
 (root / "site" / "index.html").write_text(
     "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
     + head + "\n</head>\n<body>" + body + "\n</body>\n</html>\n")
-print(f"wrote inbox-agent.html and site/index.html from {src_json.relative_to(root)} ({len(out) // 1024} KB, {len(data['emails'])} emails, {data.get('firm')})")
+n = len(data.get("emails") or data.get("rfps") or [])
+print(f"wrote {cfg['out']} and site/index.html from {cfg['json'].relative_to(root)} ({len(out) // 1024} KB, {n} records, {data.get('firm')})")

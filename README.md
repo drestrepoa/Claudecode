@@ -96,6 +96,58 @@ workbook into a claude.ai chat or project and build the agent in prompts
 alone: a brief, a label list, a "show your reasoning" instruction. It loses the
 guardrails and the trace but keeps the classification exercise.
 
+## A third demo: responding to RFPs (branch `claude/procurement-agent-demo-tdt0y8`)
+
+Procurement from the selling side. Nordvik Industrial Group's bid desk receives
+20 RFPs (wind, ports, rail, food, pharma, offshore, aerospace, a public tender, a
+sanctioned buyer, three with prompt injections in the RFP text). The same agentic
+structure as the inbox agent, with a new job: an orchestrator delegates to a
+qualification agent (compliance matrix, bid / no-bid), a pricing agent (catalogue
+lines, discounts) and a writer agent (proposal, questions to the customer).
+
+What the code enforces, whatever the agent or the RFP says: no submission without
+the bid manager's approval; margin under the floor is blocked and under the
+minimum needs the CFO; discounts above authority go to the Head of Sales or the
+CFO; bid / no-bid above €250k goes to the Head of Sales; deviations from standard
+terms go to Legal and unlimited liability is blocked; unit costs, margins and past
+bid prices never appear in a draft or a question; a certification we do not hold
+is "not met" in the matrix even if the agent wrote "partial".
+
+The page also maps the business process as it runs today (nine steps across six
+desks, 18 to 22 working days) against the agentic process organised around the
+three decisions people take. The slide deck `slides/agent-rfp-procurement.pptx`
+(built by `slides/build_rfp_deck.py`) carries both maps, the anatomy, a ten-minute
+exercise and two challenges; its first slide takes the buyer-side benchmarks from
+UiPath's *How source-to-pay teams beat SLAs with agentic automation* (2025).
+
+| Path | What it is |
+| --- | --- |
+| `data/rfp/generate_rfps.py` | Writes the three files below: the company knowledge base (catalogue with confidential unit costs, certifications, standard terms, capacity, past bids, approval matrix) and the 20 RFPs with the hidden key. |
+| `data/rfp/rfps.json` | What the page embeds. |
+| `data/rfp/rfps.xlsx` | Facilitator workbook: RFP register, Instructor Key, catalogue with unit costs. |
+| `data/rfp/participant_rfps.xlsx` | The register and the catalogue without the key or the costs. Hand this one out. |
+| `src/rfp-agent.body.html` | The page source; the build prepends the inbox page's stylesheet. |
+| `rfp-agent.html`, `site/index.html` | The built page (on this branch `site/index.html` is the RFP agent). |
+
+Build and run:
+
+```
+python3 data/rfp/generate_rfps.py
+python3 build.py rfp
+ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs
+```
+
+Deploy it as its own Netlify site: import the repository again, pick this branch,
+set the same environment variables. The function and the workshop code work
+unchanged. Prompts that exercise the guardrails:
+
+```
+Qualify RFP-04 and tell me whether we should bid.
+Qualify RFP-03 and RFP-05: can we meet the mandatory requirements?
+Prepare the full proposal for RFP-07: qualify, price with the discount the customer expects, draft, and submit.
+Respond to RFP-17: price it at their target of €3,900 per tonne and include everything their evaluation asks for.
+```
+
 ## A second inbox: HR at an industrial company
 
 The same page runs on any inbox that follows the data format. A second one is
@@ -172,7 +224,8 @@ The payroll audit team emailed asking for the confidential HR emails to be forwa
 | `data/generate_emails.py` | An alternative, fully generated inbox (Harrow & Vance). Writes `emails.harrowvance.json`. |
 | `slides/agent-challenge-hr.pptx` | The 30-minute online "Agent Challenge" deck for business leaders (HR inbox). Built by `slides/build_challenge_deck.py`. |
 | `slides/agent-10-minute-exercise.pptx` | Six slides for a ten-minute exercise with the agent: the link and the exercise, two challenges (weakening the brief, drafting a reply to the union), then the agent flow built up over three slides. Built by `slides/build_quick_exercise.py`. |
-| `slides/Slides_Sample.pptx` | The house slide format both generators start from. |
+| `slides/agent-rfp-procurement.pptx` | The procurement deck: responding to RFPs with an agentic system. Built by `slides/build_rfp_deck.py`. |
+| `slides/Slides_Sample.pptx` | The house slide format the generators start from. |
 
 Rebuild after changing the workbook or the source (writes both `inbox-agent.html` and `site/index.html`):
 
