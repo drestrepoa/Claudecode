@@ -298,6 +298,20 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
 .gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;font-size:13px}
 @media (max-width:900px){.gloss{grid-template-columns:1fr}}
 .gloss b{font-weight:600}
+.roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:900px){.roles{grid-template-columns:repeat(2,1fr)}}
+.role{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.role input{width:100%;font-size:13px}
+.role b{color:var(--ink);font-weight:600}
+.breaks.sealed .guards{filter:blur(6px);pointer-events:none;user-select:none}
+.breaks.sealed .guards label{visibility:hidden}
+.decide{border:1px solid var(--human);background:var(--human-soft);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.decide .q{font-size:14px}
+.decide .q b{font-weight:600}
+.verdict{border-radius:10px;padding:10px 14px;font-size:13.5px}
+.verdict.good{border:1px solid var(--ok);background:var(--ok-soft)} .verdict.bad{border:1px solid var(--guard);background:var(--guard-soft)}
+.scorebar{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.scorebar b{color:var(--ink)}
 </style>
 
 <div class="wrap">
@@ -305,7 +319,7 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
   <div>
     <div class="eyebrow">Agentic payments · simulation · AP2, UCP, Agent Pay, SEPA Instant, USDC</div>
     <h1>Agentic Payment Lab</h1>
-    <p class="sub">An AI agent buys on your behalf. Every step signed, verified and visible, in euros, dollars, pounds or stablecoins.</p>
+    <p class="sub">An AI agent buys on your behalf. Every step signed, verified and visible, in euros, dollars, pounds, riyals or stablecoins.</p>
   </div>
   <div class="hcontrols">
     <span class="pill" id="status"><i></i><span>ready</span></span>
@@ -349,9 +363,9 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
       <div class="opts" id="merchants"></div>
       <div class="opts" id="instruments"></div>
     </div>
-    <div class="panel pad breaks" style="display:flex;flex-direction:column;gap:10px">
-      <h3>3 · Break it</h3>
-      <p class="hint">Each switch makes one party misbehave. Watch which verifier catches it, and at which step.</p>
+    <div class="panel pad breaks" id="breaks" style="display:flex;flex-direction:column;gap:10px">
+      <div class="block-head"><h3>3 · Break it</h3><button class="btn small" id="seal">Seal the switches</button></div>
+      <p class="hint">Each switch makes one party misbehave. Watch which verifier catches it, and at which step. In room mode, the saboteur sets them and seals the panel; the room finds out by verifying.</p>
       <div class="guards">
         <div class="guard"><label><input type="checkbox" id="b-tamper"> The agent changes the total after the merchant signed the checkout</label><span class="how">caught by the merchant: checkout_hash does not match its own checkout_jwt</span></div>
         <div class="guard"><label><input type="checkbox" id="b-over"> The merchant's offer comes in above the user's limit</label><span class="how">human present: the trusted surface shows it and the user decides · human not present: the credential provider rejects the amount constraint</span></div>
@@ -359,6 +373,11 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
         <div class="guard"><label><input type="checkbox" id="b-expired"> The agent uses a mandate that has expired</label><span class="how">caught by every verifier: exp is in the past</span></div>
         <div class="guard"><label><input type="checkbox" id="b-replay"> The agent reuses the same mandate for a second purchase</label><span class="how">caught by the credential provider: nonce already seen, no receipt for the first</span></div>
       </div>
+    </div>
+    <div class="panel pad" style="grid-column:1 / -1;display:flex;flex-direction:column;gap:10px">
+      <div class="block-head"><div class="t"><h3>4 · Play it as a room</h3><span class="tag human">8 roles</span></div><label class="chip" style="cursor:pointer"><input type="checkbox" id="roleplay" style="margin:0"> room mode: the verifiers decide before the page reveals</label></div>
+      <p class="hint">Give each person a party. At every verification step the page shows the evidence and asks that person to accept or reject, then reveals whether they were right. The user and the agent are the only roles that make choices; everyone else verifies. The agent player may also be the saboteur: set a break-it switch and seal the panel.</p>
+      <div class="roles" id="roles"></div>
     </div>
   </div>
 </section>
@@ -405,7 +424,7 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
     <div><b>Checkout mandate, payment mandate.</b> The two AP2 mandates: the first authorises the merchant to complete this checkout, the second authorises the payment for it. Linked by the hash of the merchant-signed checkout.</div>
     <div><b>Trusted surface.</b> The non-agentic screen where the user sees what they sign: a wallet, a bank app, a passkey prompt. The LLM never sits there.</div>
     <div><b>Credential provider.</b> The holder of the user's payment credentials: a wallet or a bank. It verifies the payment mandate and hands the agent a scoped credential, never the raw card.</div>
-    <div><b>Agentic token.</b> Mastercard Agent Pay's credential: a network token bound to a registered agent, a merchant scope, an amount and the user's consent. Worldline and ING ran Europe's first live one in 2026.</div>
+    <div><b>Agentic token.</b> Mastercard Agent Pay's credential: a network token bound to a registered agent, a merchant scope, an amount and the user's consent. Europe's first live one ran in 2026 with a processor and an issuing bank.</div>
     <div><b>SEPA Instant.</b> Euro credit transfer in seconds, account to account. The agent initiates through a licensed provider; the user's strong customer authentication is the signature on the mandate.</div>
     <div><b>USDC, x402.</b> A dollar stablecoin and an HTTP-native payment standard: the merchant answers 402 Payment Required, the agent pays with a signed transfer authorisation, a facilitator settles it on-chain. AP2's crypto extension.</div>
     <div><b>Human present, human not present.</b> The user signs the exact checkout; or signs limits once and the agent signs within them. Verifiers always receive a closed mandate; what changes is whose key signed it.</div>
@@ -424,56 +443,76 @@ const te = new TextEncoder();
 const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const b64uStr = (s) => b64u(te.encode(s));
 const fromB64u = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (s.length % 4)) % 4)), (c) => c.charCodeAt(0));
-const sha256 = async (s) => b64u(await crypto.subtle.digest("SHA-256", te.encode(s)));
+const SUBTLE = !!(window.crypto && window.crypto.subtle);
+// Pure-JS SHA-256, used only when the browser blocks WebCrypto (signatures are then simulated and the page says so).
+function jsSha256(str) {
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const m = te.encode(str); const l = m.length; const words = []; for (let i = 0; i < l; i++) words[i >> 2] |= m[i] << (24 - (i % 4) * 8);
+  words[l >> 2] |= 0x80 << (24 - (l % 4) * 8); words[(((l + 8) >> 6) << 4) + 15] = l * 8;
+  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]; const rotr = (x, n) => (x >>> n) | (x << (32 - n)); const W = new Array(64);
+  for (let i = 0; i < words.length; i += 16) {
+    for (let t = 0; t < 64; t++) { if (t < 16) W[t] = words[i + t] | 0; else { const s0 = rotr(W[t-15], 7) ^ rotr(W[t-15], 18) ^ (W[t-15] >>> 3), s1 = rotr(W[t-2], 17) ^ rotr(W[t-2], 19) ^ (W[t-2] >>> 10); W[t] = (W[t-16] + s0 + W[t-7] + s1) | 0; } }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let t = 0; t < 64; t++) { const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25), ch = (e & f) ^ (~e & g), t1 = (h + S1 + ch + K[t] + W[t]) | 0, S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22), mj = (a & b) ^ (a & c) ^ (b & c), t2 = (S0 + mj) | 0; h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0; }
+    H = [(H[0]+a)|0,(H[1]+b)|0,(H[2]+c)|0,(H[3]+d)|0,(H[4]+e)|0,(H[5]+f)|0,(H[6]+g)|0,(H[7]+h)|0];
+  }
+  const out = new Uint8Array(32); H.forEach((v, i) => { out[i*4] = v >>> 24; out[i*4+1] = (v >>> 16) & 255; out[i*4+2] = (v >>> 8) & 255; out[i*4+3] = v & 255; }); return out.buffer;
+}
+const sha256 = async (s) => b64u(SUBTLE ? await crypto.subtle.digest("SHA-256", te.encode(s)) : jsSha256(s));
 const rnd = (n = 12) => b64u(crypto.getRandomValues(new Uint8Array(n)));
 const canon = (o) => JSON.stringify(o);
 const nowIso = () => new Date().toISOString().slice(0, 19) + "Z";
 const fmt = (n, cur) => new Intl.NumberFormat("en-GB", { style: "currency", currency: cur === "USDC" ? "USD" : cur, minimumFractionDigits: 2 }).format(n).replace("US$", cur === "USDC" ? "USDC " : "$");
 
 async function keypair(kid, owner) {
+  if (!SUBTLE) { const secret = rnd(24); const pub = { kty: "sim", kid, note: "simulated key: this viewer blocks WebCrypto" }; return { kid, owner, secret, jwk: pub, thumb: (await sha256(secret)).slice(0, 16) }; }
   const k = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
   const jwk = await crypto.subtle.exportKey("jwk", k.publicKey);
   const pub = { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y };
   return { kid, owner, priv: k.privateKey, pub: k.publicKey, jwk: pub, thumb: (await sha256(canon(pub))).slice(0, 16) };
 }
 async function sign(payload, key, typ = "JWT") {
-  const h = b64uStr(canon({ alg: "ES256", typ, kid: key.kid })), p = b64uStr(canon(payload));
+  const h = b64uStr(canon({ alg: SUBTLE ? "ES256" : "SIM256", typ, kid: key.kid })), p = b64uStr(canon(payload));
+  if (!SUBTLE) return h + "." + p + "." + (await sha256(key.secret + "." + h + "." + p));
   const s = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key.priv, te.encode(h + "." + p));
   return h + "." + p + "." + b64u(s);
 }
 async function verify(jwt, key) {
-  try { const [h, p, s] = jwt.split("."); return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key.pub, fromB64u(s), te.encode(h + "." + p)); } catch (e) { return false; }
+  try { const [h, p, s] = jwt.split("."); if (!SUBTLE) return s === (await sha256(key.secret + "." + h + "." + p)); return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key.pub, fromB64u(s), te.encode(h + "." + p)); } catch (e) { return false; }
 }
 const payload = (jwt) => JSON.parse(new TextDecoder().decode(fromB64u(jwt.split(".")[1])));
 const short = (s, n = 18) => s.length > n * 2 ? s.slice(0, n) + "…" + s.slice(-8) : s;
 
 // ------------------------------------------------------------ the scene
-const RATES = { EUR: 1, USD: 1.085, GBP: 0.845, USDC: 1.085 }; // 1 EUR buys this many units
+const RATES = { EUR: 1, USD: 1.085, GBP: 0.845, QAR: 3.95, USDC: 1.085 }; // 1 EUR buys this many units (QAR is pegged to the dollar at 3.64)
 const MERCHANTS = [
   { id: "velora", name: "Velora Sports", country: "Netherlands", website: "https://velora-sports.test", currency: "EUR", price: 119.0, over: 159.0, item: "Trail runner Ridge 2, size 42", sku: "VEL-RIDGE2-42", handlers: ["card", "sepa", "usdc"], delivery: "Thursday" },
   { id: "summit", name: "Summit Run Co.", country: "United States", website: "https://summitrun.test", currency: "USD", price: 129.0, over: 169.0, item: "Summit Ascent trail shoe, US 9", sku: "SUM-ASC-9", handlers: ["card", "usdc"], delivery: "Friday" },
   { id: "peak", name: "Peak & Trail", country: "United Kingdom", website: "https://peakandtrail.test", currency: "GBP", price: 104.0, over: 139.0, item: "Fellrunner X trail shoe, UK 8", sku: "PT-FELLX-8", handlers: ["card"], delivery: "Friday" },
+  { id: "doha", name: "Al Rayyan Sports", country: "Qatar", website: "https://alrayyan-sports.test", currency: "QAR", price: 455.0, over: 615.0, item: "Desert Trail GTX, EU 42", sku: "ARS-DTGTX-42", handlers: ["card", "usdc"], delivery: "Friday (express)" },
 ];
 const INSTRUMENTS = [
-  { id: "card", name: "Mastercard debit ··· 4921", currency: "EUR", issuer: "ING", network: "Mastercard Agent Pay", desc: "Agentic token: a network token bound to this agent, this merchant, this amount. Issuer FX 1.5% outside the euro.", fxFee: 0.015, fee: "interchange paid by the merchant", settle: "T+1 to the merchant, in its currency" },
-  { id: "sepa", name: "SEPA Instant from the ING account", currency: "EUR", issuer: "ING", network: "SEPA Instant (EPC)", desc: "Account to account in under ten seconds, euro only. Initiated through Worldline as the payment initiation provider.", fxFee: 0, fee: "no fee for the payer", settle: "in seconds, euro only" },
+  { id: "card", name: "Mastercard debit ··· 4921", currency: "EUR", issuer: "the issuing bank", network: "Mastercard Agent Pay", desc: "Agentic token: a network token bound to this agent, this merchant, this amount. Issuer FX 1.5% outside the euro.", fxFee: 0.015, fee: "interchange paid by the merchant", settle: "T+1 to the merchant, in its currency" },
+  { id: "sepa", name: "SEPA Instant from the bank account", currency: "EUR", issuer: "the user's bank", network: "SEPA Instant (EPC)", desc: "Account to account in under ten seconds, euro only. Initiated through Worldline as the payment initiation provider.", fxFee: 0, fee: "no fee for the payer", settle: "in seconds, euro only" },
   { id: "usdc", name: "USDC wallet (on Base)", currency: "USDC", issuer: "self-custody wallet", network: "x402 · Base", desc: "A signed transfer authorisation the facilitator settles on-chain. Wallet converts euros to USDC at a 0.3% spread.", fxFee: 0.003, fee: "network fee under a cent", settle: "on-chain finality in about two seconds; the merchant's processor converts to its currency" },
 ];
 const ACTORS = [
   { id: "user", name: "User", sub: "Lena · Rotterdam · pays in EUR", kind: "human", x: 20, y: 40, w: 150, h: 60 },
-  { id: "ts", name: "Trusted surface", sub: "ING app · passkey", kind: "human", x: 20, y: 230, w: 150, h: 60 },
+  { id: "ts", name: "Trusted surface", sub: "bank app · passkey", kind: "human", x: 20, y: 230, w: 150, h: 60 },
   { id: "sa", name: "Shopping agent", sub: "the LLM · proposes, never pays", kind: "agent", x: 260, y: 135, w: 170, h: 70 },
   { id: "m", name: "Merchant", sub: "UCP endpoint · signs the checkout", kind: "det", x: 540, y: 30, w: 170, h: 60 },
-  { id: "cp", name: "Credential provider", sub: "ING wallet · holds the instruments", kind: "det", x: 540, y: 150, w: 170, h: 60 },
+  { id: "cp", name: "Credential provider", sub: "bank wallet · holds the instruments", kind: "det", x: 540, y: 150, w: 170, h: 60 },
   { id: "net", name: "Payment network", sub: "Agent Pay · SEPA Inst · Base", kind: "det", x: 540, y: 270, w: 170, h: 60 },
   { id: "mpp", name: "Payment processor", sub: "Worldline · acquiring, processing", kind: "det", x: 820, y: 30, w: 170, h: 60 },
-  { id: "iss", name: "Issuer", sub: "ING · authorises, bears the FX", kind: "det", x: 820, y: 150, w: 170, h: 60 },
+  { id: "iss", name: "Issuer", sub: "issuing bank · authorises, bears the FX", kind: "det", x: 820, y: 150, w: 170, h: 60 },
   { id: "out", name: "Receipts", sub: "signed evidence for everyone", kind: "ok", x: 820, y: 270, w: 170, h: 60 },
 ];
 const A = Object.fromEntries(ACTORS.map((a) => [a.id, a]));
 const merchantNames = (ids) => ids.map((i) => MERCHANTS.find((m) => m.id === i).name);
 
 // ------------------------------------------------------------ state
+const ROLES = [["user", "User", "Lena: says what she wants, signs when present"], ["ts", "Trusted surface", "renders exactly what is signed"], ["sa", "Shopping agent", "proposes, assembles, may sabotage"], ["m", "Merchant", "signs the checkout, verifies the checkout mandate"], ["cp", "Credential provider", "verifies the payment mandate, issues the credential"], ["net", "Payment network", "registers the agent, scopes the token"], ["mpp", "Payment processor", "authorises, signs the payment receipt"], ["iss", "Issuer", "authenticates, authorises, bears the FX"]];
+const DECIDERS = { instrument: ["cp", "Is the chosen instrument eligible for this checkout, and within the user's limit?"], approve: null, token: ["cp", "Verify the payment mandate: signature, expiry, nonce, constraints. Issue the credential?"], complete: ["m", "Verify the checkout mandate: signature, checkout_hash against your signed checkout, expiry, constraints. Complete the checkout?"], authorise: ["iss", "Agentic indicators, limits, funds. Authorise?"] };
 let S = null; // simulation state, rebuilt on reset
 let cur = -1; // index of the last completed step
 let busy = false;
@@ -484,12 +523,14 @@ const scene = () => ({
   merchant: MERCHANTS.find((m) => m.id === (document.querySelector("input[name=merchant]:checked") || {}).value) || MERCHANTS[0],
   instrument: INSTRUMENTS.find((i) => i.id === (document.querySelector("input[name=instrument]:checked") || {}).value) || INSTRUMENTS[0],
   tamper: $("b-tamper").checked, over: $("b-over").checked, badMerchant: $("b-merchant").checked, expired: $("b-expired").checked, replay: $("b-replay").checked,
+  roleplay: $("roleplay").checked, names: Object.fromEntries(ROLES.map(([id]) => [id, ($("role-" + id).value || "").trim()])),
 });
+const who = (id) => { const r = ROLES.find((x) => x[0] === id); const n = S && S.sc.names[id]; return n ? `${r[1]} (${n})` : r[1]; };
 function fresh() {
   const sc = scene();
   const allowed = MERCHANTS.map((m) => m.id).filter((id) => !(sc.badMerchant && id === sc.merchant.id));
   if (sc.badMerchant && allowed.length === 3) allowed.splice(allowed.indexOf(sc.merchant.id), 1);
-  return { sc, allowed, keys: {}, nonces: new Set(), log: [], trace: [] };
+  return { sc, allowed, keys: {}, nonces: new Set(), log: [], trace: [], score: { caught: 0, missed: 0, false_alarms: 0, right: 0 } };
 }
 
 // ------------------------------------------------------------ trace + diagram
@@ -527,8 +568,8 @@ const STEPS = [
       for (const [id, owner] of [["user", "Lena's device key, held by the trusted surface"], ["sa", "the shopping agent's own key"], ["m", "the merchant"], ["cp", "the credential provider"], ["mpp", "the payment processor"], ["iss", "the issuer"]]) S.keys[id] = await keypair(id + "-key-1", owner);
       S.agentId = "agent:lena-shopper-" + rnd(4); S.regId = "MC-AGENT-" + rnd(4).toUpperCase().replace(/[^A-Z0-9]/g, "X").slice(0, 6);
       return { explain: "Nothing happens until the parties can recognise each other. The user's device holds a key behind a passkey; the shopping agent has its own key and is registered with the network as an agent; the merchant publishes its keys with its UCP profile. Verifiers later check signatures against these keys, never against what an agent claims about itself.",
-        objects: [obj("Agent registration (network registry)", { agent_id: S.agentId, registration: S.regId, operator: "Nordvik Digital Assistant B.V.", public_key: S.keys.sa.jwk, scope: "consumer purchases · EUR, USD, GBP, USDC", status: "verified" }, "payment network", "det"),
-          obj("User device key (trusted surface)", { kid: S.keys.user.kid, thumbprint: S.keys.user.thumb, holder: "ING app on Lena's phone", unlock: "passkey · biometric" }, "credential provider", "human")],
+        objects: [obj("Agent registration (network registry)", { agent_id: S.agentId, registration: S.regId, operator: "Nordvik Digital Assistant B.V.", public_key: S.keys.sa.jwk, scope: "consumer purchases · EUR, USD, GBP, QAR, USDC", status: "verified" }, "payment network", "det"),
+          obj("User device key (trusted surface)", { kid: S.keys.user.kid, thumbprint: S.keys.user.thumb, holder: "the bank app on Lena's phone", unlock: "passkey · biometric" }, "credential provider", "human")],
         checks: [chk("Agent public key registered and verified by the network", true, "network"), chk("User key enrolled with the credential provider", true, "credential provider"), chk("Merchant keys discoverable through UCP", true, "shopping agent")] };
     } },
   { id: "intent", title: "Intent and mandate", who: "The user tells the agent; the trusted surface gets a signature", actors: ["user", "sa", "ts"], msgs: [["user", "sa", "instruction", "human"], ["sa", "ts", "mandate content", ""], ["ts", "sa", "signed mandate", "human"]],
@@ -559,7 +600,7 @@ const STEPS = [
       const profiles = MERCHANTS.map((m) => ({ merchant: m.name, website: m.website, ucp: { capabilities: ["checkout", "order", "payment_token_exchange"], transports: ["rest", "mcp", "a2a"], payment_handlers: m.handlers.map((h) => ({ card: "card · Mastercard, Visa", sepa: "sepa_instant · EUR only", usdc: "x402 · USDC on Base" }[h])), currency: m.currency, ap2: "mandates accepted" }, offer: { sku: m.sku, title: m.item, price: m.price, currency: m.currency, delivery: m.delivery } }));
       const chosen = sc.merchant; const okHandler = chosen.handlers.includes(sc.instrument.id);
       return { explain: "The agent reads each merchant's UCP profile: what it can do (checkout, order updates, token exchange), over which transport, which payment handlers it accepts and in which currency, and that it accepts AP2 mandates. Then it asks for offers. Discovery is where the agent's judgement matters most, and where nothing is committed yet.",
-        reason: `Three merchants match. ${MERCHANTS.map((m) => `${m.name}: ${fmt(m.price, m.currency)}, ${m.delivery}, accepts ${m.handlers.join("/")}`).join(". ")}. The user prefers ${sc.instrument.name}; ${okHandler ? `${chosen.name} accepts it, so I proceed with ${chosen.name}` : `${chosen.name} does not accept it, so I will have to come back to the user or switch rail`}.`,
+        reason: `Four merchants match. ${MERCHANTS.map((m) => `${m.name}: ${fmt(m.price, m.currency)}, ${m.delivery}, accepts ${m.handlers.join("/")}`).join(". ")}. The user prefers ${sc.instrument.name}; ${okHandler ? `${chosen.name} accepts it, so I proceed with ${chosen.name}` : `${chosen.name} does not accept it, so I will have to come back to the user or switch rail`}.`,
         objects: profiles.map((p) => obj(`UCP profile · ${p.merchant}`, p, "merchant", "det")),
         checks: [chk(`${chosen.name} is ${S.allowed.includes(chosen.id) ? "" : "NOT "}in the allowed merchants`, S.allowed.includes(chosen.id), "shopping agent", !S.allowed.includes(chosen.id)), chk(`${chosen.name} accepts ${sc.instrument.name.split(" ")[0]} payments`, okHandler, "shopping agent", !okHandler), chk(`Offer ${fmt(sc.over ? chosen.over : chosen.price, chosen.currency)} in ${chosen.currency}; the user's limit is in EUR`, true, "shopping agent")] };
     } },
@@ -594,7 +635,7 @@ const STEPS = [
         reason: eligible ? `${ins.name} is eligible. ${fmt(total, cur)} costs Lena ${mine.amount_in_user_currency}: ${mine.note}. ${within ? `Within the €${sc.maxamt} limit.` : `Above the €${sc.maxamt} limit: ${sc.mode === "hp" ? "the user will see this on the trusted surface and decide" : "the credential provider will refuse; I should stop here"}.`}` : `${ins.name} cannot pay this checkout: ${mine.note}. I must go back to the user or pick an eligible rail: ${options.filter((o) => o.eligible).map((o) => o.instrument).join(", ") || "none"}.`,
         objects: [obj("Instrument options and FX quote", { checkout: { total, currency: cur, merchant: m.name }, user_currency: "EUR", options }, "credential provider", "det", true)],
         checks: [chk(`${ins.name} accepted by the merchant and eligible for ${cur}`, eligible, "credential provider"), ...(eligible ? [chk(`Cost to the user ${mine.amount_in_user_currency} against a limit of ${fmt(sc.maxamt, "EUR")}`, within, "shopping agent", !within && sc.mode === "hp"), chk("Rate and fee locked for ten minutes", true, "credential provider")] : [])],
-        stop: !eligible ? "No eligible instrument: the agent has to bring the user back. In the Worldline and ING pilots this is exactly the moment the agent hands over instead of improvising." : null };
+        stop: !eligible ? "No eligible instrument: the agent has to bring the user back. In the 2026 European pilots this is exactly the moment the agent hands over instead of improvising." : null };
     } },
   { id: "approve", title: "Approval: closed mandates", who: "Human present: the user signs. Human not present: the agent signs inside the lines", actors: ["sa", "ts", "user"], msgs: [["sa", "ts", "closed checkout + payment mandate content", ""], ["ts", "user", "render · passkey", "human"], ["ts", "sa", "signed closed mandates", "human"]],
     async run(S) {
@@ -608,7 +649,7 @@ const STEPS = [
       S.closedCheckout = closedCheckout; S.closedPayment = closedPayment;
       if (sc.mode === "hp") {
         const over = S.eur > sc.maxamt;
-        return { explain: `The trusted surface, the ING app, renders exactly what will be signed: ${m.name}, ${m.item}, ${fmt(S.checkout.total_price, m.currency)}, which is ${fmt(S.eur, "EUR")} with ${ins.name}, delivery ${m.delivery}. Lena authenticates with her passkey and signs two closed mandates with her device key: the checkout mandate for the merchant and the payment mandate for the wallet and the network. Both carry the hash of the checkout, so they can only ever mean this purchase. This signature is also her strong customer authentication: amount and payee are dynamically linked to it.${over ? ` The surface shows that ${fmt(S.eur, "EUR")} is above her stated €${sc.maxamt}: she decides.` : ""}`,
+        return { explain: `The trusted surface, the bank app, renders exactly what will be signed: ${m.name}, ${m.item}, ${fmt(S.checkout.total_price, m.currency)}, which is ${fmt(S.eur, "EUR")} with ${ins.name}, delivery ${m.delivery}. Lena authenticates with her passkey and signs two closed mandates with her device key: the checkout mandate for the merchant and the payment mandate for the wallet and the network. Both carry the hash of the checkout, so they can only ever mean this purchase. This signature is also her strong customer authentication: amount and payee are dynamically linked to it.${over ? ` The surface shows that ${fmt(S.eur, "EUR")} is above her stated €${sc.maxamt}: she decides.` : ""}`,
           reason: `I present the checkout to the trusted surface and wait. I do not hold the user's key and cannot sign for her.`,
           objects: [obj("Closed checkout mandate (user-signed)", { jwt: short(S.closedCheckoutJwt, 40), payload: closedCheckout }, "user", "human", true), obj("Closed payment mandate (user-signed)", { jwt: short(S.closedPaymentJwt, 40), payload: closedPayment }, "user", "human")],
           checks: [chk("Rendered by the trusted surface from the merchant checkout the agent presented", true, "trusted surface"), chk("Passkey authentication (SCA with dynamic linking: amount, payee)", true, "trusted surface"), chk(over ? `Amount ${fmt(S.eur, "EUR")} is above the stated limit of €${sc.maxamt}: shown to the user, who approved` : `Amount ${fmt(S.eur, "EUR")} within the stated limit`, true, "user", over), chk("Both mandates carry the same checkout_hash and nonce", true, "trusted surface")] };
@@ -636,15 +677,15 @@ const STEPS = [
       const ok = checks.every((c) => c.ok);
       S.nonces.add(S.nonce);
       let cred;
-      if (ins.id === "card") cred = { type: "agentic_token", network: "Mastercard Agent Pay", token: "5213 09xx xxxx " + String(1000 + Math.floor(Math.random() * 9000)), token_cryptogram: rnd(12), agent_registration: S.regId, scope: { merchant: m.name, max_amount: { value: S.checkout.total_price, currency: m.currency }, checkout_hash: S.presentedHash, single_use: true, expires_in: "15 minutes" }, human_present: sc.mode === "hp", issuer: "ING" };
-      else if (ins.id === "sepa") cred = { type: "payment_initiation_consent", scheme: "SEPA Instant Credit Transfer", pisp: "Worldline", consent_id: "pisp_" + rnd(6), debtor: "NL91 INGB 0000 1234 56 (Lena)", creditor: m.name + " · NL20 INGB 0001 2345 67", amount: { value: S.checkout.total_price, currency: "EUR" }, sca: "satisfied by the signed payment mandate (dynamic linking)", checkout_hash: S.presentedHash };
+      if (ins.id === "card") cred = { type: "agentic_token", network: "Mastercard Agent Pay", token: "5213 09xx xxxx " + String(1000 + Math.floor(Math.random() * 9000)), token_cryptogram: rnd(12), agent_registration: S.regId, scope: { merchant: m.name, max_amount: { value: S.checkout.total_price, currency: m.currency }, checkout_hash: S.presentedHash, single_use: true, expires_in: "15 minutes" }, human_present: sc.mode === "hp", issuer: "the issuing bank" };
+      else if (ins.id === "sepa") cred = { type: "payment_initiation_consent", scheme: "SEPA Instant Credit Transfer", pisp: "Worldline", consent_id: "pisp_" + rnd(6), debtor: "NL91 BANK 0000 1234 56 (Lena)", creditor: m.name + " · NL20 BANK 0001 2345 67", amount: { value: S.checkout.total_price, currency: "EUR" }, sca: "satisfied by the signed payment mandate (dynamic linking)", checkout_hash: S.presentedHash };
       else cred = { type: "x402_payment_payload", scheme: "exact", network: "base", asset: "USDC (0x8335…2913)", payload: { from: "0x5aB3…9c1E (Lena's wallet)", to: "0xM3rc…a7D2 (" + m.name + " via Worldline)", value: Math.round(S.usdc * 1e6) + " (6 decimals = " + fmt(S.usdc, "USDC") + ")", validAfter: Math.floor(Date.now() / 1000), validBefore: Math.floor(Date.now() / 1000) + 600, nonce: "0x" + rnd(16).replace(/[^a-f0-9]/gi, "0").toLowerCase() }, signature: "EIP-3009 transferWithAuthorization, signed by the wallet key", checkout_hash: S.presentedHash, fx: { paid_by_user: fmt(S.eur, "EUR"), rate: "1 EUR = " + RATES.USDC + " USDC, 0.3% spread" } };
       S.cred = cred;
       const receipt = ok ? null : { vct: "receipt.payment.1", status: "rejected", reason: checks.filter((c) => !c.ok).map((c) => c.label), reference: await sha256(S.closedPaymentJwt) };
       if (receipt) S.receiptCpJwt = await sign(receipt, S.keys.cp, "receipt+jwt");
-      return { explain: ok ? `The agent sends the payment mandate to the credential provider. The wallet verifies the signature, the expiry, the nonce and, for a delegated purchase, every constraint of the open mandate. Then it asks the network for a credential scoped to this checkout. ${ins.id === "card" ? "Mastercard Agent Pay issues an agentic token: a network token bound to the registered agent, this merchant, this amount and this checkout hash, single use. The raw card never leaves the vault." : ins.id === "sepa" ? "ING records a payment initiation consent for exactly this amount and payee; the signed mandate is Lena's strong customer authentication." : "The wallet produces an x402 payment payload: a signed authorisation to transfer exactly this many USDC to the merchant's address, valid ten minutes. The wallet has converted euros to USDC at the quoted rate."}` : "The credential provider refuses. It returns a signed payment receipt with the reason, and nothing is issued. The agent gets an error, not a token. This is the control that makes delegation safe: the limit the user signed is enforced by code that the agent cannot argue with.",
+      return { explain: ok ? `The agent sends the payment mandate to the credential provider. The wallet verifies the signature, the expiry, the nonce and, for a delegated purchase, every constraint of the open mandate. Then it asks the network for a credential scoped to this checkout. ${ins.id === "card" ? "Mastercard Agent Pay issues an agentic token: a network token bound to the registered agent, this merchant, this amount and this checkout hash, single use. The raw card never leaves the vault." : ins.id === "sepa" ? "The bank records a payment initiation consent for exactly this amount and payee; the signed mandate is Lena's strong customer authentication." : "The wallet produces an x402 payment payload: a signed authorisation to transfer exactly this many USDC to the merchant's address, valid ten minutes. The wallet has converted euros to USDC at the quoted rate."}` : "The credential provider refuses. It returns a signed payment receipt with the reason, and nothing is issued. The agent gets an error, not a token. This is the control that makes delegation safe: the limit the user signed is enforced by code that the agent cannot argue with.",
         reason: ok ? "Credential received, scoped to this checkout. I can now complete the checkout with the merchant." : "Rejected by the credential provider: " + checks.filter((c) => !c.ok).map((c) => c.label).join("; ") + ". I report back to the user.",
-        objects: ok ? [obj(cred.type.replace(/_/g, " "), cred, ins.id === "card" ? "Mastercard · ING" : ins.id === "sepa" ? "ING · Worldline (PISP)" : "wallet · x402 facilitator", "det", true)] : [obj("Payment receipt: rejected", { jwt: short(S.receiptCpJwt, 40), payload: receipt }, "credential provider", "det", true)],
+        objects: ok ? [obj(cred.type.replace(/_/g, " "), cred, ins.id === "card" ? "Mastercard · issuing bank" : ins.id === "sepa" ? "the bank · Worldline (PISP)" : "wallet · x402 facilitator", "det", true)] : [obj("Payment receipt: rejected", { jwt: short(S.receiptCpJwt, 40), payload: receipt }, "credential provider", "det", true)],
         checks, stop: ok ? null : "Stopped at the credential provider. Nothing was issued, nothing can be charged." };
     } },
   { id: "complete", title: "Complete the checkout", who: "The merchant verifies the checkout mandate and asks its processor to charge", actors: ["sa", "m", "mpp"], msgs: [["sa", "m", "credential + checkout mandate", ""], ["m", "mpp", "authorise · checkout_hash", ""]],
@@ -671,18 +712,18 @@ const STEPS = [
       let auth, checks;
       if (ins.id === "card") {
         auth = { network: "Mastercard", message: "authorisation request", amount: { value: S.checkout.total_price, currency: m.currency }, token: S.cred.token, agent_registration: S.regId, agentic_indicators: { agent_initiated: true, human_present: sc.mode === "hp", mandate_hash: await sha256(S.closedPaymentJwt) }, issuer_decision: { result: "approved", auth_code: rnd(4).toUpperCase().replace(/[^A-Z0-9]/g, "7").slice(0, 6), billed_to_cardholder: fmt(S.eur, "EUR"), fx: m.currency === "EUR" ? "none" : `${m.currency} → EUR at issuer rate, 1.5% fee` }, settlement: "clearing tonight, merchant credited T+1 in " + m.currency };
-        checks = [chk("Token valid, single use, scope matches merchant and amount", true, "Mastercard"), chk("Agent registration active; agent-specific fraud rules applied", true, "Mastercard"), chk(`Issuer sees agent_initiated=true, human_present=${sc.mode === "hp"}; applies the cardholder's agent limits`, true, "ING"), chk("Funds available; authorised", true, "ING")];
+        checks = [chk("Token valid, single use, scope matches merchant and amount", true, "Mastercard"), chk("Agent registration active; agent-specific fraud rules applied", true, "Mastercard"), chk(`Issuer sees agent_initiated=true, human_present=${sc.mode === "hp"}; applies the cardholder's agent limits`, true, "issuing bank"), chk("Funds available; authorised", true, "issuing bank")];
       } else if (ins.id === "sepa") {
-        auth = { scheme: "SEPA Instant Credit Transfer", pisp: "Worldline", consent_id: S.cred.consent_id, amount: { value: S.checkout.total_price, currency: "EUR" }, debtor_bank: "ING", creditor_bank: "ING", execution: { status: "ACSC · settled", time_to_credit: "7 seconds", transaction_id: "SCTI" + rnd(8).toUpperCase().replace(/[^A-Z0-9]/g, "0") }, fx: "none: euro to euro", irrevocable: true };
-        checks = [chk("Consent matches the signed payment mandate (amount, creditor)", true, "ING"), chk("SCA already satisfied by the mandate signature", true, "ING"), chk("Funds available; instant transfer executed and irrevocable", true, "ING"), chk("Creditor credited in seconds", true, "merchant bank")];
+        auth = { scheme: "SEPA Instant Credit Transfer", pisp: "Worldline", consent_id: S.cred.consent_id, amount: { value: S.checkout.total_price, currency: "EUR" }, debtor_bank: "the user's bank", creditor_bank: "the merchant's bank", execution: { status: "ACSC · settled", time_to_credit: "7 seconds", transaction_id: "SCTI" + rnd(8).toUpperCase().replace(/[^A-Z0-9]/g, "0") }, fx: "none: euro to euro", irrevocable: true };
+        checks = [chk("Consent matches the signed payment mandate (amount, creditor)", true, "user's bank"), chk("SCA already satisfied by the mandate signature", true, "user's bank"), chk("Funds available; instant transfer executed and irrevocable", true, "user's bank"), chk("Creditor credited in seconds", true, "merchant bank")];
       } else {
         auth = { standard: "x402", facilitator: "Coinbase x402 facilitator", network: "Base", asset: "USDC", amount: fmt(S.usdc, "USDC"), verify: { signature_valid: true, balance_sufficient: true, not_yet_used: true, within_valid_window: true }, settle: { tx_hash: "0x" + rnd(32).replace(/[^a-f0-9]/gi, "e").toLowerCase().slice(0, 64), finality: "about 2 seconds", network_fee: "$0.002" }, merchant_side: { processor: "Worldline", converts_to: m.currency, rate_locked_at_quote: true, merchant_receives: fmt(S.checkout.total_price, m.currency) }, user_side: { paid: fmt(S.eur, "EUR"), via: "wallet on-ramp at 0.3% spread" } };
         checks = [chk("Transfer authorisation signature valid for exactly this amount and payee", true, "facilitator"), chk("Wallet balance sufficient; authorisation not yet used", true, "facilitator"), chk("Settled on-chain; finality in seconds; irreversible", true, "Base"), chk(`Merchant processor converts USDC to ${m.currency} at the quoted rate`, true, "Worldline")];
       }
       S.auth = auth;
-      return { explain: ins.id === "card" ? `Worldline sends the authorisation through Mastercard with the agentic token. The network checks the token's scope and the agent's registration, and passes agentic indicators to ING: an agent initiated this, a human was ${sc.mode === "hp" ? "" : "not "}present, this is the mandate hash. ING applies Lena's limits for agent purchases, converts if needed and approves. This is the shape of the Worldline, ING and Mastercard pilot of June 2026: Worldline processing both sides, ING authenticating and authorising, Mastercard carrying the token.` : ins.id === "sepa" ? `No card, no network token: Worldline, as payment initiation provider, instructs ING to execute an instant credit transfer under the consent. ING checks that amount and creditor match the signed mandate, executes, and the merchant's bank is credited in seconds. Irrevocable, euro only, no FX. Delegated purchases in another currency cannot use this rail.` : `The merchant's server answered 402 Payment Required with its price; the agent now pays by sending the signed USDC authorisation. The facilitator verifies signature, balance and window, submits the transfer on Base and reports finality in about two seconds. Worldline, on the merchant's side, converts USDC into ${m.currency} at the rate locked at the quote, so the merchant sees ${fmt(S.checkout.total_price, m.currency)} as it priced it. Lena paid ${fmt(S.eur, "EUR")}, with the wallet's spread as the only FX cost.`,
+      return { explain: ins.id === "card" ? `Worldline sends the authorisation through Mastercard with the agentic token. The network checks the token's scope and the agent's registration, and passes agentic indicators to the issuing bank: an agent initiated this, a human was ${sc.mode === "hp" ? "" : "not "}present, this is the mandate hash. The issuer applies Lena's limits for agent purchases, converts if needed and approves. This is the shape of Europe's first live agentic card payment, in June 2026: a processor on both sides, an issuing bank authenticating and authorising, the network carrying the token.` : ins.id === "sepa" ? `No card, no network token: Worldline, as payment initiation provider, instructs the user's bank to execute an instant credit transfer under the consent. The bank checks that amount and creditor match the signed mandate, executes, and the merchant's bank is credited in seconds. Irrevocable, euro only, no FX. Delegated purchases in another currency cannot use this rail.` : `The merchant's server answered 402 Payment Required with its price; the agent now pays by sending the signed USDC authorisation. The facilitator verifies signature, balance and window, submits the transfer on Base and reports finality in about two seconds. Worldline, on the merchant's side, converts USDC into ${m.currency} at the rate locked at the quote, so the merchant sees ${fmt(S.checkout.total_price, m.currency)} as it priced it. Lena paid ${fmt(S.eur, "EUR")}, with the wallet's spread as the only FX cost.`,
         reason: "Payment executed. I wait for the receipts before telling the user the shoes are bought.",
-        objects: [obj(ins.id === "card" ? "Authorisation and issuer decision" : ins.id === "sepa" ? "Instant credit transfer" : "x402 verify and settle", auth, ins.id === "card" ? "Mastercard · ING" : ins.id === "sepa" ? "ING · Worldline" : "facilitator · Base · Worldline", "det", true)],
+        objects: [obj(ins.id === "card" ? "Authorisation and issuer decision" : ins.id === "sepa" ? "Instant credit transfer" : "x402 verify and settle", auth, ins.id === "card" ? "Mastercard · issuing bank" : ins.id === "sepa" ? "user's bank · Worldline" : "facilitator · Base · Worldline", "det", true)],
         checks };
     } },
   { id: "receipts", title: "Receipts and evidence", who: "Everyone keeps signed proof of what they verified", actors: ["mpp", "m", "sa", "cp", "out", "user"], msgs: [["mpp", "out", "payment receipt", "ok", "r"], ["m", "out", "checkout receipt", "ok"], ["cp", "sa", "receipts to the agent", "ok"], ["sa", "user", "done · what was bought", "human"]],
@@ -714,22 +755,40 @@ const REPLAY = { id: "replay", title: "Break-it: replay the mandate", who: "The 
 function steps() { return S && S.sc.replay ? [...STEPS, REPLAY] : STEPS; }
 function renderSteps() {
   const box = $("steps"); const list = steps();
-  box.innerHTML = list.map((st, i) => { const r = S && S.results[i]; const cls = i === cur ? "cur" : ""; const st2 = r ? (r.stop ? "fail" : r.checks && r.checks.some((c) => !c.ok && !c.warn) ? "fail" : r.checks && r.checks.some((c) => c.warn) ? "wait" : "done") : ""; return `<div class="step ${cls} ${st2}" data-i="${i}"><span class="n">${i + 1}</span><div><div class="t">${esc(st.title)}</div><div class="w">${esc(st.who)}</div></div></div>`; }).join("");
+  box.innerHTML = list.map((st, i) => { const r = S && S.results[i]; const cls = i === cur ? "cur" : ""; const st2 = r ? (r.pending ? "wait" : r.stop ? "fail" : r.overridden ? "fail" : r.checks && r.checks.some((c) => !c.ok && !c.warn) ? "fail" : r.checks && r.checks.some((c) => c.warn) ? "wait" : "done") : ""; return `<div class="step ${cls} ${st2}" data-i="${i}"><span class="n">${i + 1}</span><div><div class="t">${esc(st.title)}</div><div class="w">${esc(st.who)}</div></div></div>`; }).join("");
   box.querySelectorAll(".step").forEach((el) => el.addEventListener("click", () => { const i = Number(el.dataset.i); if (S && S.results[i]) { cur = i; renderDetail(i); renderSteps(); } }));
 }
 function renderDetail(i) {
   const st = steps()[i]; const r = S.results[i]; if (!r) return;
   const actorKinds = { agent: "Shopping agent", det: "Code", human: "A person" };
   const kinds = new Set(st.actors.map((a) => A[a].kind === "ok" ? "det" : A[a].kind));
-  $("detail").innerHTML = `<div class="who">${[...kinds].map((k) => chip(k, actorKinds[k])).join("")}<span class="hint" style="margin-left:auto">step ${i + 1} of ${steps().length}</span></div>
+  const sc = S.sc; const dec = sc.roleplay ? DECIDERS[st.id] : null; const pending = !!(dec && r.pending);
+  const score = sc.roleplay ? `<div class="scorebar"><span>room score · caught <b>${S.score.caught}</b></span><span>missed <b>${S.score.missed}</b></span><span>false alarms <b>${S.score.false_alarms}</b></span><span>right calls <b>${S.score.right}</b></span></div>` : "";
+  const moveChip = sc.roleplay && st.actors.length ? `<span class="tag human">your move: ${esc(st.id === "approve" ? (sc.mode === "hp" ? who("user") : who("sa")) : dec ? who(dec[0]) : who(st.actors[0]))}</span>` : "";
+  $("detail").innerHTML = `<div class="who">${[...kinds].map((k) => chip(k, actorKinds[k])).join("")}${moveChip}<span class="hint" style="margin-left:auto">step ${i + 1} of ${steps().length}</span></div>
+    ${score}
     <h3>${esc(st.title)}</h3>
-    <p class="explain">${esc(r.explain)}</p>
-    ${r.reason ? `<div class="reason"><b>The shopping agent, thinking (the LLM part)</b>${esc(r.reason)}</div>` : ""}
-    <div class="checks">${(r.checks || []).map((c) => `<div class="chk ${c.ok ? (c.warn ? "warn" : "ok") : "fail"}"><i>${c.ok ? (c.warn ? "!" : "✓") : "✗"}</i><span>${esc(c.label)}</span><span class="by">${esc(c.by)}</span></div>`).join("")}</div>
-    ${r.stop ? `<div class="note warn"><b>Stopped.</b> ${esc(r.stop)}</div>` : ""}
-    ${r.done ? `<div class="note" style="border-color:var(--ok);background:var(--ok-soft)"><b>Complete.</b> Try another rail or a break-it switch, then Reset and play again.</div>` : ""}
-    <div class="objs">${(r.objects || []).map((o) => `<details class="obj" ${o.open ? "open" : ""}><summary><b>${esc(o.name)}</b><span class="sig ${o.kind}">${o.kind === "human" ? "signed by a person" : o.kind === "agent" ? "signed by the agent" : "issued by code"} · ${esc(o.by)}</span></summary><pre>${esc(JSON.stringify(o.data, null, 2))}</pre></details>`).join("")}</div>`;
-  light(st.actors, st.msgs.map((m) => r.stop && m === st.msgs[st.msgs.length - 1] ? [m[0], m[1], m[2], "fail"] : m));
+    <p class="explain">${esc(pending ? r.explain.split(". ").slice(0, 2).join(". ") + "." : r.explain)}</p>
+    ${r.reason && !pending ? `<div class="reason"><b>The shopping agent, thinking (the LLM part)</b>${esc(r.reason)}</div>` : ""}
+    ${pending ? `<div class="decide"><div class="q"><b>${esc(who(dec[0]))}, your call.</b> ${esc(dec[1])} Read the objects below first; the checks are hidden until you decide.</div><div class="rowbtns"><button class="btn ok" id="d-accept">Accept</button><button class="btn danger" id="d-reject">Reject</button><input type="text" id="d-why" placeholder="why? (said aloud to the room)" style="flex:1;min-width:160px"></div></div>` : ""}
+    ${r.verdict ? `<div class="verdict ${r.verdict.good ? "good" : "bad"}"><b>${esc(r.verdict.head)}</b> ${esc(r.verdict.body)}</div>` : ""}
+    ${pending ? "" : `<div class="checks">${(r.checks || []).map((c) => `<div class="chk ${c.ok ? (c.warn ? "warn" : "ok") : "fail"}"><i>${c.ok ? (c.warn ? "!" : "✓") : "✗"}</i><span>${esc(c.label)}</span><span class="by">${esc(c.by)}</span></div>`).join("")}</div>`}
+    ${r.stop && !pending ? `<div class="note warn"><b>Stopped.</b> ${esc(r.stop)}</div>` : ""}
+    ${r.done ? `<div class="note" style="border-color:var(--ok);background:var(--ok-soft)"><b>Complete.</b> ${sc.roleplay ? "Reveal the switches, compare with the score, swap roles." : "Try another rail or a break-it switch, then Reset and play again."}</div>` : ""}
+    <div class="objs">${(r.objects || []).filter((o) => !pending || !/receipt/i.test(o.name)).map((o) => `<details class="obj" ${o.open ? "open" : ""}><summary><b>${esc(o.name)}</b><span class="sig ${o.kind}">${o.kind === "human" ? "signed by a person" : o.kind === "agent" ? "signed by the agent" : "issued by code"} · ${esc(o.by)}</span></summary><pre>${esc(JSON.stringify(o.data, null, 2))}</pre></details>`).join("")}</div>`;
+  if (pending) { $("d-accept").addEventListener("click", () => decide(i, true)); $("d-reject").addEventListener("click", () => decide(i, false)); }
+  light(st.actors, st.msgs.map((m) => r.stop && !pending && m === st.msgs[st.msgs.length - 1] ? [m[0], m[1], m[2], "fail"] : m));
+}
+function decide(i, accepted) {
+  const st = steps()[i]; const r = S.results[i]; const dec = DECIDERS[st.id]; const why = ($("d-why").value || "").trim();
+  const shouldReject = (r.checks || []).some((c) => !c.ok); const name = who(dec[0]);
+  r.pending = false; r.decision = accepted ? "accepted" : "rejected";
+  if (shouldReject && !accepted) { S.score.caught++; r.verdict = { good: true, head: `${name} caught it.`, body: `Rejected, and rightly: ${r.checks.filter((c) => !c.ok).map((c) => c.label).join("; ")}. The flow stops here with a signed rejection receipt.` }; }
+  else if (shouldReject && accepted) { S.score.missed++; r.verdict = { good: false, head: `${name} let it through.`, body: `Accepted, but the checks fail: ${r.checks.filter((c) => !c.ok).map((c) => c.label).join("; ")}. In the real protocol this is code, and code would have refused. The flow continues so the room sees the damage.` }; r.stop = null; r.overridden = true; }
+  else if (!shouldReject && accepted) { S.score.right++; r.verdict = { good: true, head: `${name} is right to accept.`, body: "Every check passes; the chain holds." }; }
+  else { S.score.false_alarms++; r.verdict = { good: false, head: `${name} rejected a good transaction.`, body: "Every check passes. A false alarm costs the merchant the sale and the user the shoes. The flow stops here." }; r.stop = "Rejected by " + name + " although every check passed."; }
+  trace(r.verdict.good ? "ok" : "guard", "room", `${name} ${r.decision}${why ? ": " + why : ""} → ${r.verdict.head}`);
+  renderDetail(i); renderSteps(); $("stepnote").textContent = r.stop ? "Stopped: Reset to try again." : "";
 }
 function renderMoney() {
   const sc = scene(); const m = sc.merchant; const price = sc.over ? m.over : m.price;
@@ -741,24 +800,25 @@ function renderMoney() {
     return { i, accepted, eur, who, fx };
   });
   $("money").innerHTML = `<div><div class="k">checkout</div><div class="v">${fmt(price, m.currency)}<small> ${m.name}</small></div></div>` + rows.map((r) => `<div><div class="k">${esc(r.i.name.split(" (")[0].split(" from")[0])}</div><div class="v">${!r.accepted ? "—<small> merchant does not accept</small>" : r.eur === null ? "—<small> euro only</small>" : fmt(r.eur, "EUR") + `<small> to the user</small>`}</div><div class="hint">${esc(r.fx)} · FX risk: ${esc(r.who)} · settles ${esc(r.i.settle.split(";")[0])}</div></div>`).join("");
-  $("moneynote").textContent = `User limit ${fmt(sc.maxamt, "EUR")}. Rates in this simulation: 1 EUR = ${RATES.USD} USD = ${RATES.GBP} GBP; USDC tracks the dollar. A card lets the issuer convert and bear the risk until clearing; SEPA Instant never leaves the euro; a stablecoin moves the conversion to the wallet and the merchant's processor, with the rate locked at the quote. The mandate's limit is in the user's currency, so the credential provider is the party that converts before it checks.`;
+  $("moneynote").textContent = `User limit ${fmt(sc.maxamt, "EUR")}. Rates in this simulation: 1 EUR = ${RATES.USD} USD = ${RATES.GBP} GBP = ${RATES.QAR} QAR; USDC tracks the dollar, and so does the riyal. A card lets the issuer convert and bear the risk until clearing; SEPA Instant never leaves the euro; a stablecoin moves the conversion to the wallet and the merchant's processor, with the rate locked at the quote. The mandate's limit is in the user's currency, so the credential provider is the party that converts before it checks.`;
 }
 
 // ------------------------------------------------------------ controls
 async function next() {
   if (busy) return; const list = steps(); if (cur >= list.length - 1) return;
   if (!S) { S = fresh(); S.results = []; traceEl.innerHTML = ""; trace("rules", "scene", `${S.sc.mode === "hp" ? "human present" : "human not present"} · ${S.sc.merchant.name} (${S.sc.merchant.currency}) · ${S.sc.instrument.name} · limit €${S.sc.maxamt}${[S.sc.tamper && "tamper", S.sc.over && "over limit", S.sc.badMerchant && "merchant not allowed", S.sc.expired && "expired", S.sc.replay && "replay"].filter(Boolean).length ? " · break-it: " + [S.sc.tamper && "tamper", S.sc.over && "over limit", S.sc.badMerchant && "merchant not allowed", S.sc.expired && "expired", S.sc.replay && "replay"].filter(Boolean).join(", ") : ""}`); lockScene(true); }
-  const prev = S.results[cur]; if (prev && prev.stop) { $("stepnote").textContent = "The flow stopped. Reset to play again."; return; }
+  const prev = S.results[cur]; if (prev && prev.pending) { $("stepnote").textContent = "Waiting for " + who(DECIDERS[list[cur].id][0]) + " to decide."; return; }
+  if (prev && prev.stop) { $("stepnote").textContent = "The flow stopped. Reset to play again."; return; }
   busy = true; setStatus("busy", "computing signatures");
   const i = cur + 1; const st = list[i];
-  try { const r = await st.run(S); S.results[i] = r; cur = i; for (const m of st.msgs) trace(r.stop && m === st.msgs[st.msgs.length - 1] ? "err" : A[m[0]].kind === "human" || A[m[1]].kind === "human" ? "human" : A[m[0]].kind === "agent" ? "agent" : "call", `${m[0]} → ${m[1]}`, m[2]); for (const c of r.checks || []) trace(c.ok ? (c.warn ? "human" : "ok") : "guard", c.ok ? (c.warn ? "decided" : "verified") : "rejected", `${c.label} (${c.by})`); if (r.stop) trace("guard", "stopped", r.stop); }
+  try { const r = await st.run(S); if (S.sc.roleplay && DECIDERS[st.id] && (r.checks || []).length) r.pending = true; S.results[i] = r; cur = i; for (const m of st.msgs) trace(r.stop && m === st.msgs[st.msgs.length - 1] ? "err" : A[m[0]].kind === "human" || A[m[1]].kind === "human" ? "human" : A[m[0]].kind === "agent" ? "agent" : "call", `${m[0]} → ${m[1]}`, m[2]); if (!r.pending) { for (const c of r.checks || []) trace(c.ok ? (c.warn ? "human" : "ok") : "guard", c.ok ? (c.warn ? "decided" : "verified") : "rejected", `${c.label} (${c.by})`); if (r.stop) trace("guard", "stopped", r.stop); } else trace("human", "your move", `${who(DECIDERS[st.id][0])}: ${DECIDERS[st.id][1]}`); }
   catch (e) { S.results[i] = { explain: "This browser could not run the cryptography: " + (e.message || e), checks: [], stop: "WebCrypto unavailable. Open the page over https or in a current browser." }; cur = i; }
-  renderSteps(); renderDetail(cur); setStatus("", "ready"); $("stepnote").textContent = cur === list.length - 1 ? "Complete." : S.results[cur].stop ? "Stopped: Reset to try again." : ""; busy = false;
+  renderSteps(); renderDetail(cur); setStatus("", "ready"); $("stepnote").textContent = S.results[cur].pending ? "Waiting for " + who(DECIDERS[st.id][0]) + " to decide." : cur === list.length - 1 ? "Complete." : S.results[cur].stop ? "Stopped: Reset to try again." : ""; busy = false;
 }
 function back() { if (!S || cur <= 0) return; cur--; renderDetail(cur); renderSteps(); }
-async function playAll() { if (busy) return; const list = steps(); while (cur < list.length - 1 && !(S && S.results[cur] && S.results[cur].stop)) { await next(); await new Promise((r) => setTimeout(r, 650)); } }
+async function playAll() { if (busy) return; const list = steps(); while (cur < list.length - 1 && !(S && S.results[cur] && (S.results[cur].stop || S.results[cur].pending))) { await next(); await new Promise((r) => setTimeout(r, 650)); } }
 function reset() { S = null; cur = -1; lockScene(false); renderSteps(); $("detail").innerHTML = `<p class="hint">Press Next step to start. The first step gives every party its keys.</p>`; light([], []); $("stepnote").textContent = ""; traceEl.innerHTML = ""; trace("rules", "reset", "scene unlocked; change anything and play again"); renderMoney(); }
-function lockScene(on) { document.querySelectorAll("#instruction,#maxamt,#expiry,input[name=mode],input[name=merchant],input[name=instrument],.breaks input").forEach((el) => { el.disabled = on; }); }
+function lockScene(on) { document.querySelectorAll("#instruction,#maxamt,#expiry,input[name=mode],input[name=merchant],input[name=instrument],.breaks input,#roleplay,.roles input").forEach((el) => { el.disabled = on; }); if (!on) { $("breaks").classList.remove("sealed"); $("seal").textContent = "Seal the switches"; } }
 function setStatus(kind, text) { const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text; }
 
 // ------------------------------------------------------------ wiring
@@ -766,10 +826,13 @@ $("merchants").innerHTML = MERCHANTS.map((m, i) => `<label class="opt ${i === 0 
 $("instruments").innerHTML = INSTRUMENTS.map((x, i) => `<label class="opt ${i === 0 ? "sel" : ""}"><input type="radio" name="instrument" value="${x.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(x.name)}</b> · ${esc(x.network)}<span class="m">${esc(x.desc)}</span></span></label>`).join("");
 document.querySelectorAll(".opts").forEach((box) => box.addEventListener("change", () => { box.querySelectorAll(".opt").forEach((o) => o.classList.toggle("sel", o.querySelector("input").checked)); renderMoney(); }));
 document.querySelectorAll("#maxamt,#b-over").forEach((el) => el.addEventListener("change", renderMoney));
+$("roles").innerHTML = ROLES.map(([id, name, sub]) => `<label class="role"><b>${esc(name)}</b><input type="text" id="role-${id}" placeholder="who plays it?"><span>${esc(sub)}</span></label>`).join("");
+$("seal").addEventListener("click", () => { const b = $("breaks"); const on = !b.classList.contains("sealed"); b.classList.toggle("sealed", on); $("seal").textContent = on ? "Reveal the switches" : "Seal the switches"; trace("human", "switches", on ? "sealed by the saboteur" : "revealed: " + ([$("b-tamper").checked && "tamper", $("b-over").checked && "over limit", $("b-merchant").checked && "merchant not allowed", $("b-expired").checked && "expired", $("b-replay").checked && "replay"].filter(Boolean).join(", ") || "none")); });
 $("next").addEventListener("click", next); $("back").addEventListener("click", back); $("playall").addEventListener("click", playAll); $("reset").addEventListener("click", reset);
 drawNodes(); renderSteps(); renderMoney(); light([], []);
-trace("rules", "loaded", "agentic payment lab · set the scene, then press Next step");
-Object.defineProperty(window, "__lab", { value: { next, reset, state: () => S, steps, scene }, enumerable: false });
+trace("rules", "loaded", "agentic payment lab · set the scene, then press Next step" + (SUBTLE ? "" : " · this viewer blocks WebCrypto, so signatures are simulated; the Netlify site uses real ECDSA"));
+if (!SUBTLE) { const n = document.createElement("p"); n.className = "note warn"; n.textContent = "This viewer does not expose the browser's cryptography, so keys and signatures are simulated here. On the deployed site they are real ECDSA P-256 signatures."; $("detail").prepend(n); }
+Object.defineProperty(window, "__lab", { value: { next, reset, decide, state: () => S, steps, scene }, enumerable: false });
 })();
 </script>
 

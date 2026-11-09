@@ -104,9 +104,9 @@ Agent Payments Protocol (AP2 v0.2: shopping agent, credential provider,
 merchant, merchant payment processor, trusted surface; checkout and payment
 mandates, open and closed, receipts) with discovery and checkout as in the
 Universal Commerce Protocol (UCP). Three rails: a Mastercard agentic token
-(the shape of the Worldline, ING and Mastercard pilot of 2026), SEPA Instant
+(the shape of Europe's first live agentic card payment in 2026), SEPA Instant
 through a payment initiation provider, and USDC over x402 settled on Base.
-Three merchants price in EUR, USD and GBP; the user's limit is in EUR, so the
+Four merchants price in EUR, USD, GBP and QAR; the user's limit is in EUR, so the
 credential provider converts before it checks.
 
 What runs in the browser: real P-256 key pairs for every party, real ECDSA
@@ -135,8 +135,8 @@ python3 build.py payments
 Deploy as its own Netlify site (import the repository, pick this branch) or
 point an existing project at this branch. Sources: the AP2 specification and
 documentation (github.com/google-agentic-commerce/AP2), the UCP overview
-(ucp.dev), Mastercard's agentic token framework, Worldline and ING's 2026
-pilots. Rates, fees, names and addresses in the lab are illustrative.
+(ucp.dev), Mastercard's agentic token framework, and the 2026 European pilots
+by Worldline with Mastercard and Visa. No real bank is named in the lab. Rates, fees, names and addresses in the lab are illustrative.
 
 ## A second inbox: HR at an industrial company
 
