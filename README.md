@@ -96,6 +96,48 @@ workbook into a claude.ai chat or project and build the agent in prompts
 alone: a brief, a label list, a "show your reasoning" instruction. It loses the
 guardrails and the trace but keeps the classification exercise.
 
+## Agentic payments: the lab (branch `claude/agentic-payments-demo-tdt0y8`)
+
+A simulation for a session on agentic payments: an AI shopping agent buys trail
+shoes for a user, and every step is signed, verified and shown. Built on the
+Agent Payments Protocol (AP2 v0.2: shopping agent, credential provider,
+merchant, merchant payment processor, trusted surface; checkout and payment
+mandates, open and closed, receipts) with discovery and checkout as in the
+Universal Commerce Protocol (UCP). Three rails: a Mastercard agentic token
+(the shape of the Worldline, ING and Mastercard pilot of 2026), SEPA Instant
+through a payment initiation provider, and USDC over x402 settled on Base.
+Three merchants price in EUR, USD and GBP; the user's limit is in EUR, so the
+credential provider converts before it checks.
+
+What runs in the browser: real P-256 key pairs for every party, real ECDSA
+signatures and SHA-256 hashes (WebCrypto), so the chain intent → merchant-signed
+checkout → checkout_hash → closed mandates → credential → receipts is
+verifiable on screen. Human present (the user signs the exact checkout on a
+trusted surface) and human not present (the user signs open mandates with
+constraints such as `payment.amount_range`, `payment.allowed_payees` and
+`checkout.allowed_merchants`; the agent signs the closed ones inside them).
+Five break-it switches show who catches what: a tampered total (the merchant),
+an offer above the limit (the credential provider, or the user when present),
+a merchant outside the list, an expired mandate, a replayed mandate.
+
+No model calls and no API key: the page is static. The `/api/agent` function is
+unused on this branch.
+
+| Path | What it is |
+| --- | --- |
+| `src/payments-lab.body.html` | The page source; the build prepends the inbox page's stylesheet. |
+| `payments-lab.html`, `site/index.html` | The built page (on this branch `site/index.html` is the lab). |
+
+```
+python3 build.py payments
+```
+
+Deploy as its own Netlify site (import the repository, pick this branch) or
+point an existing project at this branch. Sources: the AP2 specification and
+documentation (github.com/google-agentic-commerce/AP2), the UCP overview
+(ucp.dev), Mastercard's agentic token framework, Worldline and ING's 2026
+pilots. Rates, fees, names and addresses in the lab are illustrative.
+
 ## A second inbox: HR at an industrial company
 
 The same page runs on any inbox that follows the data format. A second one is

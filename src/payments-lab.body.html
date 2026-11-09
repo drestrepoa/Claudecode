@@ -1,0 +1,537 @@
+
+<style>
+.actors svg{min-width:900px}
+.actors .node rect{fill:var(--panel-2);stroke:var(--line);stroke-width:1.4;rx:8}
+.actors .node.agent rect{fill:var(--agent-soft);stroke:var(--agent)} .actors .node.det rect{fill:var(--det-soft);stroke:var(--det)} .actors .node.human rect{fill:var(--human-soft);stroke:var(--human)} .actors .node.ok rect{fill:var(--ok-soft);stroke:var(--ok)}
+.actors .node.lit rect{stroke-width:3;filter:drop-shadow(0 0 4px rgba(94,72,184,.35))}
+.actors .node.dim{opacity:.45}
+.actors .msg{fill:none;stroke:var(--agent);stroke-width:2;marker-end:url(#m-a)}
+.actors .msg.fail{stroke:var(--guard);marker-end:url(#m-g)}
+.actors .msg.ok{stroke:var(--ok);marker-end:url(#m-ok)}
+.actors .msg.human{stroke:var(--human);marker-end:url(#m-h)}
+.actors .mlabel{font-size:11px;fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round}
+.scene{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:980px){.scene{grid-template-columns:1fr}}
+.scene label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.scene label.f input[type=text],.scene label.f select{width:100%}
+.scene .opts{display:flex;flex-direction:column;gap:6px}
+.scene .opt{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border:1px solid var(--line-2);border-radius:7px;background:var(--panel-2);font-size:12.5px;cursor:pointer}
+.scene .opt input{margin-top:3px}
+.scene .opt b{font-weight:600}
+.scene .opt .m{color:var(--muted);display:block}
+.scene .opt.sel{border-color:var(--agent);background:var(--agent-soft)}
+.breaks .guard label{cursor:pointer}
+.player{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:14px;align-items:start}
+@media (max-width:980px){.player{grid-template-columns:1fr}}
+.steps{display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line-2);cursor:pointer;align-items:start}
+.step:hover{background:var(--panel-2)}
+.step.cur{background:var(--agent-soft)}
+.step .n{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:11.5px;font-weight:600;color:var(--muted);background:var(--panel)}
+.step.done .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.step.fail .n{background:var(--guard);border-color:var(--guard);color:#fff}
+.step.wait .n{background:var(--human);border-color:var(--human);color:#fff}
+.step .t{font-weight:600;font-size:13px}
+.step .w{font-size:11.5px;color:var(--muted)}
+.detail{display:flex;flex-direction:column;gap:12px;min-height:420px}
+.who{display:flex;gap:6px;flex-wrap:wrap}
+.explain{font-size:14px}
+.reason{border-left:3px solid var(--agent);padding:6px 10px;color:var(--ink);font-style:italic;background:var(--agent-soft);border-radius:0 6px 6px 0;font-size:13px}
+.reason b{font-style:normal;color:var(--agent);font-size:11px;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px}
+.objs{display:flex;flex-direction:column;gap:8px}
+.obj{border:1px solid var(--line-2);border-radius:7px;background:var(--panel-2)}
+.obj summary{cursor:pointer;padding:7px 10px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.obj summary b{font-weight:600}
+.obj pre{margin:0;padding:8px 10px;border-top:1px solid var(--line-2);font-family:"IBM Plex Mono",monospace;font-size:11.5px;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto}
+.sig{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.sig.agent{color:var(--agent);border-color:var(--agent)} .sig.human{color:var(--human);border-color:var(--human)} .sig.det{color:var(--det);border-color:var(--det)}
+.checks{display:flex;flex-direction:column;gap:5px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;padding:5px 9px;border-radius:6px;border:1px solid var(--line-2)}
+.chk i{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;color:#fff;flex:none;margin-top:1px}
+.chk.ok i{background:var(--ok)} .chk.fail i{background:var(--guard)} .chk.fail{border-color:var(--guard);background:var(--guard-soft)} .chk.warn i{background:var(--human)} .chk.warn{border-color:var(--human);background:var(--human-soft)}
+.chk .by{color:var(--muted);font-size:11.5px;margin-left:auto;white-space:nowrap}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.money{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.money .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.money .v{font-size:17px;font-family:"Source Serif 4",serif;font-weight:600;font-variant-numeric:tabular-nums}
+.money .v small{font-size:11px;color:var(--muted);font-family:"IBM Plex Sans",sans-serif;font-weight:400}
+table.cmp{border-collapse:collapse;width:100%;font-size:13px}
+table.cmp th,table.cmp td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line-2);vertical-align:top}
+table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+.gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;font-size:13px}
+@media (max-width:900px){.gloss{grid-template-columns:1fr}}
+.gloss b{font-weight:600}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">Agentic payments · simulation · AP2, UCP, Agent Pay, SEPA Instant, USDC</div>
+    <h1>Agentic Payment Lab</h1>
+    <p class="sub">An AI agent buys on your behalf. Every step signed, verified and visible, in euros, dollars, pounds or stablecoins.</p>
+  </div>
+  <div class="hcontrols">
+    <span class="pill" id="status"><i></i><span>ready</span></span>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><h2>The actors — who does what in an agentic payment</h2><p>One agent, six parties, and a person. Lights follow the step you are on.</p></div>
+  <div class="panel pad diagram actors">
+    <svg id="actors" viewBox="0 0 1100 360" role="img" aria-label="Actors in an agentic payment: user and trusted surface, shopping agent, merchant, credential provider, payment network, merchant payment processor and issuer. Messages light up step by step.">
+      <defs>
+        <marker id="m-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--agent)"/></marker>
+        <marker id="m-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--guard)"/></marker>
+        <marker id="m-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ok)"/></marker>
+        <marker id="m-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--human)"/></marker>
+      </defs>
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+    <div class="legend" style="margin-top:10px"><span><i class="sw human"></i>a person, or a surface a person trusts</span><span><i class="sw agent"></i>agent (an LLM decides)</span><span><i class="sw det"></i>deterministic code: verifies, signs, moves money</span><span><i class="sw ok"></i>outcome</span></div>
+    <p class="caption" style="margin-top:10px">Only one box thinks: the shopping agent. Everyone else runs code that verifies signatures and constraints before anything moves. That is the design principle of the Agent Payments Protocol: the agent proposes, mandates prove what the user allowed, and verifiers check them in code.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Set the scene</h2><p>Who is buying what, how the agent is allowed to act, which rail pays, and what could go wrong.</p></div>
+  <div class="scene">
+    <div class="panel pad" style="display:flex;flex-direction:column;gap:10px">
+      <h3>1 · The user and the mandate</h3>
+      <label class="f">What the user says to the agent<input type="text" id="instruction" value="Buy me trail running shoes, size 42, under €130, delivered by Friday"></label>
+      <div class="opts" id="modes">
+        <label class="opt sel"><input type="radio" name="mode" value="hp" checked><span><b>Human present</b><span class="m">The agent finds the offer, the user sees the exact checkout on a trusted surface and signs it.</span></span></label>
+        <label class="opt"><input type="radio" name="mode" value="hnp"><span><b>Human not present</b><span class="m">The user signs the limits once (open mandates). The agent buys alone when it finds a match, within them.</span></span></label>
+      </div>
+      <label class="f">Spending limit for this task (EUR)<input type="number" id="maxamt" value="130" min="10" max="5000" step="5"></label>
+      <label class="f">Mandate validity (hours)<input type="number" id="expiry" value="48" min="1" max="720"></label>
+    </div>
+    <div class="panel pad" style="display:flex;flex-direction:column;gap:10px">
+      <h3>2 · The merchant and the rail</h3>
+      <div class="opts" id="merchants"></div>
+      <div class="opts" id="instruments"></div>
+    </div>
+    <div class="panel pad breaks" style="display:flex;flex-direction:column;gap:10px">
+      <h3>3 · Break it</h3>
+      <p class="hint">Each switch makes one party misbehave. Watch which verifier catches it, and at which step.</p>
+      <div class="guards">
+        <div class="guard"><label><input type="checkbox" id="b-tamper"> The agent changes the total after the merchant signed the checkout</label><span class="how">caught by the merchant: checkout_hash does not match its own checkout_jwt</span></div>
+        <div class="guard"><label><input type="checkbox" id="b-over"> The merchant's offer comes in above the user's limit</label><span class="how">human present: the trusted surface shows it and the user decides · human not present: the credential provider rejects the amount constraint</span></div>
+        <div class="guard"><label><input type="checkbox" id="b-merchant"> The agent picks a merchant outside the allowed list</label><span class="how">caught by the credential provider (allowed payees) and the merchant (allowed merchants)</span></div>
+        <div class="guard"><label><input type="checkbox" id="b-expired"> The agent uses a mandate that has expired</label><span class="how">caught by every verifier: exp is in the past</span></div>
+        <div class="guard"><label><input type="checkbox" id="b-replay"> The agent reuses the same mandate for a second purchase</label><span class="how">caught by the credential provider: nonce already seen, no receipt for the first</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Play the payment — ten steps</h2><p>Keys, signatures and hashes are computed live in your browser (ECDSA P-256, SHA-256). Open the objects to read them.</p></div>
+  <div class="player">
+    <div class="panel"><div class="steps" id="steps"></div><div class="controls"><button class="btn" id="back">◀ Back</button><button class="btn primary" id="next">Next step ▶</button><button class="btn" id="playall">Play all</button><span class="hint" id="stepnote"></span></div></div>
+    <div class="panel pad detail" id="detail"><p class="hint">Press Next step to start. The first step gives every party its keys.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Money, currencies and who bears what</h2><p>Same purchase, three rails. The figures update with the scene above.</p></div>
+  <div class="panel pad" id="moneybox"><div class="money" id="money"></div><p class="caption" id="moneynote" style="margin-top:10px"></p></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>What the agent does, what code does, what a person does</h2><p>The division of labour the protocol imposes.</p></div>
+  <div class="panel pad">
+    <table class="cmp">
+      <tr><th>Step</th><th>Shopping agent (LLM)</th><th>Code (merchant, wallet, network, processor)</th><th>A person</th></tr>
+      <tr><td>Intent</td><td>Turns a sentence into a structured intent and, for delegation, into constraints</td><td>The trusted surface renders exactly what will be signed</td><td>Reads it, authenticates, signs</td></tr>
+      <tr><td>Discovery and checkout</td><td>Finds merchants (UCP), compares offers, builds the cart</td><td>The merchant signs the checkout: items, price, currency, expiry</td><td>Nothing, unless the agent asks</td></tr>
+      <tr><td>Instrument and FX</td><td>Chooses a rail the merchant accepts and the mandate allows</td><td>The wallet quotes the amount in the user's currency, rate and fee locked</td><td>Nothing</td></tr>
+      <tr><td>Approval</td><td>Human not present: signs with its own key, inside the limits</td><td>Binds the payment to the checkout hash; checks the constraints</td><td>Human present: signs the exact checkout</td></tr>
+      <tr><td>Token, authorisation, settlement</td><td>Carries the mandates and the token between parties</td><td>Issues a scoped token, authorises, moves the money, signs receipts</td><td>Nothing; the issuer may still step up</td></tr>
+      <tr><td>Dispute</td><td>Can hand over the mandates it holds</td><td>Each party holds signed evidence of what it verified</td><td>Asks: did I authorise this exact purchase?</td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Trace — every message</h2><p>Who sent what to whom, and what was verified.</p></div>
+  <div class="panel trace" id="trace"></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Glossary</h2><p>The terms you will hear in the market.</p></div>
+  <div class="panel pad gloss">
+    <div><b>AP2, Agent Payments Protocol.</b> Open protocol (Google and partners, 2025) for payments initiated by agents. Signed mandates prove what the user allowed; verifiers check them in code. Payment-method agnostic: cards, bank transfers, stablecoins.</div>
+    <div><b>UCP, Universal Commerce Protocol.</b> Open standard (Google, Shopify and others, 2026) for agents to discover a merchant's capabilities, run a checkout and receive order events. AP2 mandates plug into its checkout.</div>
+    <div><b>Mandate.</b> A signed, tamper-evident record of an authorisation. Closed: a specific checkout and payment. Open: constraints the agent must stay within. AP2 uses SD-JWT verifiable credentials.</div>
+    <div><b>Checkout mandate, payment mandate.</b> The two AP2 mandates: the first authorises the merchant to complete this checkout, the second authorises the payment for it. Linked by the hash of the merchant-signed checkout.</div>
+    <div><b>Trusted surface.</b> The non-agentic screen where the user sees what they sign: a wallet, a bank app, a passkey prompt. The LLM never sits there.</div>
+    <div><b>Credential provider.</b> The holder of the user's payment credentials: a wallet or a bank. It verifies the payment mandate and hands the agent a scoped credential, never the raw card.</div>
+    <div><b>Agentic token.</b> Mastercard Agent Pay's credential: a network token bound to a registered agent, a merchant scope, an amount and the user's consent. Worldline and ING ran Europe's first live one in 2026.</div>
+    <div><b>SEPA Instant.</b> Euro credit transfer in seconds, account to account. The agent initiates through a licensed provider; the user's strong customer authentication is the signature on the mandate.</div>
+    <div><b>USDC, x402.</b> A dollar stablecoin and an HTTP-native payment standard: the merchant answers 402 Payment Required, the agent pays with a signed transfer authorisation, a facilitator settles it on-chain. AP2's crypto extension.</div>
+    <div><b>Human present, human not present.</b> The user signs the exact checkout; or signs limits once and the agent signs within them. Verifiers always receive a closed mandate; what changes is whose key signed it.</div>
+    <div><b>Receipt.</b> Signed answers from the merchant and the payment processor: accepted or rejected, and why. With the mandates, the evidence in a dispute.</div>
+    <div><b>FX, settlement currency.</b> The checkout is in the merchant's currency; the user's limit is in theirs. Someone converts, at a rate, for a fee, and bears the risk until settlement: the issuer for cards, the wallet for stablecoins, nobody for SEPA, which is euro only.</div>
+  </div>
+</section>
+</div>
+
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const te = new TextEncoder();
+const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64uStr = (s) => b64u(te.encode(s));
+const fromB64u = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (s.length % 4)) % 4)), (c) => c.charCodeAt(0));
+const sha256 = async (s) => b64u(await crypto.subtle.digest("SHA-256", te.encode(s)));
+const rnd = (n = 12) => b64u(crypto.getRandomValues(new Uint8Array(n)));
+const canon = (o) => JSON.stringify(o);
+const nowIso = () => new Date().toISOString().slice(0, 19) + "Z";
+const fmt = (n, cur) => new Intl.NumberFormat("en-GB", { style: "currency", currency: cur === "USDC" ? "USD" : cur, minimumFractionDigits: 2 }).format(n).replace("US$", cur === "USDC" ? "USDC " : "$");
+
+async function keypair(kid, owner) {
+  const k = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+  const jwk = await crypto.subtle.exportKey("jwk", k.publicKey);
+  const pub = { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y };
+  return { kid, owner, priv: k.privateKey, pub: k.publicKey, jwk: pub, thumb: (await sha256(canon(pub))).slice(0, 16) };
+}
+async function sign(payload, key, typ = "JWT") {
+  const h = b64uStr(canon({ alg: "ES256", typ, kid: key.kid })), p = b64uStr(canon(payload));
+  const s = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key.priv, te.encode(h + "." + p));
+  return h + "." + p + "." + b64u(s);
+}
+async function verify(jwt, key) {
+  try { const [h, p, s] = jwt.split("."); return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key.pub, fromB64u(s), te.encode(h + "." + p)); } catch (e) { return false; }
+}
+const payload = (jwt) => JSON.parse(new TextDecoder().decode(fromB64u(jwt.split(".")[1])));
+const short = (s, n = 18) => s.length > n * 2 ? s.slice(0, n) + "…" + s.slice(-8) : s;
+
+// ------------------------------------------------------------ the scene
+const RATES = { EUR: 1, USD: 1.085, GBP: 0.845, USDC: 1.085 }; // 1 EUR buys this many units
+const MERCHANTS = [
+  { id: "velora", name: "Velora Sports", country: "Netherlands", website: "https://velora-sports.test", currency: "EUR", price: 119.0, over: 159.0, item: "Trail runner Ridge 2, size 42", sku: "VEL-RIDGE2-42", handlers: ["card", "sepa", "usdc"], delivery: "Thursday" },
+  { id: "summit", name: "Summit Run Co.", country: "United States", website: "https://summitrun.test", currency: "USD", price: 129.0, over: 169.0, item: "Summit Ascent trail shoe, US 9", sku: "SUM-ASC-9", handlers: ["card", "usdc"], delivery: "Friday" },
+  { id: "peak", name: "Peak & Trail", country: "United Kingdom", website: "https://peakandtrail.test", currency: "GBP", price: 104.0, over: 139.0, item: "Fellrunner X trail shoe, UK 8", sku: "PT-FELLX-8", handlers: ["card"], delivery: "Friday" },
+];
+const INSTRUMENTS = [
+  { id: "card", name: "Mastercard debit ··· 4921", currency: "EUR", issuer: "ING", network: "Mastercard Agent Pay", desc: "Agentic token: a network token bound to this agent, this merchant, this amount. Issuer FX 1.5% outside the euro.", fxFee: 0.015, fee: "interchange paid by the merchant", settle: "T+1 to the merchant, in its currency" },
+  { id: "sepa", name: "SEPA Instant from the ING account", currency: "EUR", issuer: "ING", network: "SEPA Instant (EPC)", desc: "Account to account in under ten seconds, euro only. Initiated through Worldline as the payment initiation provider.", fxFee: 0, fee: "no fee for the payer", settle: "in seconds, euro only" },
+  { id: "usdc", name: "USDC wallet (on Base)", currency: "USDC", issuer: "self-custody wallet", network: "x402 · Base", desc: "A signed transfer authorisation the facilitator settles on-chain. Wallet converts euros to USDC at a 0.3% spread.", fxFee: 0.003, fee: "network fee under a cent", settle: "on-chain finality in about two seconds; the merchant's processor converts to its currency" },
+];
+const ACTORS = [
+  { id: "user", name: "User", sub: "Lena · Rotterdam · pays in EUR", kind: "human", x: 20, y: 40, w: 150, h: 60 },
+  { id: "ts", name: "Trusted surface", sub: "ING app · passkey", kind: "human", x: 20, y: 230, w: 150, h: 60 },
+  { id: "sa", name: "Shopping agent", sub: "the LLM · proposes, never pays", kind: "agent", x: 260, y: 135, w: 170, h: 70 },
+  { id: "m", name: "Merchant", sub: "UCP endpoint · signs the checkout", kind: "det", x: 540, y: 30, w: 170, h: 60 },
+  { id: "cp", name: "Credential provider", sub: "ING wallet · holds the instruments", kind: "det", x: 540, y: 150, w: 170, h: 60 },
+  { id: "net", name: "Payment network", sub: "Agent Pay · SEPA Inst · Base", kind: "det", x: 540, y: 270, w: 170, h: 60 },
+  { id: "mpp", name: "Payment processor", sub: "Worldline · acquiring, processing", kind: "det", x: 820, y: 30, w: 170, h: 60 },
+  { id: "iss", name: "Issuer", sub: "ING · authorises, bears the FX", kind: "det", x: 820, y: 150, w: 170, h: 60 },
+  { id: "out", name: "Receipts", sub: "signed evidence for everyone", kind: "ok", x: 820, y: 270, w: 170, h: 60 },
+];
+const A = Object.fromEntries(ACTORS.map((a) => [a.id, a]));
+const merchantNames = (ids) => ids.map((i) => MERCHANTS.find((m) => m.id === i).name);
+
+// ------------------------------------------------------------ state
+let S = null; // simulation state, rebuilt on reset
+let cur = -1; // index of the last completed step
+let busy = false;
+const scene = () => ({
+  instruction: $("instruction").value.trim() || "Buy me trail running shoes under €130",
+  mode: document.querySelector("input[name=mode]:checked").value,
+  maxamt: Math.max(1, Number($("maxamt").value) || 130), expiry: Math.max(1, Number($("expiry").value) || 48),
+  merchant: MERCHANTS.find((m) => m.id === (document.querySelector("input[name=merchant]:checked") || {}).value) || MERCHANTS[0],
+  instrument: INSTRUMENTS.find((i) => i.id === (document.querySelector("input[name=instrument]:checked") || {}).value) || INSTRUMENTS[0],
+  tamper: $("b-tamper").checked, over: $("b-over").checked, badMerchant: $("b-merchant").checked, expired: $("b-expired").checked, replay: $("b-replay").checked,
+});
+function fresh() {
+  const sc = scene();
+  const allowed = MERCHANTS.map((m) => m.id).filter((id) => !(sc.badMerchant && id === sc.merchant.id));
+  if (sc.badMerchant && allowed.length === 3) allowed.splice(allowed.indexOf(sc.merchant.id), 1);
+  return { sc, allowed, keys: {}, nonces: new Set(), log: [], trace: [] };
+}
+
+// ------------------------------------------------------------ trace + diagram
+const traceEl = $("trace");
+function trace(kind, key, body) {
+  const t = new Date(); const hh = [t.getHours(), t.getMinutes(), t.getSeconds()].map((n) => String(n).padStart(2, "0")).join(":");
+  const d = document.createElement("div"); d.className = "tr " + kind; d.innerHTML = `<span class="t">${hh}</span><span class="k">${esc(key)}</span><span class="b">${esc(body)}</span>`; traceEl.appendChild(d); traceEl.scrollTop = traceEl.scrollHeight;
+}
+function drawNodes() {
+  $("nodes").innerHTML = ACTORS.map((a) => `<g class="node ${a.kind}" id="n-${a.id}"><rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}"/><text x="${a.x + a.w / 2}" y="${a.y + 24}" text-anchor="middle" font-weight="600">${esc(a.name)}</text><text x="${a.x + a.w / 2}" y="${a.y + 42}" text-anchor="middle" class="small">${esc(a.sub)}</text></g>`).join("");
+}
+function light(active, msgs) {
+  for (const a of ACTORS) { const n = $("n-" + a.id); n.classList.toggle("lit", active.includes(a.id)); n.classList.toggle("dim", active.length > 0 && !active.includes(a.id)); }
+  const anchor = (a, side) => ({ x: side === "l" ? a.x : side === "r" ? a.x + a.w : a.x + a.w / 2, y: side === "t" ? a.y : side === "b" ? a.y + a.h : a.y + a.h / 2 });
+  $("edges").innerHTML = msgs.map(([f, t, label, kind, side], i) => {
+    const F = A[f], T = A[t]; const dx = (T.x + T.w / 2) - (F.x + F.w / 2), dy = (T.y + T.h / 2) - (F.y + F.h / 2);
+    if (side === "r" || side === "l") { const p1 = anchor(F, side), p2 = anchor(T, side); const bx = side === "r" ? Math.max(p1.x, p2.x) + 70 : Math.min(p1.x, p2.x) - 70; const my = (p1.y + p2.y) / 2; return `<path class="msg ${kind || ""}" d="M${p1.x} ${p1.y} C${bx} ${p1.y} ${bx} ${p2.y} ${p2.x} ${p2.y}"/>${label ? `<text class="mlabel" x="${bx - 10}" y="${my}" text-anchor="${side === "r" ? "end" : "start"}">${esc(label)}</text>` : ""}`; }
+    const horiz = Math.abs(dx) > Math.abs(dy) || Math.abs(dx) > 200;
+    const p1 = anchor(F, horiz ? (dx > 0 ? "r" : "l") : (dy > 0 ? "b" : "t")), p2 = anchor(T, horiz ? (dx > 0 ? "l" : "r") : (dy > 0 ? "t" : "b"));
+    const off = (i % 2 ? 1 : -1) * 6 * Math.ceil(i / 2); const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2 + (horiz ? off : 0);
+    const d = horiz ? `M${p1.x} ${p1.y + off} C${mx} ${p1.y + off} ${mx} ${p2.y + off} ${p2.x} ${p2.y + off}` : `M${p1.x + off} ${p1.y} C${p1.x + off} ${my} ${p2.x + off} ${my} ${p2.x + off} ${p2.y}`;
+    return `<path class="msg ${kind || ""}" d="${d}"/>${label ? `<text class="mlabel" x="${mx + (horiz ? 0 : off + 8)}" y="${horiz ? my - 6 : my}" text-anchor="${horiz ? "middle" : "start"}">${esc(label)}</text>` : ""}`;
+  }).join("");
+}
+
+// ------------------------------------------------------------ the steps
+const WHO = { agent: "agent", det: "deterministic", human: "human" };
+const chip = (k, t) => `<span class="tag ${k === "human" ? "human" : k === "agent" ? "agent" : "det"}">${esc(t)}</span>`;
+const obj = (name, data, by, kind = "det", open = false) => ({ name, data, by, kind, open });
+const chk = (label, ok, by, warn = false) => ({ label, ok, by, warn });
+
+const STEPS = [
+  { id: "keys", title: "Keys and trust", who: "Enrolment, before any purchase", actors: ["user", "ts", "sa", "m", "cp", "net"], msgs: [["ts", "cp", "device key enrolled", "human"], ["sa", "net", "agent registered", ""], ["m", "sa", "merchant keys in the UCP profile", ""]],
+    async run(S) {
+      for (const [id, owner] of [["user", "Lena's device key, held by the trusted surface"], ["sa", "the shopping agent's own key"], ["m", "the merchant"], ["cp", "the credential provider"], ["mpp", "the payment processor"], ["iss", "the issuer"]]) S.keys[id] = await keypair(id + "-key-1", owner);
+      S.agentId = "agent:lena-shopper-" + rnd(4); S.regId = "MC-AGENT-" + rnd(4).toUpperCase().replace(/[^A-Z0-9]/g, "X").slice(0, 6);
+      return { explain: "Nothing happens until the parties can recognise each other. The user's device holds a key behind a passkey; the shopping agent has its own key and is registered with the network as an agent; the merchant publishes its keys with its UCP profile. Verifiers later check signatures against these keys, never against what an agent claims about itself.",
+        objects: [obj("Agent registration (network registry)", { agent_id: S.agentId, registration: S.regId, operator: "Nordvik Digital Assistant B.V.", public_key: S.keys.sa.jwk, scope: "consumer purchases · EUR, USD, GBP, USDC", status: "verified" }, "payment network", "det"),
+          obj("User device key (trusted surface)", { kid: S.keys.user.kid, thumbprint: S.keys.user.thumb, holder: "ING app on Lena's phone", unlock: "passkey · biometric" }, "credential provider", "human")],
+        checks: [chk("Agent public key registered and verified by the network", true, "network"), chk("User key enrolled with the credential provider", true, "credential provider"), chk("Merchant keys discoverable through UCP", true, "shopping agent")] };
+    } },
+  { id: "intent", title: "Intent and mandate", who: "The user tells the agent; the trusted surface gets a signature", actors: ["user", "sa", "ts"], msgs: [["user", "sa", "instruction", "human"], ["sa", "ts", "mandate content", ""], ["ts", "sa", "signed mandate", "human"]],
+    async run(S) {
+      const sc = S.sc; const exp = Math.floor(Date.now() / 1000) + (sc.expired ? -3600 : sc.expiry * 3600);
+      S.exp = exp;
+      if (sc.mode === "hp") {
+        const intent = { vct: "mandate.intent.1", natural_language_description: sc.instruction, user_cart_confirmation_required: true, merchants: merchantNames(S.allowed), requires_refundability: true, intent_expiry: new Date(exp * 1000).toISOString(), iat: Math.floor(Date.now() / 1000) };
+        S.intentJwt = await sign(intent, S.keys.user, "intent+jwt"); const ok = await verify(S.intentJwt, S.keys.user);
+        return { explain: "Human present. The agent turns the sentence into a structured intent and the trusted surface shows it to Lena: what she wants, which merchants, how long it is valid, and that she will confirm the cart herself. She authenticates with her passkey and signs. The agent now carries a signed intent it can show merchants, but it cannot pay with it.",
+          reason: `"${sc.instruction}" → category trail running shoes, size 42, budget under €${sc.maxamt}, delivery by Friday, merchants: ${merchantNames(S.allowed).join(", ")}. The user wants to confirm the cart, so this is a human-present purchase: I will come back with the exact checkout.`,
+          objects: [obj("Intent mandate (user-signed)", { jwt: short(S.intentJwt, 40), payload: payload(S.intentJwt) }, "user, on the trusted surface", "human", true)],
+          checks: [chk("Rendered on a trusted surface, not in the chat", true, "trusted surface", false), chk("Signature verifies against Lena's enrolled key", ok, "shopping agent"), chk(`Expires ${new Date(exp * 1000).toLocaleString("en-GB")}${sc.expired ? " · already in the past" : ""}`, !sc.expired, "trusted surface")] };
+      }
+      const openCheckout = { vct: "mandate.checkout.open.1", constraints: [{ type: "checkout.allowed_merchants", allowed: S.allowed.map((id) => { const m = MERCHANTS.find((x) => x.id === id); return { id: m.id, name: m.name, website: m.website }; }) }, { type: "checkout.line_items", items: [{ id: "line_1", acceptable_items: MERCHANTS.map((m) => ({ id: m.sku, title: m.item })), quantity: 1 }] }], cnf: { jwk: S.keys.sa.jwk }, iat: Math.floor(Date.now() / 1000), exp };
+      S.openCheckoutJwt = await sign(openCheckout, S.keys.user, "kb+sd-jwt"); S.openCheckoutHash = await sha256(S.openCheckoutJwt);
+      const openPayment = { vct: "mandate.payment.open.1", constraints: [{ type: "payment.amount_range", min: 0, max: sc.maxamt, currency: "EUR" }, { type: "payment.allowed_payment_instruments", allowed: INSTRUMENTS.map((i) => ({ id: i.id, type: i.id === "card" ? "card" : i.id === "sepa" ? "sepa_instant" : "x402_usdc", description: i.name })) }, { type: "payment.allowed_payees", allowed: S.allowed.map((id) => ({ id, name: MERCHANTS.find((x) => x.id === id).name })) }, { type: "payment.reference", open_checkout_hash: S.openCheckoutHash }], cnf: { jwk: S.keys.sa.jwk }, iat: Math.floor(Date.now() / 1000), exp };
+      S.openPaymentJwt = await sign(openPayment, S.keys.user, "kb+sd-jwt");
+      const ok1 = await verify(S.openCheckoutJwt, S.keys.user), ok2 = await verify(S.openPaymentJwt, S.keys.user);
+      return { explain: "Human not present. Lena will not be there when the agent buys, so she signs the limits now: two open mandates. The open checkout mandate says which merchants and which items; the open payment mandate says how much, in which currency, with which instruments, to which payees. Both name the agent's public key (cnf) so only this agent can use them, and both expire. The agent will later sign the actual checkout with its own key and attach these as proof that it stayed inside the lines.",
+        reason: `Delegated task. I propose constraints the user can read: merchants ${merchantNames(S.allowed).join(", ")}; one pair of trail shoes; at most €${sc.maxamt}; card, SEPA or USDC; valid ${sc.expiry} hours. If a match appears inside these lines I buy without asking; outside them I cannot.`,
+        objects: [obj("Open checkout mandate (user-signed)", { jwt: short(S.openCheckoutJwt, 40), payload: openCheckout }, "user, on the trusted surface", "human", true), obj("Open payment mandate (user-signed)", { jwt: short(S.openPaymentJwt, 40), payload: openPayment }, "user, on the trusted surface", "human")],
+        checks: [chk("Both signatures verify against Lena's enrolled key", ok1 && ok2, "shopping agent"), chk("cnf claim binds the mandates to this agent's key", true, "trusted surface"), chk(`Expire ${new Date(exp * 1000).toLocaleString("en-GB")}${sc.expired ? " · already in the past" : ""}`, !sc.expired, "trusted surface"), chk("Open payment mandate references the open checkout mandate by hash", true, "trusted surface")] };
+    } },
+  { id: "discover", title: "Discovery (UCP)", who: "The agent finds merchants that can sell and be paid", actors: ["sa", "m"], msgs: [["sa", "m", "GET /.well-known/ucp", ""], ["m", "sa", "capabilities · handlers", ""]],
+    async run(S) {
+      const sc = S.sc;
+      const profiles = MERCHANTS.map((m) => ({ merchant: m.name, website: m.website, ucp: { capabilities: ["checkout", "order", "payment_token_exchange"], transports: ["rest", "mcp", "a2a"], payment_handlers: m.handlers.map((h) => ({ card: "card · Mastercard, Visa", sepa: "sepa_instant · EUR only", usdc: "x402 · USDC on Base" }[h])), currency: m.currency, ap2: "mandates accepted" }, offer: { sku: m.sku, title: m.item, price: m.price, currency: m.currency, delivery: m.delivery } }));
+      const chosen = sc.merchant; const okHandler = chosen.handlers.includes(sc.instrument.id);
+      return { explain: "The agent reads each merchant's UCP profile: what it can do (checkout, order updates, token exchange), over which transport, which payment handlers it accepts and in which currency, and that it accepts AP2 mandates. Then it asks for offers. Discovery is where the agent's judgement matters most, and where nothing is committed yet.",
+        reason: `Three merchants match. ${MERCHANTS.map((m) => `${m.name}: ${fmt(m.price, m.currency)}, ${m.delivery}, accepts ${m.handlers.join("/")}`).join(". ")}. The user prefers ${sc.instrument.name}; ${okHandler ? `${chosen.name} accepts it, so I proceed with ${chosen.name}` : `${chosen.name} does not accept it, so I will have to come back to the user or switch rail`}.`,
+        objects: profiles.map((p) => obj(`UCP profile · ${p.merchant}`, p, "merchant", "det")),
+        checks: [chk(`${chosen.name} is ${S.allowed.includes(chosen.id) ? "" : "NOT "}in the allowed merchants`, S.allowed.includes(chosen.id), "shopping agent", !S.allowed.includes(chosen.id)), chk(`${chosen.name} accepts ${sc.instrument.name.split(" ")[0]} payments`, okHandler, "shopping agent", !okHandler), chk(`Offer ${fmt(sc.over ? chosen.over : chosen.price, chosen.currency)} in ${chosen.currency}; the user's limit is in EUR`, true, "shopping agent")] };
+    } },
+  { id: "checkout", title: "Checkout, merchant-signed", who: "The merchant commits to items, price, currency and expiry", actors: ["sa", "m"], msgs: [["sa", "m", "create checkout", ""], ["m", "sa", "checkout_jwt (signed)", "ok"]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant; const price = sc.over ? m.over : m.price;
+      const checkout = { order_id: "co_" + rnd(6), merchant: { id: m.id, name: m.name, website: m.website }, line_items: [{ id: "line_1", product: { id: m.sku, title: m.item, price, currency: m.currency }, quantity: 1 }], total_price: price, currency: m.currency, payment_handlers: m.handlers, fulfillment: { method: "shipping", promised: m.delivery }, return_policy: "30-day returns", expires_at: new Date(Date.now() + 15 * 60000).toISOString() };
+      S.checkout = checkout; S.checkoutJwt = await sign(checkout, S.keys.m, "JWT"); S.checkoutHash = await sha256(S.checkoutJwt);
+      const ok = await verify(S.checkoutJwt, S.keys.m);
+      // the tamper: the agent keeps a different checkout than the one the merchant signed
+      S.presented = sc.tamper ? { ...checkout, total_price: Math.round((price - 40) * 100) / 100, line_items: [{ ...checkout.line_items[0], product: { ...checkout.line_items[0].product, price: Math.round((price - 40) * 100) / 100 } }] } : checkout;
+      S.presentedJwt = sc.tamper ? await sign(S.presented, S.keys.sa, "JWT") : S.checkoutJwt; S.presentedHash = await sha256(S.presentedJwt);
+      return { explain: `The agent asks ${m.name} to create a checkout for one pair. The merchant answers with a signed checkout: items, unit price, total ${fmt(price, m.currency)} in ${m.currency}, delivery promise, return policy, and a fifteen-minute expiry. From here on, this JWT is the anchor: every mandate will carry its hash. Nobody, not even the agent, can change a cent without breaking the chain.${sc.tamper ? " Break-it is on: the agent will present a checkout with €40 less to the user and re-sign it with its own key. Watch the merchant catch it at step 8." : ""}`,
+        reason: `Checkout created at ${m.name}: ${fmt(price, m.currency)}, delivery ${m.delivery}. Merchant signature verified against the key from its UCP profile. Next: find out what this costs the user in euros and which instrument the wallet will allow.`,
+        objects: [obj("checkout_jwt (merchant-signed)", { jwt: short(S.checkoutJwt, 40), payload: checkout, checkout_hash: S.checkoutHash }, m.name, "det", true), ...(sc.tamper ? [obj("What the agent will present instead (break-it)", { jwt: short(S.presentedJwt, 40), payload: S.presented, hash: S.presentedHash, signed_by: "the agent's own key, not the merchant's" }, "shopping agent", "agent")] : [])],
+        checks: [chk("Merchant signature verifies against the published merchant key", ok, "shopping agent"), chk(`Total ${fmt(price, m.currency)} ${m.currency}, expires in 15 minutes`, true, "shopping agent"), chk("checkout_hash = SHA-256(checkout_jwt): " + S.checkoutHash.slice(0, 22) + "…", true, "shopping agent")] };
+    } },
+  { id: "instrument", title: "Instrument and FX quote", who: "The wallet says what can pay, and what it costs in euros", actors: ["sa", "cp"], msgs: [["sa", "cp", "instrument options for checkout", ""], ["cp", "sa", "eligible instruments · FX quote", ""]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant, ins = sc.instrument; const total = S.checkout.total_price, cur = m.currency;
+      const options = INSTRUMENTS.map((i) => {
+        const accepted = m.handlers.includes(i.id); const sameCur = i.currency === cur || (i.id === "usdc" && cur === "USD");
+        let eur, note;
+        if (i.id === "sepa") { eur = cur === "EUR" ? total : null; note = cur === "EUR" ? "euro to euro, no conversion" : "SEPA is euro only: not eligible for a " + cur + " checkout"; }
+        else if (i.id === "card") { eur = cur === "EUR" ? total : Math.round((total / RATES[cur]) * (1 + i.fxFee) * 100) / 100; note = cur === "EUR" ? "no conversion" : `issuer converts ${cur} at ${(1 / RATES[cur]).toFixed(4)} EUR per ${cur} plus 1.5% FX fee`; }
+        else { const usdc = Math.round((total / RATES[cur]) * RATES.USDC * 100) / 100; eur = Math.round((usdc / RATES.USDC) * (1 + i.fxFee) * 100) / 100; note = `merchant quotes ${fmt(usdc, "USDC")} (USDC ≈ USD); wallet buys USDC with euros at 0.3% spread`; i._usdc = usdc; }
+        return { instrument: i.name, type: i.id, accepted_by_merchant: accepted, eligible: accepted && eur !== null, amount_in_user_currency: eur === null ? null : fmt(eur, "EUR"), note, rate_valid_for: "10 minutes" };
+      });
+      const mine = options.find((o) => o.type === ins.id); S.eur = mine.amount_in_user_currency ? Number(mine.amount_in_user_currency.replace(/[^0-9.]/g, "")) : null; S.usdc = ins._usdc || null; S.options = options;
+      const eligible = mine.eligible; const within = S.eur !== null && S.eur <= sc.maxamt;
+      return { explain: `The agent never sees a card number. It asks the credential provider which instruments can pay this ${cur} checkout and what each would cost Lena in euros. The wallet answers with eligible instruments and a quote: rate, fee, validity. This is where multi-currency becomes concrete: a ${cur} price, a limit in EUR, and a rail that may or may not cross currencies. SEPA is euro only; a card converts at the issuer; USDC converts at the wallet.`,
+        reason: eligible ? `${ins.name} is eligible. ${fmt(total, cur)} costs Lena ${mine.amount_in_user_currency}: ${mine.note}. ${within ? `Within the €${sc.maxamt} limit.` : `Above the €${sc.maxamt} limit: ${sc.mode === "hp" ? "the user will see this on the trusted surface and decide" : "the credential provider will refuse; I should stop here"}.`}` : `${ins.name} cannot pay this checkout: ${mine.note}. I must go back to the user or pick an eligible rail: ${options.filter((o) => o.eligible).map((o) => o.instrument).join(", ") || "none"}.`,
+        objects: [obj("Instrument options and FX quote", { checkout: { total, currency: cur, merchant: m.name }, user_currency: "EUR", options }, "credential provider", "det", true)],
+        checks: [chk(`${ins.name} accepted by the merchant and eligible for ${cur}`, eligible, "credential provider"), ...(eligible ? [chk(`Cost to the user ${mine.amount_in_user_currency} against a limit of ${fmt(sc.maxamt, "EUR")}`, within, "shopping agent", !within && sc.mode === "hp"), chk("Rate and fee locked for ten minutes", true, "credential provider")] : [])],
+        stop: !eligible ? "No eligible instrument: the agent has to bring the user back. In the Worldline and ING pilots this is exactly the moment the agent hands over instead of improvising." : null };
+    } },
+  { id: "approve", title: "Approval: closed mandates", who: "Human present: the user signs. Human not present: the agent signs inside the lines", actors: ["sa", "ts", "user"], msgs: [["sa", "ts", "closed checkout + payment mandate content", ""], ["ts", "user", "render · passkey", "human"], ["ts", "sa", "signed closed mandates", "human"]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant, ins = sc.instrument; const nonce = rnd(16); S.nonce = nonce;
+      const payee = { id: m.id, name: m.name }; const instrument = { id: ins.id, type: ins.id === "card" ? "card" : ins.id === "sepa" ? "sepa_instant" : "x402_usdc", description: ins.name };
+      const amount = { value: S.checkout.total_price, currency: m.currency }; const userAmount = { value: S.eur, currency: "EUR" };
+      const closedCheckout = { vct: "mandate.checkout.1", checkout_hash: S.presentedHash, aud: "merchant", nonce, iat: Math.floor(Date.now() / 1000), human_present: sc.mode === "hp", ...(sc.mode === "hnp" ? { sd_hash: S.openCheckoutHash } : {}) };
+      const closedPayment = { vct: "mandate.payment.1", checkout_hash: S.presentedHash, payment_amount: amount, amount_in_user_currency: userAmount, payment_instrument: instrument, payee, agent_id: S.agentId, human_present: sc.mode === "hp", aud: "credential-provider", nonce, iat: Math.floor(Date.now() / 1000), ...(sc.mode === "hnp" ? { sd_hash: await sha256(S.openPaymentJwt) } : {}) };
+      const signer = sc.mode === "hp" ? S.keys.user : S.keys.sa;
+      S.closedCheckoutJwt = await sign(closedCheckout, signer, "kb+sd-jwt"); S.closedPaymentJwt = await sign(closedPayment, signer, "kb+sd-jwt");
+      S.closedCheckout = closedCheckout; S.closedPayment = closedPayment;
+      if (sc.mode === "hp") {
+        const over = S.eur > sc.maxamt;
+        return { explain: `The trusted surface, the ING app, renders exactly what will be signed: ${m.name}, ${m.item}, ${fmt(S.checkout.total_price, m.currency)}, which is ${fmt(S.eur, "EUR")} with ${ins.name}, delivery ${m.delivery}. Lena authenticates with her passkey and signs two closed mandates with her device key: the checkout mandate for the merchant and the payment mandate for the wallet and the network. Both carry the hash of the checkout, so they can only ever mean this purchase. This signature is also her strong customer authentication: amount and payee are dynamically linked to it.${over ? ` The surface shows that ${fmt(S.eur, "EUR")} is above her stated €${sc.maxamt}: she decides.` : ""}`,
+          reason: `I present the checkout to the trusted surface and wait. I do not hold the user's key and cannot sign for her.`,
+          objects: [obj("Closed checkout mandate (user-signed)", { jwt: short(S.closedCheckoutJwt, 40), payload: closedCheckout }, "user", "human", true), obj("Closed payment mandate (user-signed)", { jwt: short(S.closedPaymentJwt, 40), payload: closedPayment }, "user", "human")],
+          checks: [chk("Rendered by the trusted surface from the merchant checkout the agent presented", true, "trusted surface"), chk("Passkey authentication (SCA with dynamic linking: amount, payee)", true, "trusted surface"), chk(over ? `Amount ${fmt(S.eur, "EUR")} is above the stated limit of €${sc.maxamt}: shown to the user, who approved` : `Amount ${fmt(S.eur, "EUR")} within the stated limit`, true, "user", over), chk("Both mandates carry the same checkout_hash and nonce", true, "trusted surface")] };
+      }
+      const agentChecks = [chk(`Payee ${m.name} in allowed_payees`, S.allowed.includes(m.id), "shopping agent (self-check)"), chk(`Amount ${fmt(S.eur, "EUR")} within amount_range max €${sc.maxamt}`, S.eur <= sc.maxamt, "shopping agent (self-check)"), chk("Instrument in allowed_payment_instruments", true, "shopping agent (self-check)"), chk("Open mandates not expired", !sc.expired, "shopping agent (self-check)")];
+      return { explain: `Nobody is watching. The agent assembles the closed checkout and payment mandates for this exact checkout and signs them with its own key (the one named in the open mandates' cnf claim). It attaches the user-signed open mandates by hash. The verifiers will not take its word: each will check that the closed mandate stays inside the open one. The agent checks too, but its check is advice to itself, not a control.`,
+        reason: `Match found inside the lines? ${agentChecks.every((c) => c.ok) ? "Yes: I sign the closed mandates with my key and proceed." : "Not all constraints hold: " + agentChecks.filter((c) => !c.ok).map((c) => c.label).join("; ") + ". A careful agent stops here. This one proceeds, to show what the verifiers do."}`,
+        objects: [obj("Closed checkout mandate (agent-signed, bound to the open one)", { jwt: short(S.closedCheckoutJwt, 40), payload: closedCheckout }, "shopping agent", "agent", true), obj("Closed payment mandate (agent-signed, bound to the open one)", { jwt: short(S.closedPaymentJwt, 40), payload: closedPayment }, "shopping agent", "agent")],
+        checks: agentChecks };
+    } },
+  { id: "token", title: "Credential: a scoped token", who: "The wallet verifies the payment mandate and asks the network for a credential", actors: ["sa", "cp", "net"], msgs: [["sa", "cp", "payment mandate (+ open)", ""], ["cp", "net", "mandate · request token", ""], ["net", "cp", "agentic token / consent / payload", "ok"], ["cp", "sa", "scoped credential", "ok"]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant, ins = sc.instrument; const checks = [];
+      const signer = sc.mode === "hp" ? S.keys.user : S.keys.sa;
+      checks.push(chk(sc.mode === "hp" ? "Signature verifies against Lena's enrolled key" : "Signature verifies against the agent key named in the user-signed open mandate (cnf)", await verify(S.closedPaymentJwt, signer), "credential provider"));
+      if (sc.mode === "hnp") checks.push(chk("Open payment mandate signature verifies against Lena's key", await verify(S.openPaymentJwt, S.keys.user), "credential provider"));
+      checks.push(chk("Mandate not expired", !sc.expired, "credential provider"));
+      const seen = S.nonces.has(S.nonce); checks.push(chk(seen ? "Nonce already seen and no rejection receipt for it: replay" : "Nonce fresh; no open mandate in flight", !seen, "credential provider"));
+      if (sc.mode === "hnp") {
+        checks.push(chk(`payment.amount_range: ${fmt(S.eur, "EUR")} ≤ €${sc.maxamt}`, S.eur <= sc.maxamt, "credential provider"));
+        checks.push(chk(`payment.allowed_payees includes ${m.name}`, S.allowed.includes(m.id), "credential provider"));
+        checks.push(chk("payment.allowed_payment_instruments includes " + ins.name.split(" ")[0], true, "credential provider"));
+      } else checks.push(chk("Human present: the user signed this exact amount; no range check needed", true, "credential provider"));
+      checks.push(chk("Instrument belongs to this user and is enabled for agent use", true, "credential provider"));
+      const ok = checks.every((c) => c.ok);
+      S.nonces.add(S.nonce);
+      let cred;
+      if (ins.id === "card") cred = { type: "agentic_token", network: "Mastercard Agent Pay", token: "5213 09xx xxxx " + String(1000 + Math.floor(Math.random() * 9000)), token_cryptogram: rnd(12), agent_registration: S.regId, scope: { merchant: m.name, max_amount: { value: S.checkout.total_price, currency: m.currency }, checkout_hash: S.presentedHash, single_use: true, expires_in: "15 minutes" }, human_present: sc.mode === "hp", issuer: "ING" };
+      else if (ins.id === "sepa") cred = { type: "payment_initiation_consent", scheme: "SEPA Instant Credit Transfer", pisp: "Worldline", consent_id: "pisp_" + rnd(6), debtor: "NL91 INGB 0000 1234 56 (Lena)", creditor: m.name + " · NL20 INGB 0001 2345 67", amount: { value: S.checkout.total_price, currency: "EUR" }, sca: "satisfied by the signed payment mandate (dynamic linking)", checkout_hash: S.presentedHash };
+      else cred = { type: "x402_payment_payload", scheme: "exact", network: "base", asset: "USDC (0x8335…2913)", payload: { from: "0x5aB3…9c1E (Lena's wallet)", to: "0xM3rc…a7D2 (" + m.name + " via Worldline)", value: Math.round(S.usdc * 1e6) + " (6 decimals = " + fmt(S.usdc, "USDC") + ")", validAfter: Math.floor(Date.now() / 1000), validBefore: Math.floor(Date.now() / 1000) + 600, nonce: "0x" + rnd(16).replace(/[^a-f0-9]/gi, "0").toLowerCase() }, signature: "EIP-3009 transferWithAuthorization, signed by the wallet key", checkout_hash: S.presentedHash, fx: { paid_by_user: fmt(S.eur, "EUR"), rate: "1 EUR = " + RATES.USDC + " USDC, 0.3% spread" } };
+      S.cred = cred;
+      const receipt = ok ? null : { vct: "receipt.payment.1", status: "rejected", reason: checks.filter((c) => !c.ok).map((c) => c.label), reference: await sha256(S.closedPaymentJwt) };
+      if (receipt) S.receiptCpJwt = await sign(receipt, S.keys.cp, "receipt+jwt");
+      return { explain: ok ? `The agent sends the payment mandate to the credential provider. The wallet verifies the signature, the expiry, the nonce and, for a delegated purchase, every constraint of the open mandate. Then it asks the network for a credential scoped to this checkout. ${ins.id === "card" ? "Mastercard Agent Pay issues an agentic token: a network token bound to the registered agent, this merchant, this amount and this checkout hash, single use. The raw card never leaves the vault." : ins.id === "sepa" ? "ING records a payment initiation consent for exactly this amount and payee; the signed mandate is Lena's strong customer authentication." : "The wallet produces an x402 payment payload: a signed authorisation to transfer exactly this many USDC to the merchant's address, valid ten minutes. The wallet has converted euros to USDC at the quoted rate."}` : "The credential provider refuses. It returns a signed payment receipt with the reason, and nothing is issued. The agent gets an error, not a token. This is the control that makes delegation safe: the limit the user signed is enforced by code that the agent cannot argue with.",
+        reason: ok ? "Credential received, scoped to this checkout. I can now complete the checkout with the merchant." : "Rejected by the credential provider: " + checks.filter((c) => !c.ok).map((c) => c.label).join("; ") + ". I report back to the user.",
+        objects: ok ? [obj(cred.type.replace(/_/g, " "), cred, ins.id === "card" ? "Mastercard · ING" : ins.id === "sepa" ? "ING · Worldline (PISP)" : "wallet · x402 facilitator", "det", true)] : [obj("Payment receipt: rejected", { jwt: short(S.receiptCpJwt, 40), payload: receipt }, "credential provider", "det", true)],
+        checks, stop: ok ? null : "Stopped at the credential provider. Nothing was issued, nothing can be charged." };
+    } },
+  { id: "complete", title: "Complete the checkout", who: "The merchant verifies the checkout mandate and asks its processor to charge", actors: ["sa", "m", "mpp"], msgs: [["sa", "m", "credential + checkout mandate", ""], ["m", "mpp", "authorise · checkout_hash", ""]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant; const checks = [];
+      const signer = sc.mode === "hp" ? S.keys.user : S.keys.sa;
+      checks.push(chk(sc.mode === "hp" ? "Checkout mandate signature verifies against the user's key" : "Checkout mandate signature verifies against the agent key named in the open mandate", await verify(S.closedCheckoutJwt, signer), m.name));
+      const hashOk = S.closedCheckout.checkout_hash === S.checkoutHash; checks.push(chk(hashOk ? "checkout_hash matches the hash of the checkout_jwt I signed" : `checkout_hash ${S.closedCheckout.checkout_hash.slice(0, 16)}… does not match my checkout_jwt ${S.checkoutHash.slice(0, 16)}…: the agent presented something else`, hashOk, m.name));
+      checks.push(chk("Checkout not expired, inventory still reserved", true, m.name));
+      if (sc.mode === "hnp") { checks.push(chk(`checkout.allowed_merchants includes ${m.name}`, S.allowed.includes(m.id), m.name)); checks.push(chk("checkout.line_items satisfied: one pair from the acceptable items", true, m.name)); }
+      checks.push(chk("Credential scope matches: merchant, amount, checkout_hash", true, m.name));
+      const ok = checks.every((c) => c.ok);
+      const receipt = ok ? null : { vct: "receipt.checkout.1", status: "rejected", reason: checks.filter((c) => !c.ok).map((c) => c.label), reference: await sha256(S.closedCheckoutJwt) };
+      if (receipt) S.receiptMJwt = await sign(receipt, S.keys.m, "receipt+jwt");
+      S.authReq = ok ? { processor: "Worldline", merchant: m.name, amount: { value: S.checkout.total_price, currency: m.currency }, credential: S.cred.type, checkout_hash: S.checkoutHash, agent_id: S.agentId, human_present: sc.mode === "hp" } : null;
+      return { explain: ok ? `The agent hands the merchant the scoped credential and the closed checkout mandate. The merchant checks the signature, recomputes the hash of the checkout it signed and compares, confirms the checkout has not expired and, for a delegated purchase, that its own constraints are met. Then it asks its payment processor, Worldline, to charge: amount, currency, credential, checkout hash, agent identifier.` : `The merchant refuses. ${hashOk ? "" : "The hash in the mandate is not the hash of the checkout it signed: the agent presented a different price to the user. The merchant cannot tell whether the agent lied or was manipulated, and does not need to: the signature chain is broken, so it returns a rejection receipt."} Nothing is charged.`,
+        reason: ok ? "Merchant accepted the checkout mandate and is charging through Worldline." : "Merchant rejected: " + checks.filter((c) => !c.ok).map((c) => c.label).join("; "),
+        objects: ok ? [obj("Authorisation request to the processor", S.authReq, m.name, "det", true)] : [obj("Checkout receipt: rejected", { jwt: short(S.receiptMJwt, 40), payload: receipt }, m.name, "det", true)],
+        checks, stop: ok ? null : "Stopped at the merchant. The checkout was not completed and nothing was charged." };
+    } },
+  { id: "authorise", title: "Authorise and settle", who: "Processor, network and issuer move the money", actors: ["mpp", "net", "iss"], msgs: [["mpp", "net", "authorisation", ""], ["net", "iss", "agentic flags · amount", ""], ["iss", "mpp", "approved", "ok"]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant, ins = sc.instrument;
+      let auth, checks;
+      if (ins.id === "card") {
+        auth = { network: "Mastercard", message: "authorisation request", amount: { value: S.checkout.total_price, currency: m.currency }, token: S.cred.token, agent_registration: S.regId, agentic_indicators: { agent_initiated: true, human_present: sc.mode === "hp", mandate_hash: await sha256(S.closedPaymentJwt) }, issuer_decision: { result: "approved", auth_code: rnd(4).toUpperCase().replace(/[^A-Z0-9]/g, "7").slice(0, 6), billed_to_cardholder: fmt(S.eur, "EUR"), fx: m.currency === "EUR" ? "none" : `${m.currency} → EUR at issuer rate, 1.5% fee` }, settlement: "clearing tonight, merchant credited T+1 in " + m.currency };
+        checks = [chk("Token valid, single use, scope matches merchant and amount", true, "Mastercard"), chk("Agent registration active; agent-specific fraud rules applied", true, "Mastercard"), chk(`Issuer sees agent_initiated=true, human_present=${sc.mode === "hp"}; applies the cardholder's agent limits`, true, "ING"), chk("Funds available; authorised", true, "ING")];
+      } else if (ins.id === "sepa") {
+        auth = { scheme: "SEPA Instant Credit Transfer", pisp: "Worldline", consent_id: S.cred.consent_id, amount: { value: S.checkout.total_price, currency: "EUR" }, debtor_bank: "ING", creditor_bank: "ING", execution: { status: "ACSC · settled", time_to_credit: "7 seconds", transaction_id: "SCTI" + rnd(8).toUpperCase().replace(/[^A-Z0-9]/g, "0") }, fx: "none: euro to euro", irrevocable: true };
+        checks = [chk("Consent matches the signed payment mandate (amount, creditor)", true, "ING"), chk("SCA already satisfied by the mandate signature", true, "ING"), chk("Funds available; instant transfer executed and irrevocable", true, "ING"), chk("Creditor credited in seconds", true, "merchant bank")];
+      } else {
+        auth = { standard: "x402", facilitator: "Coinbase x402 facilitator", network: "Base", asset: "USDC", amount: fmt(S.usdc, "USDC"), verify: { signature_valid: true, balance_sufficient: true, not_yet_used: true, within_valid_window: true }, settle: { tx_hash: "0x" + rnd(32).replace(/[^a-f0-9]/gi, "e").toLowerCase().slice(0, 64), finality: "about 2 seconds", network_fee: "$0.002" }, merchant_side: { processor: "Worldline", converts_to: m.currency, rate_locked_at_quote: true, merchant_receives: fmt(S.checkout.total_price, m.currency) }, user_side: { paid: fmt(S.eur, "EUR"), via: "wallet on-ramp at 0.3% spread" } };
+        checks = [chk("Transfer authorisation signature valid for exactly this amount and payee", true, "facilitator"), chk("Wallet balance sufficient; authorisation not yet used", true, "facilitator"), chk("Settled on-chain; finality in seconds; irreversible", true, "Base"), chk(`Merchant processor converts USDC to ${m.currency} at the quoted rate`, true, "Worldline")];
+      }
+      S.auth = auth;
+      return { explain: ins.id === "card" ? `Worldline sends the authorisation through Mastercard with the agentic token. The network checks the token's scope and the agent's registration, and passes agentic indicators to ING: an agent initiated this, a human was ${sc.mode === "hp" ? "" : "not "}present, this is the mandate hash. ING applies Lena's limits for agent purchases, converts if needed and approves. This is the shape of the Worldline, ING and Mastercard pilot of June 2026: Worldline processing both sides, ING authenticating and authorising, Mastercard carrying the token.` : ins.id === "sepa" ? `No card, no network token: Worldline, as payment initiation provider, instructs ING to execute an instant credit transfer under the consent. ING checks that amount and creditor match the signed mandate, executes, and the merchant's bank is credited in seconds. Irrevocable, euro only, no FX. Delegated purchases in another currency cannot use this rail.` : `The merchant's server answered 402 Payment Required with its price; the agent now pays by sending the signed USDC authorisation. The facilitator verifies signature, balance and window, submits the transfer on Base and reports finality in about two seconds. Worldline, on the merchant's side, converts USDC into ${m.currency} at the rate locked at the quote, so the merchant sees ${fmt(S.checkout.total_price, m.currency)} as it priced it. Lena paid ${fmt(S.eur, "EUR")}, with the wallet's spread as the only FX cost.`,
+        reason: "Payment executed. I wait for the receipts before telling the user the shoes are bought.",
+        objects: [obj(ins.id === "card" ? "Authorisation and issuer decision" : ins.id === "sepa" ? "Instant credit transfer" : "x402 verify and settle", auth, ins.id === "card" ? "Mastercard · ING" : ins.id === "sepa" ? "ING · Worldline" : "facilitator · Base · Worldline", "det", true)],
+        checks };
+    } },
+  { id: "receipts", title: "Receipts and evidence", who: "Everyone keeps signed proof of what they verified", actors: ["mpp", "m", "sa", "cp", "out", "user"], msgs: [["mpp", "out", "payment receipt", "ok", "r"], ["m", "out", "checkout receipt", "ok"], ["cp", "sa", "receipts to the agent", "ok"], ["sa", "user", "done · what was bought", "human"]],
+    async run(S) {
+      const sc = S.sc, m = sc.merchant;
+      const pr = { vct: "receipt.payment.1", status: "accepted", reference: await sha256(S.closedPaymentJwt), checkout_hash: S.checkoutHash, amount: { value: S.checkout.total_price, currency: m.currency }, instrument: sc.instrument.id, agent_id: S.agentId, human_present: sc.mode === "hp", iat: Math.floor(Date.now() / 1000) };
+      const cr = { vct: "receipt.checkout.1", status: "accepted", reference: await sha256(S.closedCheckoutJwt), order_id: S.checkout.order_id, merchant: m.name, promised_delivery: m.delivery, iat: Math.floor(Date.now() / 1000) };
+      S.prJwt = await sign(pr, S.keys.mpp, "receipt+jwt"); S.crJwt = await sign(cr, S.keys.m, "receipt+jwt");
+      const chain = [["user instruction", sc.instruction], [sc.mode === "hp" ? "intent mandate (user-signed)" : "open checkout + payment mandates (user-signed)", sc.mode === "hp" ? short(S.intentJwt, 24) : short(S.openCheckoutJwt, 24)], ["checkout_jwt (merchant-signed)", short(S.checkoutJwt, 24)], ["checkout_hash", S.checkoutHash], [`closed checkout mandate (${sc.mode === "hp" ? "user" : "agent"}-signed)`, short(S.closedCheckoutJwt, 24)], [`closed payment mandate (${sc.mode === "hp" ? "user" : "agent"}-signed)`, short(S.closedPaymentJwt, 24)], ["credential", S.cred.type], ["payment receipt (processor-signed)", short(S.prJwt, 24)], ["checkout receipt (merchant-signed)", short(S.crJwt, 24)]];
+      return { explain: `Worldline signs a payment receipt and sends it to the agent, the credential provider and the network; ${m.name} signs a checkout receipt for the agent. The trusted surface shows Lena what was bought, for how much, in which currency. Who holds what: the agent and the merchant hold the checkout mandate and receipt; the agent, the wallet, the network and the processor hold the payment mandate and receipt. In a dispute the chain answers the only question that matters: did the user authorise this exact purchase, directly or through limits she signed?`,
+        reason: `Done. ${m.item} from ${m.name}, ${fmt(S.checkout.total_price, m.currency)} (${fmt(S.eur, "EUR")} for you), delivery ${m.delivery}. Order ${S.checkout.order_id}. ${sc.mode === "hnp" ? "Bought within the limits you signed." : "Signed by you."}`,
+        objects: [obj("Payment receipt (processor-signed)", { jwt: short(S.prJwt, 40), payload: pr }, "Worldline", "det", true), obj("Checkout receipt (merchant-signed)", { jwt: short(S.crJwt, 40), payload: cr }, m.name, "det"), obj("The evidence chain", Object.fromEntries(chain), "everyone", "det")],
+        checks: [chk("Payment receipt reference = hash of the closed payment mandate", true, "credential provider"), chk("Checkout receipt reference = hash of the closed checkout mandate", true, "shopping agent"), chk("Every link verifiable without trusting the agent", true, "anyone")],
+        done: true };
+    } },
+];
+const REPLAY = { id: "replay", title: "Break-it: replay the mandate", who: "The agent tries to buy a second pair with the same mandate", actors: ["sa", "cp"], msgs: [["sa", "cp", "same payment mandate again", "fail"], ["cp", "sa", "rejected: nonce seen", "fail"]],
+  async run(S) {
+    const seen = S.nonces.has(S.nonce);
+    const receipt = { vct: "receipt.payment.1", status: "rejected", reason: ["nonce already used", "a receipt exists for the first presentation", "single-use credential already consumed"], reference: await sha256(S.closedPaymentJwt) };
+    const jwt = await sign(receipt, S.keys.cp, "receipt+jwt");
+    return { explain: "The agent presents the same payment mandate a second time, hoping for a second token. The credential provider has seen the nonce and holds a receipt for it; the agentic token was single use and is spent. Rejected before anything reaches the network. The protocol forbids an agent from presenting a new open mandate while one is in flight, for the same reason: no double spend by a confused or malicious agent.",
+      reason: "Rejected: the mandate was already used. I cannot buy twice on one authorisation.",
+      objects: [obj("Payment receipt: rejected (replay)", { jwt: short(jwt, 40), payload: receipt }, "credential provider", "det", true)],
+      checks: [chk("Nonce already seen: " + seen, !seen, "credential provider"), chk("Credential single use, already consumed", false, "credential provider")], stop: "Replay refused." };
+  } };
+
+// ------------------------------------------------------------ rendering
+function steps() { return S && S.sc.replay ? [...STEPS, REPLAY] : STEPS; }
+function renderSteps() {
+  const box = $("steps"); const list = steps();
+  box.innerHTML = list.map((st, i) => { const r = S && S.results[i]; const cls = i === cur ? "cur" : ""; const st2 = r ? (r.stop ? "fail" : r.checks && r.checks.some((c) => !c.ok && !c.warn) ? "fail" : r.checks && r.checks.some((c) => c.warn) ? "wait" : "done") : ""; return `<div class="step ${cls} ${st2}" data-i="${i}"><span class="n">${i + 1}</span><div><div class="t">${esc(st.title)}</div><div class="w">${esc(st.who)}</div></div></div>`; }).join("");
+  box.querySelectorAll(".step").forEach((el) => el.addEventListener("click", () => { const i = Number(el.dataset.i); if (S && S.results[i]) { cur = i; renderDetail(i); renderSteps(); } }));
+}
+function renderDetail(i) {
+  const st = steps()[i]; const r = S.results[i]; if (!r) return;
+  const actorKinds = { agent: "Shopping agent", det: "Code", human: "A person" };
+  const kinds = new Set(st.actors.map((a) => A[a].kind === "ok" ? "det" : A[a].kind));
+  $("detail").innerHTML = `<div class="who">${[...kinds].map((k) => chip(k, actorKinds[k])).join("")}<span class="hint" style="margin-left:auto">step ${i + 1} of ${steps().length}</span></div>
+    <h3>${esc(st.title)}</h3>
+    <p class="explain">${esc(r.explain)}</p>
+    ${r.reason ? `<div class="reason"><b>The shopping agent, thinking (the LLM part)</b>${esc(r.reason)}</div>` : ""}
+    <div class="checks">${(r.checks || []).map((c) => `<div class="chk ${c.ok ? (c.warn ? "warn" : "ok") : "fail"}"><i>${c.ok ? (c.warn ? "!" : "✓") : "✗"}</i><span>${esc(c.label)}</span><span class="by">${esc(c.by)}</span></div>`).join("")}</div>
+    ${r.stop ? `<div class="note warn"><b>Stopped.</b> ${esc(r.stop)}</div>` : ""}
+    ${r.done ? `<div class="note" style="border-color:var(--ok);background:var(--ok-soft)"><b>Complete.</b> Try another rail or a break-it switch, then Reset and play again.</div>` : ""}
+    <div class="objs">${(r.objects || []).map((o) => `<details class="obj" ${o.open ? "open" : ""}><summary><b>${esc(o.name)}</b><span class="sig ${o.kind}">${o.kind === "human" ? "signed by a person" : o.kind === "agent" ? "signed by the agent" : "issued by code"} · ${esc(o.by)}</span></summary><pre>${esc(JSON.stringify(o.data, null, 2))}</pre></details>`).join("")}</div>`;
+  light(st.actors, st.msgs.map((m) => r.stop && m === st.msgs[st.msgs.length - 1] ? [m[0], m[1], m[2], "fail"] : m));
+}
+function renderMoney() {
+  const sc = scene(); const m = sc.merchant; const price = sc.over ? m.over : m.price;
+  const rows = INSTRUMENTS.map((i) => {
+    const accepted = m.handlers.includes(i.id); let eur = null, who = "", fx = "";
+    if (i.id === "sepa") { eur = m.currency === "EUR" ? price : null; who = "nobody: euro only"; fx = m.currency === "EUR" ? "none" : "not possible"; }
+    else if (i.id === "card") { eur = m.currency === "EUR" ? price : (price / RATES[m.currency]) * (1 + i.fxFee); who = "the issuer, until clearing"; fx = m.currency === "EUR" ? "none" : "issuer rate + 1.5%"; }
+    else { eur = (price / RATES[m.currency]) * (1 + i.fxFee); who = "the wallet on-ramp, then the merchant's processor"; fx = "0.3% spread, merchant converts at the locked rate"; }
+    return { i, accepted, eur, who, fx };
+  });
+  $("money").innerHTML = `<div><div class="k">checkout</div><div class="v">${fmt(price, m.currency)}<small> ${m.name}</small></div></div>` + rows.map((r) => `<div><div class="k">${esc(r.i.name.split(" (")[0].split(" from")[0])}</div><div class="v">${!r.accepted ? "—<small> merchant does not accept</small>" : r.eur === null ? "—<small> euro only</small>" : fmt(r.eur, "EUR") + `<small> to the user</small>`}</div><div class="hint">${esc(r.fx)} · FX risk: ${esc(r.who)} · settles ${esc(r.i.settle.split(";")[0])}</div></div>`).join("");
+  $("moneynote").textContent = `User limit ${fmt(sc.maxamt, "EUR")}. Rates in this simulation: 1 EUR = ${RATES.USD} USD = ${RATES.GBP} GBP; USDC tracks the dollar. A card lets the issuer convert and bear the risk until clearing; SEPA Instant never leaves the euro; a stablecoin moves the conversion to the wallet and the merchant's processor, with the rate locked at the quote. The mandate's limit is in the user's currency, so the credential provider is the party that converts before it checks.`;
+}
+
+// ------------------------------------------------------------ controls
+async function next() {
+  if (busy) return; const list = steps(); if (cur >= list.length - 1) return;
+  if (!S) { S = fresh(); S.results = []; traceEl.innerHTML = ""; trace("rules", "scene", `${S.sc.mode === "hp" ? "human present" : "human not present"} · ${S.sc.merchant.name} (${S.sc.merchant.currency}) · ${S.sc.instrument.name} · limit €${S.sc.maxamt}${[S.sc.tamper && "tamper", S.sc.over && "over limit", S.sc.badMerchant && "merchant not allowed", S.sc.expired && "expired", S.sc.replay && "replay"].filter(Boolean).length ? " · break-it: " + [S.sc.tamper && "tamper", S.sc.over && "over limit", S.sc.badMerchant && "merchant not allowed", S.sc.expired && "expired", S.sc.replay && "replay"].filter(Boolean).join(", ") : ""}`); lockScene(true); }
+  const prev = S.results[cur]; if (prev && prev.stop) { $("stepnote").textContent = "The flow stopped. Reset to play again."; return; }
+  busy = true; setStatus("busy", "computing signatures");
+  const i = cur + 1; const st = list[i];
+  try { const r = await st.run(S); S.results[i] = r; cur = i; for (const m of st.msgs) trace(r.stop && m === st.msgs[st.msgs.length - 1] ? "err" : A[m[0]].kind === "human" || A[m[1]].kind === "human" ? "human" : A[m[0]].kind === "agent" ? "agent" : "call", `${m[0]} → ${m[1]}`, m[2]); for (const c of r.checks || []) trace(c.ok ? (c.warn ? "human" : "ok") : "guard", c.ok ? (c.warn ? "decided" : "verified") : "rejected", `${c.label} (${c.by})`); if (r.stop) trace("guard", "stopped", r.stop); }
+  catch (e) { S.results[i] = { explain: "This browser could not run the cryptography: " + (e.message || e), checks: [], stop: "WebCrypto unavailable. Open the page over https or in a current browser." }; cur = i; }
+  renderSteps(); renderDetail(cur); setStatus("", "ready"); $("stepnote").textContent = cur === list.length - 1 ? "Complete." : S.results[cur].stop ? "Stopped: Reset to try again." : ""; busy = false;
+}
+function back() { if (!S || cur <= 0) return; cur--; renderDetail(cur); renderSteps(); }
+async function playAll() { if (busy) return; const list = steps(); while (cur < list.length - 1 && !(S && S.results[cur] && S.results[cur].stop)) { await next(); await new Promise((r) => setTimeout(r, 650)); } }
+function reset() { S = null; cur = -1; lockScene(false); renderSteps(); $("detail").innerHTML = `<p class="hint">Press Next step to start. The first step gives every party its keys.</p>`; light([], []); $("stepnote").textContent = ""; traceEl.innerHTML = ""; trace("rules", "reset", "scene unlocked; change anything and play again"); renderMoney(); }
+function lockScene(on) { document.querySelectorAll("#instruction,#maxamt,#expiry,input[name=mode],input[name=merchant],input[name=instrument],.breaks input").forEach((el) => { el.disabled = on; }); }
+function setStatus(kind, text) { const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text; }
+
+// ------------------------------------------------------------ wiring
+$("merchants").innerHTML = MERCHANTS.map((m, i) => `<label class="opt ${i === 0 ? "sel" : ""}"><input type="radio" name="merchant" value="${m.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(m.name)}</b> · ${esc(m.country)} · ${fmt(m.price, m.currency)}<span class="m">${esc(m.item)} · delivery ${m.delivery} · accepts ${m.handlers.map((h) => ({ card: "card", sepa: "SEPA", usdc: "USDC" }[h])).join(", ")}</span></span></label>`).join("");
+$("instruments").innerHTML = INSTRUMENTS.map((x, i) => `<label class="opt ${i === 0 ? "sel" : ""}"><input type="radio" name="instrument" value="${x.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(x.name)}</b> · ${esc(x.network)}<span class="m">${esc(x.desc)}</span></span></label>`).join("");
+document.querySelectorAll(".opts").forEach((box) => box.addEventListener("change", () => { box.querySelectorAll(".opt").forEach((o) => o.classList.toggle("sel", o.querySelector("input").checked)); renderMoney(); }));
+document.querySelectorAll("#maxamt,#b-over").forEach((el) => el.addEventListener("change", renderMoney));
+$("next").addEventListener("click", next); $("back").addEventListener("click", back); $("playall").addEventListener("click", playAll); $("reset").addEventListener("click", reset);
+drawNodes(); renderSteps(); renderMoney(); light([], []);
+trace("rules", "loaded", "agentic payment lab · set the scene, then press Next step");
+Object.defineProperty(window, "__lab", { value: { next, reset, state: () => S, steps, scene }, enumerable: false });
+})();
+</script>
