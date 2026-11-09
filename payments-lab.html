@@ -291,13 +291,6 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
 .gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;font-size:13px}
 @media (max-width:900px){.gloss{grid-template-columns:1fr}}
 .gloss b{font-weight:600}
-.roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-@media (max-width:900px){.roles{grid-template-columns:repeat(2,1fr)}}
-.role{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
-.role input{width:100%;font-size:13px}
-.role b{color:var(--ink);font-weight:600}
-.breaks.sealed .guards{filter:blur(6px);pointer-events:none;user-select:none}
-.breaks.sealed .guards label{visibility:hidden}
 .decide{border:1px solid var(--human);background:var(--human-soft);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .decide .q{font-size:14px}
 .decide .q b{font-weight:600}
@@ -343,7 +336,9 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
   <div class="scene">
     <div class="panel pad" style="display:flex;flex-direction:column;gap:10px">
       <h3>1 · The user and the mandate</h3>
-      <label class="f">What the user says to the agent<input type="text" id="instruction" value="Buy me trail running shoes, size 42, under €130, delivered by Friday"></label>
+      <label class="f">What the user asks for<select id="scenario"></select></label>
+      <label class="f">In the user's words (editable)<input type="text" id="instruction" value=""></label>
+      <p class="hint" id="scn-hint"></p>
       <div class="opts" id="modes">
         <label class="opt sel"><input type="radio" name="mode" value="hp" checked><span><b>Human present</b><span class="m">The agent finds the offer, the user sees the exact checkout on a trusted surface and signs it.</span></span></label>
         <label class="opt"><input type="radio" name="mode" value="hnp"><span><b>Human not present</b><span class="m">The user signs the limits once (open mandates). The agent buys alone when it finds a match, within them.</span></span></label>
@@ -357,8 +352,8 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
       <div class="opts" id="instruments"></div>
     </div>
     <div class="panel pad breaks" id="breaks" style="display:flex;flex-direction:column;gap:10px">
-      <div class="block-head"><h3>3 · Break it</h3><button class="btn small" id="seal">Seal the switches</button></div>
-      <p class="hint">Each switch makes one party misbehave. Watch which verifier catches it, and at which step. In room mode, the saboteur sets them and seals the panel; the room finds out by verifying.</p>
+      <h3>3 · Break it</h3>
+      <p class="hint">Each switch makes one party misbehave. Watch which verifier catches it, and at which step.</p>
       <div class="guards">
         <div class="guard"><label><input type="checkbox" id="b-tamper"> The agent changes the total after the merchant signed the checkout</label><span class="how">caught by the merchant: checkout_hash does not match its own checkout_jwt</span></div>
         <div class="guard"><label><input type="checkbox" id="b-over"> The merchant's offer comes in above the user's limit</label><span class="how">human present: the trusted surface shows it and the user decides · human not present: the credential provider rejects the amount constraint</span></div>
@@ -366,11 +361,6 @@ table.cmp th{font-weight:600;color:var(--muted);font-size:11.5px;text-transform:
         <div class="guard"><label><input type="checkbox" id="b-expired"> The agent uses a mandate that has expired</label><span class="how">caught by every verifier: exp is in the past</span></div>
         <div class="guard"><label><input type="checkbox" id="b-replay"> The agent reuses the same mandate for a second purchase</label><span class="how">caught by the credential provider: nonce already seen, no receipt for the first</span></div>
       </div>
-    </div>
-    <div class="panel pad" style="grid-column:1 / -1;display:flex;flex-direction:column;gap:10px">
-      <div class="block-head"><div class="t"><h3>4 · Play it as a room</h3><span class="tag human">8 roles</span></div><label class="chip" style="cursor:pointer"><input type="checkbox" id="roleplay" style="margin:0"> room mode: the verifiers decide before the page reveals</label></div>
-      <p class="hint">Give each person a party. At every verification step the page shows the evidence and asks that person to accept or reject, then reveals whether they were right. The user and the agent are the only roles that make choices; everyone else verifies. The agent player may also be the saboteur: set a break-it switch and seal the panel.</p>
-      <div class="roles" id="roles"></div>
     </div>
   </div>
 </section>
@@ -478,12 +468,51 @@ const short = (s, n = 18) => s.length > n * 2 ? s.slice(0, n) + "…" + s.slice(
 
 // ------------------------------------------------------------ the scene
 const RATES = { EUR: 1, USD: 1.085, GBP: 0.845, QAR: 3.95, USDC: 1.085 }; // 1 EUR buys this many units (QAR is pegged to the dollar at 3.64)
-const MERCHANTS = [
-  { id: "velora", name: "Velora Sports", country: "Netherlands", website: "https://velora-sports.test", currency: "EUR", price: 119.0, over: 159.0, item: "Trail runner Ridge 2, size 42", sku: "VEL-RIDGE2-42", handlers: ["card", "sepa", "usdc"], delivery: "Thursday" },
-  { id: "summit", name: "Summit Run Co.", country: "United States", website: "https://summitrun.test", currency: "USD", price: 129.0, over: 169.0, item: "Summit Ascent trail shoe, US 9", sku: "SUM-ASC-9", handlers: ["card", "usdc"], delivery: "Friday" },
-  { id: "peak", name: "Peak & Trail", country: "United Kingdom", website: "https://peakandtrail.test", currency: "GBP", price: 104.0, over: 139.0, item: "Fellrunner X trail shoe, UK 8", sku: "PT-FELLX-8", handlers: ["card"], delivery: "Friday" },
-  { id: "doha", name: "Al Rayyan Sports", country: "Qatar", website: "https://alrayyan-sports.test", currency: "QAR", price: 455.0, over: 615.0, item: "Desert Trail GTX, EU 42", sku: "ARS-DTGTX-42", handlers: ["card", "usdc"], delivery: "Friday (express)" },
+const SCENARIOS = [
+  { label: "Trail running shoes, size 42, under €130", instruction: "Buy me trail running shoes, size 42, under €130, delivered by Friday", summary: "one pair of trail running shoes, size 42", hint: "A concrete purchase: one item, one limit, a date. The simplest mandate.", mode: "hp", maxamt: 130, expiry: 48, quantity: 1, recurring: false,
+    merchants: [
+      { id: "velora", name: "Velora Sports", country: "Netherlands", website: "https://velora-sports.test", currency: "EUR", lines: [["VEL-RIDGE2-42", "Trail runner Ridge 2, size 42", 119.0, 1]], over: 159.0, handlers: ["card", "sepa", "usdc"], delivery: "Thursday" },
+      { id: "summit", name: "Summit Run Co.", country: "United States", website: "https://summitrun.test", currency: "USD", lines: [["SUM-ASC-9", "Summit Ascent trail shoe, US 9", 129.0, 1]], over: 169.0, handlers: ["card", "usdc"], delivery: "Friday" },
+      { id: "peak", name: "Peak & Trail", country: "United Kingdom", website: "https://peakandtrail.test", currency: "GBP", lines: [["PT-FELLX-8", "Fellrunner X trail shoe, UK 8", 104.0, 1]], over: 139.0, handlers: ["card"], delivery: "Friday" },
+      { id: "doha", name: "Al Rayyan Sports", country: "Qatar", website: "https://alrayyan-sports.test", currency: "QAR", lines: [["ARS-DTGTX-42", "Desert Trail GTX, EU 42", 455.0, 1]], over: 615.0, handlers: ["card", "usdc"], delivery: "Friday (express)" }] },
+  { label: "Everything for my son's birthday party, up to €250", instruction: "Buy everything I need to organise my son's birthday party for twelve children next Saturday, up to €250", summary: "a party bundle for twelve children: decorations, balloons, tableware, a cake", hint: "An open mandate: the agent decides what 'everything' is, inside a budget, a list of merchants and a date. The user signs the limits, not the items.", mode: "hnp", maxamt: 250, expiry: 120, quantity: 4, recurring: false,
+    merchants: [
+      { id: "partybox", name: "PartyBox", country: "Netherlands", website: "https://partybox.test", currency: "EUR", lines: [["PB-DECO-12", "Dinosaur decoration set", 38.0, 1], ["PB-BALL-30", "Balloon set, 30 pieces", 24.0, 1], ["PB-TABLE-12", "Tableware for twelve", 31.0, 1], ["PB-CAKE-12", "Chocolate cake for twelve", 49.0, 1]], over: 279.0, handlers: ["card", "sepa", "usdc"], delivery: "Friday" },
+      { id: "festakids", name: "Festa Kids", country: "United States", website: "https://festakids.test", currency: "USD", lines: [["FK-DECO", "Space party decoration kit", 69.0, 1], ["FK-BALL", "Balloon arch kit", 35.0, 1], ["FK-TABLE", "Tableware for twelve", 44.0, 1], ["FK-CAKE", "Custom cake for twelve", 65.0, 1]], over: 299.0, handlers: ["card", "usdc"], delivery: "Saturday morning" },
+      { id: "dohaparty", name: "Doha Celebrations", country: "Qatar", website: "https://doha-celebrations.test", currency: "QAR", lines: [["DC-DECO", "Decoration set", 160.0, 1], ["DC-BALL", "Balloon set", 95.0, 1], ["DC-TABLE", "Tableware for twelve", 120.0, 1], ["DC-CAKE", "Cake for twelve", 210.0, 1]], over: 999.0, handlers: ["card"], delivery: "Friday" }] },
+  { label: "Renew my annual rail season ticket, max €1,900", instruction: "Renew my annual rail season ticket Rotterdam–Amsterdam when it comes up for renewal, same class, max €1,900", summary: "one annual season ticket, Rotterdam–Amsterdam, second class", hint: "A recurring, high-value mandate with one obvious payee. The agent waits for the renewal date; the price may have moved.", mode: "hnp", maxamt: 1900, expiry: 720, quantity: 1, recurring: true,
+    merchants: [
+      { id: "nlrail", name: "Lowland Rail", country: "Netherlands", website: "https://lowland-rail.test", currency: "EUR", lines: [["LR-ANN-RTM-AMS", "Annual season ticket, Rotterdam–Amsterdam, 2nd class", 1795.0, 1]], over: 2090.0, handlers: ["card", "sepa"], delivery: "digital, immediate" },
+      { id: "railpass", name: "RailPass Europe", country: "United Kingdom", website: "https://railpass-europe.test", currency: "GBP", lines: [["RPE-NL-ANN", "Annual pass, Netherlands intercity", 1520.0, 1]], over: 1690.0, handlers: ["card"], delivery: "digital, immediate" }] },
+  { label: "A four-star hotel in Lisbon, two nights, under €180 a night", instruction: "Book me a four-star hotel in Lisbon for two nights, 14 and 15 May, under €180 a night, free cancellation", summary: "two nights in a four-star hotel in Lisbon, 14 and 15 May", hint: "A concrete purchase with a judgement call: which hotel. The user wants to see the choice before it is paid.", mode: "hp", maxamt: 360, expiry: 48, quantity: 1, recurring: false,
+    merchants: [
+      { id: "tejo", name: "Hotel Tejo Lisboa", country: "Portugal", website: "https://hotel-tejo.test", currency: "EUR", lines: [["TEJO-DBL", "Double room, two nights, breakfast, free cancellation", 165.0, 2]], over: 410.0, handlers: ["card", "sepa"], delivery: "confirmation by email" },
+      { id: "riverside", name: "Riverside Suites (US chain)", country: "United States", website: "https://riverside-suites.test", currency: "USD", lines: [["RS-LIS-SUITE", "Junior suite, two nights", 189.0, 2]], over: 458.0, handlers: ["card", "usdc"], delivery: "confirmation by email" },
+      { id: "lisgrand", name: "Lisbon Grand (UK group)", country: "United Kingdom", website: "https://lisbon-grand.test", currency: "GBP", lines: [["LG-SUP", "Superior room, two nights", 148.0, 2]], over: 378.0, handlers: ["card"], delivery: "confirmation by email" }] },
+  { label: "Office printer toner whenever stock runs low, up to €400 a month", instruction: "Reorder printer toner for the office whenever stock drops below two cartridges, up to €400 a month", summary: "two toner cartridges for the office printer", hint: "A business mandate that repeats. The limit is a monthly budget; the trigger is a stock level the agent watches.", mode: "hnp", maxamt: 400, expiry: 720, quantity: 2, recurring: true,
+    merchants: [
+      { id: "officedirect", name: "OfficeDirect", country: "Netherlands", website: "https://officedirect.test", currency: "EUR", lines: [["OD-TN-4500", "Toner cartridge TN-4500, black", 142.0, 2]], over: 430.0, handlers: ["card", "sepa", "usdc"], delivery: "next day" },
+      { id: "tonerdepot", name: "Toner Depot", country: "United States", website: "https://tonerdepot.test", currency: "USD", lines: [["TD-TN4500", "Toner cartridge TN-4500, black", 159.0, 2]], over: 478.0, handlers: ["card", "usdc"], delivery: "three days" },
+      { id: "almaktab", name: "Al Maktab Supplies", country: "Qatar", website: "https://almaktab.test", currency: "QAR", lines: [["AM-TN4500", "Toner cartridge TN-4500, black", 560.0, 2]], over: 1700.0, handlers: ["card"], delivery: "four days" }] },
+  { label: "A direct economy flight to Doha on 3 December, under €650", instruction: "Get me a direct economy flight to Doha on 3 December, under €650", summary: "one direct economy ticket to Doha on 3 December", hint: "Travel: prices move by the hour, the merchant may price in riyal, and the user wants to approve the exact fare.", mode: "hp", maxamt: 650, expiry: 48, quantity: 1, recurring: false,
+    merchants: [
+      { id: "gulfpearl", name: "Gulf Pearl Airways", country: "Qatar", website: "https://gulfpearl.test", currency: "QAR", lines: [["GP-AMS-DOH-Y", "AMS–DOH direct, economy, 3 December", 2290.0, 1]], over: 2990.0, handlers: ["card", "usdc"], delivery: "e-ticket" },
+      { id: "lowland", name: "Lowland Airlines", country: "Netherlands", website: "https://lowland-air.test", currency: "EUR", lines: [["LA-AMS-DOH-Y", "AMS–DOH direct, economy, 3 December", 612.0, 1]], over: 745.0, handlers: ["card", "sepa"], delivery: "e-ticket" },
+      { id: "atlantic", name: "Atlantic Connect", country: "United States", website: "https://atlantic-connect.test", currency: "USD", lines: [["AC-AMS-DOH-Y", "AMS–DOH direct, economy, 3 December", 698.0, 1]], over: 829.0, handlers: ["card", "usdc"], delivery: "e-ticket" }] },
+  { label: "Pay my electricity bill when it arrives, if under €120", instruction: "Pay my electricity bill to Groenstroom when it arrives each month, if it is under €120", summary: "one monthly electricity bill to Groenstroom", hint: "One payee, a cap, every month: the narrowest useful mandate. Try the bad-merchant switch here: the list of allowed payees has one name.", mode: "hnp", maxamt: 120, expiry: 720, quantity: 1, recurring: true,
+    merchants: [
+      { id: "groenstroom", name: "Groenstroom Energie", country: "Netherlands", website: "https://groenstroom.test", currency: "EUR", lines: [["GS-INV-2026-11", "Electricity, November 2026", 92.4, 1]], over: 131.8, handlers: ["sepa", "card"], delivery: "receipt by email" }] },
+  { label: "My weekly groceries from the usual list, under €120", instruction: "Order my weekly groceries from my usual list, under €120, delivered tomorrow evening", summary: "the weekly groceries list, three deliveries' worth of items", hint: "Routine shopping the user would rather not see each week. Delegated, with a weekly cap and known merchants.", mode: "hnp", maxamt: 120, expiry: 168, quantity: 3, recurring: true,
+    merchants: [
+      { id: "buurtsuper", name: "Buurtsuper", country: "Netherlands", website: "https://buurtsuper.test", currency: "EUR", lines: [["BS-FRESH", "Fresh produce box", 34.0, 1], ["BS-DAIRY", "Dairy and eggs", 28.0, 1], ["BS-PANTRY", "Pantry items", 41.0, 1]], over: 139.0, handlers: ["card", "sepa", "usdc"], delivery: "tomorrow, 18:00–20:00" },
+      { id: "freshcart", name: "FreshCart", country: "United Kingdom", website: "https://freshcart.test", currency: "GBP", lines: [["FC-FRESH", "Fresh produce box", 29.0, 1], ["FC-DAIRY", "Dairy and eggs", 24.0, 1], ["FC-PANTRY", "Pantry items", 36.0, 1]], over: 118.0, handlers: ["card"], delivery: "tomorrow" },
+      { id: "quickmart", name: "QuickMart", country: "Qatar", website: "https://quickmart-doha.test", currency: "QAR", lines: [["QM-FRESH", "Fresh produce box", 130.0, 1], ["QM-DAIRY", "Dairy and eggs", 110.0, 1], ["QM-PANTRY", "Pantry items", 160.0, 1]], over: 540.0, handlers: ["card", "usdc"], delivery: "tomorrow" }] },
 ];
+const SCN = () => SCENARIOS[Number($("scenario").value) || 0];
+let MERCHANTS = SCENARIOS[0].merchants;
+const mTotal = (m, over = false) => over ? m.over : Math.round(m.lines.reduce((a, [, , p, q]) => a + p * q, 0) * 100) / 100;
+const mDesc = (m) => m.lines.length === 1 ? m.lines[0][1] : `${m.lines[0][1]} and ${m.lines.length - 1} more item${m.lines.length > 2 ? "s" : ""}`;
+const mLines = (m, over = false) => { const tot = mTotal(m, false); const k = over ? m.over / tot : 1; return m.lines.map(([sku, title, price, qty], i) => ({ id: "line_" + (i + 1), product: { id: sku, title, price: Math.round(price * k * 100) / 100, currency: m.currency }, quantity: qty })); };
 const INSTRUMENTS = [
   { id: "card", name: "Mastercard debit ··· 4921", currency: "EUR", issuer: "the issuing bank", network: "Mastercard Agent Pay", desc: "Agentic token: a network token bound to this agent, this merchant, this amount. Issuer FX 1.5% outside the euro.", fxFee: 0.015, fee: "interchange paid by the merchant", settle: "T+1 to the merchant, in its currency" },
   { id: "sepa", name: "SEPA Instant from the bank account", currency: "EUR", issuer: "the user's bank", network: "SEPA Instant (EPC)", desc: "Account to account in under ten seconds, euro only. Initiated through Worldline as the payment initiation provider.", fxFee: 0, fee: "no fee for the payer", settle: "in seconds, euro only" },
@@ -510,19 +539,18 @@ let S = null; // simulation state, rebuilt on reset
 let cur = -1; // index of the last completed step
 let busy = false;
 const scene = () => ({
-  instruction: $("instruction").value.trim() || "Buy me trail running shoes under €130",
+  scenario: SCN(), instruction: $("instruction").value.trim() || SCN().instruction,
   mode: document.querySelector("input[name=mode]:checked").value,
   maxamt: Math.max(1, Number($("maxamt").value) || 130), expiry: Math.max(1, Number($("expiry").value) || 48),
   merchant: MERCHANTS.find((m) => m.id === (document.querySelector("input[name=merchant]:checked") || {}).value) || MERCHANTS[0],
   instrument: INSTRUMENTS.find((i) => i.id === (document.querySelector("input[name=instrument]:checked") || {}).value) || INSTRUMENTS[0],
   tamper: $("b-tamper").checked, over: $("b-over").checked, badMerchant: $("b-merchant").checked, expired: $("b-expired").checked, replay: $("b-replay").checked,
-  roleplay: $("roleplay").checked, names: Object.fromEntries(ROLES.map(([id]) => [id, ($("role-" + id).value || "").trim()])),
+  roleplay: false, names: {},
 });
 const who = (id) => { const r = ROLES.find((x) => x[0] === id); const n = S && S.sc.names[id]; return n ? `${r[1]} (${n})` : r[1]; };
 function fresh() {
   const sc = scene();
   const allowed = MERCHANTS.map((m) => m.id).filter((id) => !(sc.badMerchant && id === sc.merchant.id));
-  if (sc.badMerchant && allowed.length === 3) allowed.splice(allowed.indexOf(sc.merchant.id), 1);
   return { sc, allowed, keys: {}, nonces: new Set(), log: [], trace: [], score: { caught: 0, missed: 0, false_alarms: 0, right: 0 } };
 }
 
@@ -573,40 +601,41 @@ const STEPS = [
         const intent = { vct: "mandate.intent.1", natural_language_description: sc.instruction, user_cart_confirmation_required: true, merchants: merchantNames(S.allowed), requires_refundability: true, intent_expiry: new Date(exp * 1000).toISOString(), iat: Math.floor(Date.now() / 1000) };
         S.intentJwt = await sign(intent, S.keys.user, "intent+jwt"); const ok = await verify(S.intentJwt, S.keys.user);
         return { explain: "Human present. The agent turns the sentence into a structured intent and the trusted surface shows it to Lena: what she wants, which merchants, how long it is valid, and that she will confirm the cart herself. She authenticates with her passkey and signs. The agent now carries a signed intent it can show merchants, but it cannot pay with it.",
-          reason: `"${sc.instruction}" → category trail running shoes, size 42, budget under €${sc.maxamt}, delivery by Friday, merchants: ${merchantNames(S.allowed).join(", ")}. The user wants to confirm the cart, so this is a human-present purchase: I will come back with the exact checkout.`,
+          reason: `"${sc.instruction}" → ${sc.scenario.summary}; budget under €${sc.maxamt}; merchants: ${merchantNames(S.allowed).join(", ")}. The user wants to confirm the cart, so this is a human-present purchase: I will come back with the exact checkout.`,
           objects: [obj("Intent mandate (user-signed)", { jwt: short(S.intentJwt, 40), payload: payload(S.intentJwt) }, "user, on the trusted surface", "human", true)],
           checks: [chk("Rendered on a trusted surface, not in the chat", true, "trusted surface", false), chk("Signature verifies against Lena's enrolled key", ok, "shopping agent"), chk(`Expires ${new Date(exp * 1000).toLocaleString("en-GB")}${sc.expired ? " · already in the past" : ""}`, !sc.expired, "trusted surface")] };
       }
-      const openCheckout = { vct: "mandate.checkout.open.1", constraints: [{ type: "checkout.allowed_merchants", allowed: S.allowed.map((id) => { const m = MERCHANTS.find((x) => x.id === id); return { id: m.id, name: m.name, website: m.website }; }) }, { type: "checkout.line_items", items: [{ id: "line_1", acceptable_items: MERCHANTS.map((m) => ({ id: m.sku, title: m.item })), quantity: 1 }] }], cnf: { jwk: S.keys.sa.jwk }, iat: Math.floor(Date.now() / 1000), exp };
+      const openCheckout = { vct: "mandate.checkout.open.1", constraints: [{ type: "checkout.allowed_merchants", allowed: S.allowed.map((id) => { const m = MERCHANTS.find((x) => x.id === id); return { id: m.id, name: m.name, website: m.website }; }) }, { type: "checkout.line_items", items: [{ id: "line_1", acceptable_items: MERCHANTS.flatMap((m) => m.lines.map(([sku, title]) => ({ id: sku, title }))), quantity: sc.scenario.quantity }] }], cnf: { jwk: S.keys.sa.jwk }, iat: Math.floor(Date.now() / 1000), exp };
       S.openCheckoutJwt = await sign(openCheckout, S.keys.user, "kb+sd-jwt"); S.openCheckoutHash = await sha256(S.openCheckoutJwt);
-      const openPayment = { vct: "mandate.payment.open.1", constraints: [{ type: "payment.amount_range", min: 0, max: sc.maxamt, currency: "EUR" }, { type: "payment.allowed_payment_instruments", allowed: INSTRUMENTS.map((i) => ({ id: i.id, type: i.id === "card" ? "card" : i.id === "sepa" ? "sepa_instant" : "x402_usdc", description: i.name })) }, { type: "payment.allowed_payees", allowed: S.allowed.map((id) => ({ id, name: MERCHANTS.find((x) => x.id === id).name })) }, { type: "payment.reference", open_checkout_hash: S.openCheckoutHash }], cnf: { jwk: S.keys.sa.jwk }, iat: Math.floor(Date.now() / 1000), exp };
+      const openPayment = { vct: "mandate.payment.open.1", constraints: [{ type: "payment.amount_range", min: 0, max: sc.maxamt, currency: "EUR" }, { type: "payment.allowed_payment_instruments", allowed: INSTRUMENTS.map((i) => ({ id: i.id, type: i.id === "card" ? "card" : i.id === "sepa" ? "sepa_instant" : "x402_usdc", description: i.name })) }, { type: "payment.allowed_payees", allowed: S.allowed.map((id) => ({ id, name: MERCHANTS.find((x) => x.id === id).name })) }, { type: "payment.reference", open_checkout_hash: S.openCheckoutHash }, ...(sc.scenario.recurring ? [{ type: "payment.agent_recurrence", frequency: "as the task requires", max_uses: 12 }, { type: "payment.budget", max: sc.maxamt * 12, currency: "EUR" }] : [])], cnf: { jwk: S.keys.sa.jwk }, iat: Math.floor(Date.now() / 1000), exp };
       S.openPaymentJwt = await sign(openPayment, S.keys.user, "kb+sd-jwt");
       const ok1 = await verify(S.openCheckoutJwt, S.keys.user), ok2 = await verify(S.openPaymentJwt, S.keys.user);
       return { explain: "Human not present. Lena will not be there when the agent buys, so she signs the limits now: two open mandates. The open checkout mandate says which merchants and which items; the open payment mandate says how much, in which currency, with which instruments, to which payees. Both name the agent's public key (cnf) so only this agent can use them, and both expire. The agent will later sign the actual checkout with its own key and attach these as proof that it stayed inside the lines.",
-        reason: `Delegated task. I propose constraints the user can read: merchants ${merchantNames(S.allowed).join(", ")}; one pair of trail shoes; at most €${sc.maxamt}; card, SEPA or USDC; valid ${sc.expiry} hours. If a match appears inside these lines I buy without asking; outside them I cannot.`,
+        reason: `Delegated task. I propose constraints the user can read: merchants ${merchantNames(S.allowed).join(", ") || "none"}; ${sc.scenario.summary}; at most €${sc.maxamt}${sc.scenario.recurring ? " each time, with a yearly budget" : ""}; card, SEPA or USDC; valid ${sc.expiry} hours. If a match appears inside these lines I buy without asking; outside them I cannot.`,
         objects: [obj("Open checkout mandate (user-signed)", { jwt: short(S.openCheckoutJwt, 40), payload: openCheckout }, "user, on the trusted surface", "human", true), obj("Open payment mandate (user-signed)", { jwt: short(S.openPaymentJwt, 40), payload: openPayment }, "user, on the trusted surface", "human")],
         checks: [chk("Both signatures verify against Lena's enrolled key", ok1 && ok2, "shopping agent"), chk("cnf claim binds the mandates to this agent's key", true, "trusted surface"), chk(`Expire ${new Date(exp * 1000).toLocaleString("en-GB")}${sc.expired ? " · already in the past" : ""}`, !sc.expired, "trusted surface"), chk("Open payment mandate references the open checkout mandate by hash", true, "trusted surface")] };
     } },
   { id: "discover", title: "Discovery (UCP)", who: "The agent finds merchants that can sell and be paid", actors: ["sa", "m"], msgs: [["sa", "m", "GET /.well-known/ucp", ""], ["m", "sa", "capabilities · handlers", ""]],
     async run(S) {
       const sc = S.sc;
-      const profiles = MERCHANTS.map((m) => ({ merchant: m.name, website: m.website, ucp: { capabilities: ["checkout", "order", "payment_token_exchange"], transports: ["rest", "mcp", "a2a"], payment_handlers: m.handlers.map((h) => ({ card: "card · Mastercard, Visa", sepa: "sepa_instant · EUR only", usdc: "x402 · USDC on Base" }[h])), currency: m.currency, ap2: "mandates accepted" }, offer: { sku: m.sku, title: m.item, price: m.price, currency: m.currency, delivery: m.delivery } }));
+      const profiles = MERCHANTS.map((m) => ({ merchant: m.name, website: m.website, ucp: { capabilities: ["checkout", "order", "payment_token_exchange"], transports: ["rest", "mcp", "a2a"], payment_handlers: m.handlers.map((h) => ({ card: "card · Mastercard, Visa", sepa: "sepa_instant · EUR only", usdc: "x402 · USDC on Base" }[h])), currency: m.currency, ap2: "mandates accepted" }, offer: { items: m.lines.map(([sku, title, price, qty]) => `${qty} × ${title} (${sku}) ${fmt(price, m.currency)}`), total: mTotal(m, sc.over), currency: m.currency, delivery: m.delivery } }));
       const chosen = sc.merchant; const okHandler = chosen.handlers.includes(sc.instrument.id);
       return { explain: "The agent reads each merchant's UCP profile: what it can do (checkout, order updates, token exchange), over which transport, which payment handlers it accepts and in which currency, and that it accepts AP2 mandates. Then it asks for offers. Discovery is where the agent's judgement matters most, and where nothing is committed yet.",
-        reason: `Four merchants match. ${MERCHANTS.map((m) => `${m.name}: ${fmt(m.price, m.currency)}, ${m.delivery}, accepts ${m.handlers.join("/")}`).join(". ")}. The user prefers ${sc.instrument.name}; ${okHandler ? `${chosen.name} accepts it, so I proceed with ${chosen.name}` : `${chosen.name} does not accept it, so I will have to come back to the user or switch rail`}.`,
+        reason: `${MERCHANTS.length === 1 ? "One merchant matches" : MERCHANTS.length + " merchants match"}. ${MERCHANTS.map((m) => `${m.name}: ${fmt(mTotal(m, sc.over), m.currency)}, ${m.delivery}, accepts ${m.handlers.join("/")}`).join(". ")}. The user prefers ${sc.instrument.name}; ${okHandler ? `${chosen.name} accepts it, so I proceed with ${chosen.name}` : `${chosen.name} does not accept it, so I will have to come back to the user or switch rail`}.`,
         objects: profiles.map((p) => obj(`UCP profile · ${p.merchant}`, p, "merchant", "det")),
-        checks: [chk(`${chosen.name} is ${S.allowed.includes(chosen.id) ? "" : "NOT "}in the allowed merchants`, S.allowed.includes(chosen.id), "shopping agent", !S.allowed.includes(chosen.id)), chk(`${chosen.name} accepts ${sc.instrument.name.split(" ")[0]} payments`, okHandler, "shopping agent", !okHandler), chk(`Offer ${fmt(sc.over ? chosen.over : chosen.price, chosen.currency)} in ${chosen.currency}; the user's limit is in EUR`, true, "shopping agent")] };
+        checks: [chk(`${chosen.name} is ${S.allowed.includes(chosen.id) ? "" : "NOT "}in the allowed merchants`, S.allowed.includes(chosen.id), "shopping agent", !S.allowed.includes(chosen.id)), chk(`${chosen.name} accepts ${sc.instrument.name.split(" ")[0]} payments`, okHandler, "shopping agent", !okHandler), chk(`Offer ${fmt(mTotal(chosen, sc.over), chosen.currency)} in ${chosen.currency}; the user's limit is in EUR`, true, "shopping agent")] };
     } },
   { id: "checkout", title: "Checkout, merchant-signed", who: "The merchant commits to items, price, currency and expiry", actors: ["sa", "m"], msgs: [["sa", "m", "create checkout", ""], ["m", "sa", "checkout_jwt (signed)", "ok"]],
     async run(S) {
-      const sc = S.sc, m = sc.merchant; const price = sc.over ? m.over : m.price;
-      const checkout = { order_id: "co_" + rnd(6), merchant: { id: m.id, name: m.name, website: m.website }, line_items: [{ id: "line_1", product: { id: m.sku, title: m.item, price, currency: m.currency }, quantity: 1 }], total_price: price, currency: m.currency, payment_handlers: m.handlers, fulfillment: { method: "shipping", promised: m.delivery }, return_policy: "30-day returns", expires_at: new Date(Date.now() + 15 * 60000).toISOString() };
+      const sc = S.sc, m = sc.merchant; const price = mTotal(m, sc.over); const lines = mLines(m, sc.over);
+      const checkout = { order_id: "co_" + rnd(6), merchant: { id: m.id, name: m.name, website: m.website }, line_items: lines, total_price: price, currency: m.currency, payment_handlers: m.handlers, fulfillment: { method: "shipping", promised: m.delivery }, return_policy: "30-day returns", expires_at: new Date(Date.now() + 15 * 60000).toISOString() };
       S.checkout = checkout; S.checkoutJwt = await sign(checkout, S.keys.m, "JWT"); S.checkoutHash = await sha256(S.checkoutJwt);
       const ok = await verify(S.checkoutJwt, S.keys.m);
       // the tamper: the agent keeps a different checkout than the one the merchant signed
-      S.presented = sc.tamper ? { ...checkout, total_price: Math.round((price - 40) * 100) / 100, line_items: [{ ...checkout.line_items[0], product: { ...checkout.line_items[0].product, price: Math.round((price - 40) * 100) / 100 } }] } : checkout;
+      const cut = Math.round(price * 0.3 * 100) / 100;
+      S.presented = sc.tamper ? { ...checkout, total_price: Math.round((price - cut) * 100) / 100, line_items: checkout.line_items.map((l, i) => i === 0 ? { ...l, product: { ...l.product, price: Math.round((l.product.price - cut / l.quantity) * 100) / 100 } } : l) } : checkout;
       S.presentedJwt = sc.tamper ? await sign(S.presented, S.keys.sa, "JWT") : S.checkoutJwt; S.presentedHash = await sha256(S.presentedJwt);
-      return { explain: `The agent asks ${m.name} to create a checkout for one pair. The merchant answers with a signed checkout: items, unit price, total ${fmt(price, m.currency)} in ${m.currency}, delivery promise, return policy, and a fifteen-minute expiry. From here on, this JWT is the anchor: every mandate will carry its hash. Nobody, not even the agent, can change a cent without breaking the chain.${sc.tamper ? " Break-it is on: the agent will present a checkout with €40 less to the user and re-sign it with its own key. Watch the merchant catch it at step 8." : ""}`,
+      return { explain: `The agent asks ${m.name} to create a checkout for ${sc.scenario.summary}. The merchant answers with a signed checkout: ${lines.length === 1 ? "the item, its price" : lines.length + " line items with their prices"}, total ${fmt(price, m.currency)} in ${m.currency}, delivery promise, return policy, and a fifteen-minute expiry. From here on, this JWT is the anchor: every mandate will carry its hash. Nobody, not even the agent, can change a cent without breaking the chain.${sc.tamper ? ` Break-it is on: the agent will present a checkout ${fmt(cut, m.currency)} cheaper to the user and re-sign it with its own key. Watch the merchant catch it at step 8.` : ""}`,
         reason: `Checkout created at ${m.name}: ${fmt(price, m.currency)}, delivery ${m.delivery}. Merchant signature verified against the key from its UCP profile. Next: find out what this costs the user in euros and which instrument the wallet will allow.`,
         objects: [obj("checkout_jwt (merchant-signed)", { jwt: short(S.checkoutJwt, 40), payload: checkout, checkout_hash: S.checkoutHash }, m.name, "det", true), ...(sc.tamper ? [obj("What the agent will present instead (break-it)", { jwt: short(S.presentedJwt, 40), payload: S.presented, hash: S.presentedHash, signed_by: "the agent's own key, not the merchant's" }, "shopping agent", "agent")] : [])],
         checks: [chk("Merchant signature verifies against the published merchant key", ok, "shopping agent"), chk(`Total ${fmt(price, m.currency)} ${m.currency}, expires in 15 minutes`, true, "shopping agent"), chk("checkout_hash = SHA-256(checkout_jwt): " + S.checkoutHash.slice(0, 22) + "…", true, "shopping agent")] };
@@ -642,7 +671,7 @@ const STEPS = [
       S.closedCheckout = closedCheckout; S.closedPayment = closedPayment;
       if (sc.mode === "hp") {
         const over = S.eur > sc.maxamt;
-        return { explain: `The trusted surface, the bank app, renders exactly what will be signed: ${m.name}, ${m.item}, ${fmt(S.checkout.total_price, m.currency)}, which is ${fmt(S.eur, "EUR")} with ${ins.name}, delivery ${m.delivery}. Lena authenticates with her passkey and signs two closed mandates with her device key: the checkout mandate for the merchant and the payment mandate for the wallet and the network. Both carry the hash of the checkout, so they can only ever mean this purchase. This signature is also her strong customer authentication: amount and payee are dynamically linked to it.${over ? ` The surface shows that ${fmt(S.eur, "EUR")} is above her stated €${sc.maxamt}: she decides.` : ""}`,
+        return { explain: `The trusted surface, the bank app, renders exactly what will be signed: ${m.name}, ${mDesc(m)}, ${fmt(S.checkout.total_price, m.currency)}, which is ${fmt(S.eur, "EUR")} with ${ins.name}, delivery ${m.delivery}. Lena authenticates with her passkey and signs two closed mandates with her device key: the checkout mandate for the merchant and the payment mandate for the wallet and the network. Both carry the hash of the checkout, so they can only ever mean this purchase. This signature is also her strong customer authentication: amount and payee are dynamically linked to it.${over ? ` The surface shows that ${fmt(S.eur, "EUR")} is above her stated €${sc.maxamt}: she decides.` : ""}`,
           reason: `I present the checkout to the trusted surface and wait. I do not hold the user's key and cannot sign for her.`,
           objects: [obj("Closed checkout mandate (user-signed)", { jwt: short(S.closedCheckoutJwt, 40), payload: closedCheckout }, "user", "human", true), obj("Closed payment mandate (user-signed)", { jwt: short(S.closedPaymentJwt, 40), payload: closedPayment }, "user", "human")],
           checks: [chk("Rendered by the trusted surface from the merchant checkout the agent presented", true, "trusted surface"), chk("Passkey authentication (SCA with dynamic linking: amount, payee)", true, "trusted surface"), chk(over ? `Amount ${fmt(S.eur, "EUR")} is above the stated limit of €${sc.maxamt}: shown to the user, who approved` : `Amount ${fmt(S.eur, "EUR")} within the stated limit`, true, "user", over), chk("Both mandates carry the same checkout_hash and nonce", true, "trusted surface")] };
@@ -688,7 +717,7 @@ const STEPS = [
       checks.push(chk(sc.mode === "hp" ? "Checkout mandate signature verifies against the user's key" : "Checkout mandate signature verifies against the agent key named in the open mandate", await verify(S.closedCheckoutJwt, signer), m.name));
       const hashOk = S.closedCheckout.checkout_hash === S.checkoutHash; checks.push(chk(hashOk ? "checkout_hash matches the hash of the checkout_jwt I signed" : `checkout_hash ${S.closedCheckout.checkout_hash.slice(0, 16)}… does not match my checkout_jwt ${S.checkoutHash.slice(0, 16)}…: the agent presented something else`, hashOk, m.name));
       checks.push(chk("Checkout not expired, inventory still reserved", true, m.name));
-      if (sc.mode === "hnp") { checks.push(chk(`checkout.allowed_merchants includes ${m.name}`, S.allowed.includes(m.id), m.name)); checks.push(chk("checkout.line_items satisfied: one pair from the acceptable items", true, m.name)); }
+      if (sc.mode === "hnp") { checks.push(chk(`checkout.allowed_merchants includes ${m.name}`, S.allowed.includes(m.id), m.name)); checks.push(chk(`checkout.line_items satisfied: ${S.checkout.line_items.length} line item(s) from the acceptable items`, true, m.name)); }
       checks.push(chk("Credential scope matches: merchant, amount, checkout_hash", true, m.name));
       const ok = checks.every((c) => c.ok);
       const receipt = ok ? null : { vct: "receipt.checkout.1", status: "rejected", reason: checks.filter((c) => !c.ok).map((c) => c.label), reference: await sha256(S.closedCheckoutJwt) };
@@ -727,7 +756,7 @@ const STEPS = [
       S.prJwt = await sign(pr, S.keys.mpp, "receipt+jwt"); S.crJwt = await sign(cr, S.keys.m, "receipt+jwt");
       const chain = [["user instruction", sc.instruction], [sc.mode === "hp" ? "intent mandate (user-signed)" : "open checkout + payment mandates (user-signed)", sc.mode === "hp" ? short(S.intentJwt, 24) : short(S.openCheckoutJwt, 24)], ["checkout_jwt (merchant-signed)", short(S.checkoutJwt, 24)], ["checkout_hash", S.checkoutHash], [`closed checkout mandate (${sc.mode === "hp" ? "user" : "agent"}-signed)`, short(S.closedCheckoutJwt, 24)], [`closed payment mandate (${sc.mode === "hp" ? "user" : "agent"}-signed)`, short(S.closedPaymentJwt, 24)], ["credential", S.cred.type], ["payment receipt (processor-signed)", short(S.prJwt, 24)], ["checkout receipt (merchant-signed)", short(S.crJwt, 24)]];
       return { explain: `Worldline signs a payment receipt and sends it to the agent, the credential provider and the network; ${m.name} signs a checkout receipt for the agent. The trusted surface shows Lena what was bought, for how much, in which currency. Who holds what: the agent and the merchant hold the checkout mandate and receipt; the agent, the wallet, the network and the processor hold the payment mandate and receipt. In a dispute the chain answers the only question that matters: did the user authorise this exact purchase, directly or through limits she signed?`,
-        reason: `Done. ${m.item} from ${m.name}, ${fmt(S.checkout.total_price, m.currency)} (${fmt(S.eur, "EUR")} for you), delivery ${m.delivery}. Order ${S.checkout.order_id}. ${sc.mode === "hnp" ? "Bought within the limits you signed." : "Signed by you."}`,
+        reason: `Done. ${mDesc(m)} from ${m.name}, ${fmt(S.checkout.total_price, m.currency)} (${fmt(S.eur, "EUR")} for you), delivery ${m.delivery}. Order ${S.checkout.order_id}. ${sc.mode === "hnp" ? "Bought within the limits you signed." : "Signed by you."}`,
         objects: [obj("Payment receipt (processor-signed)", { jwt: short(S.prJwt, 40), payload: pr }, "Worldline", "det", true), obj("Checkout receipt (merchant-signed)", { jwt: short(S.crJwt, 40), payload: cr }, m.name, "det"), obj("The evidence chain", Object.fromEntries(chain), "everyone", "det")],
         checks: [chk("Payment receipt reference = hash of the closed payment mandate", true, "credential provider"), chk("Checkout receipt reference = hash of the closed checkout mandate", true, "shopping agent"), chk("Every link verifiable without trusting the agent", true, "anyone")],
         done: true };
@@ -784,7 +813,7 @@ function decide(i, accepted) {
   renderDetail(i); renderSteps(); $("stepnote").textContent = r.stop ? "Stopped: Reset to try again." : "";
 }
 function renderMoney() {
-  const sc = scene(); const m = sc.merchant; const price = sc.over ? m.over : m.price;
+  const sc = scene(); const m = sc.merchant; const price = mTotal(m, sc.over);
   const rows = INSTRUMENTS.map((i) => {
     const accepted = m.handlers.includes(i.id); let eur = null, who = "", fx = "";
     if (i.id === "sepa") { eur = m.currency === "EUR" ? price : null; who = "nobody: euro only"; fx = m.currency === "EUR" ? "none" : "not possible"; }
@@ -811,16 +840,25 @@ async function next() {
 function back() { if (!S || cur <= 0) return; cur--; renderDetail(cur); renderSteps(); }
 async function playAll() { if (busy) return; const list = steps(); while (cur < list.length - 1 && !(S && S.results[cur] && (S.results[cur].stop || S.results[cur].pending))) { await next(); await new Promise((r) => setTimeout(r, 650)); } }
 function reset() { S = null; cur = -1; lockScene(false); renderSteps(); $("detail").innerHTML = `<p class="hint">Press Next step to start. The first step gives every party its keys.</p>`; light([], []); $("stepnote").textContent = ""; traceEl.innerHTML = ""; trace("rules", "reset", "scene unlocked; change anything and play again"); renderMoney(); }
-function lockScene(on) { document.querySelectorAll("#instruction,#maxamt,#expiry,input[name=mode],input[name=merchant],input[name=instrument],.breaks input,#roleplay,.roles input").forEach((el) => { el.disabled = on; }); if (!on) { $("breaks").classList.remove("sealed"); $("seal").textContent = "Seal the switches"; } }
+function lockScene(on) { document.querySelectorAll("#scenario,#instruction,#maxamt,#expiry,input[name=mode],input[name=merchant],input[name=instrument],.breaks input").forEach((el) => { el.disabled = on; }); }
 function setStatus(kind, text) { const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text; }
 
 // ------------------------------------------------------------ wiring
-$("merchants").innerHTML = MERCHANTS.map((m, i) => `<label class="opt ${i === 0 ? "sel" : ""}"><input type="radio" name="merchant" value="${m.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(m.name)}</b> · ${esc(m.country)} · ${fmt(m.price, m.currency)}<span class="m">${esc(m.item)} · delivery ${m.delivery} · accepts ${m.handlers.map((h) => ({ card: "card", sepa: "SEPA", usdc: "USDC" }[h])).join(", ")}</span></span></label>`).join("");
+function renderMerchants() {
+  $("merchants").innerHTML = MERCHANTS.map((m, i) => `<label class="opt ${i === 0 ? "sel" : ""}"><input type="radio" name="merchant" value="${m.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(m.name)}</b> · ${esc(m.country)} · ${fmt(mTotal(m), m.currency)}<span class="m">${esc(mDesc(m))} · ${m.delivery} · accepts ${m.handlers.map((h) => ({ card: "card", sepa: "SEPA", usdc: "USDC" }[h])).join(", ")}</span></span></label>`).join("");
+}
+function applyScenario() {
+  const sc = SCN(); MERCHANTS = sc.merchants;
+  $("instruction").value = sc.instruction; $("scn-hint").textContent = sc.hint; $("maxamt").value = sc.maxamt; $("expiry").value = sc.expiry;
+  document.querySelector(`input[name=mode][value=${sc.mode}]`).checked = true; document.querySelectorAll("#modes .opt").forEach((o) => o.classList.toggle("sel", o.querySelector("input").checked));
+  renderMerchants(); renderMoney();
+}
+$("scenario").innerHTML = SCENARIOS.map((x, i) => `<option value="${i}">${esc(x.label)}</option>`).join("");
+$("scenario").addEventListener("change", () => { applyScenario(); trace("rules", "scene", `now: ${SCN().label}`); });
+applyScenario();
 $("instruments").innerHTML = INSTRUMENTS.map((x, i) => `<label class="opt ${i === 0 ? "sel" : ""}"><input type="radio" name="instrument" value="${x.id}" ${i === 0 ? "checked" : ""}><span><b>${esc(x.name)}</b> · ${esc(x.network)}<span class="m">${esc(x.desc)}</span></span></label>`).join("");
 document.querySelectorAll(".opts").forEach((box) => box.addEventListener("change", () => { box.querySelectorAll(".opt").forEach((o) => o.classList.toggle("sel", o.querySelector("input").checked)); renderMoney(); }));
 document.querySelectorAll("#maxamt,#b-over").forEach((el) => el.addEventListener("change", renderMoney));
-$("roles").innerHTML = ROLES.map(([id, name, sub]) => `<label class="role"><b>${esc(name)}</b><input type="text" id="role-${id}" placeholder="who plays it?"><span>${esc(sub)}</span></label>`).join("");
-$("seal").addEventListener("click", () => { const b = $("breaks"); const on = !b.classList.contains("sealed"); b.classList.toggle("sealed", on); $("seal").textContent = on ? "Reveal the switches" : "Seal the switches"; trace("human", "switches", on ? "sealed by the saboteur" : "revealed: " + ([$("b-tamper").checked && "tamper", $("b-over").checked && "over limit", $("b-merchant").checked && "merchant not allowed", $("b-expired").checked && "expired", $("b-replay").checked && "replay"].filter(Boolean).join(", ") || "none")); });
 $("next").addEventListener("click", next); $("back").addEventListener("click", back); $("playall").addEventListener("click", playAll); $("reset").addEventListener("click", reset);
 drawNodes(); renderSteps(); renderMoney(); light([], []);
 trace("rules", "loaded", "agentic payment lab · set the scene, then press Next step" + (SUBTLE ? "" : " · this viewer blocks WebCrypto, so signatures are simulated; the Netlify site uses real ECDSA"));

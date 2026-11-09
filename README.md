@@ -109,6 +109,13 @@ through a payment initiation provider, and USDC over x402 settled on Base.
 Four merchants price in EUR, USD, GBP and QAR; the user's limit is in EUR, so the
 credential provider converts before it checks.
 
+Eight things the user can ask for, chosen from a list: trail shoes under €130
+(one concrete item), everything for a child's birthday party up to €250 (an open
+mandate over a four-item bundle), an annual rail ticket (recurring, high value),
+a hotel in Lisbon, office toner on a monthly budget, a flight to Doha priced in
+riyal, a monthly electricity bill to a single payee, the weekly groceries. Each
+brings its own merchants in EUR, USD, GBP or QAR, its default mode and limit.
+
 What runs in the browser: real P-256 key pairs for every party, real ECDSA
 signatures and SHA-256 hashes (WebCrypto), so the chain intent → merchant-signed
 checkout → checkout_hash → closed mandates → credential → receipts is
