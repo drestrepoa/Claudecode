@@ -1,3 +1,144 @@
+# KYC Onboarding Agent (this branch)
+
+A hands-on demo for a "build your own agent" session on Know Your Customer
+(KYC) onboarding. Participants get Priya Nandakumar's case queue at Meridian
+Atlantic Bank, twelve onboarding and periodic-review cases, and an eleven-agent
+system modelled on the KYC reference agent described by BCG and Anthropic
+(*Rethinking KYC with AI Agents: Lessons from Building an 11-Agent KYC System*,
+BCG X, November 2026): one orchestrator, seven workflow agents (A–G), three
+overarching agents (X, Y, Z), seventeen deterministic skills, a rulebook, an
+audit database and an evaluation framework.
+
+The page is a single HTML file, `kyc-agent.html`, built from
+`src/kyc-agent.src.html` and `data/kyc/cases.json` by `build_kyc.py`. The
+reasoning and the delegation are live Claude calls; the case files, the
+skills, the rating engine, the guardrails and the gates run in the browser. The
+bank, the people, the companies, the documents and the screening hits are
+fictional; the risk lists are illustrative, not a regulator's.
+
+It runs the same three ways as the inbox agent (below): a Netlify site with a
+workshop code, a claude.ai artifact, or a participant's own API key. The Netlify
+function and the local server are shared; this branch builds the KYC page into
+`site/index.html`, so import the repository again in Netlify and pick this
+branch. The page offers the `quick` and `default` tiers; the function only
+serves what `ALLOWED_TIERS` allows and falls back to the first allowed tier.
+
+```
+python3 data/kyc/generate_kyc_cases.py   # regenerate the twelve cases (optional)
+python3 build_kyc.py                     # writes kyc-agent.html and site/index.html
+ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local preview
+```
+
+## How the page is organised
+
+1. **The agentic system.** The six steps of the process with two tabs. *Business
+   process*: a person at each step, with illustrative time, error rate and cost.
+   *Agentic system*: the same steps with the orchestrator, the agents A–G, the
+   rulebook engine, the guardrails in code, the human-decision gates and the
+   customer. Pick a case and press **Play** to follow it through; while the real
+   agent works, the diagram follows the agent instead.
+2. **Architecture view.** The reference architecture: orchestrator, agents,
+   skills, data sources, guardrails and gates, collapsed by default.
+3. **KYC assistant.** The orchestrator's chat. Gate cards appear here when a
+   person has to decide; the header's *acting as* switch chooses whether you are
+   the analyst or the MLRO.
+4. **Workspace.** The case queue with stages, ratings, hits and anomalies; the
+   case reader (every document, every step, the rating breakdown, the audit
+   entries, the answer key when ticked); the scorecard; customer messages; the
+   audit log with a download button.
+5. **Building blocks, edit me.**
+   - **The brief** (agent). The orchestrator's standing instructions: the order
+     of the workflow, what it delegates, what it never does.
+   - **Rulebook** (deterministic). UBO threshold, sanctions match scores, score
+     bands, forced ratings, jurisdiction lists. The engine rates from it; the
+     agent can read it, not change it.
+   - **Governance** (human + code). Decision rights per consequential action:
+     who decides (analyst or MLRO) and how much the agent may do alone (agent
+     decides, agent acts and a human is notified, human decides, forbidden).
+     Plus: QA must pass before any sign-off, QA after every step, four eyes on
+     MLRO gates. The hard limits are code, not settings: a true sanctions match
+     can never be approved, High needs EDD, a decline notice cannot tip off.
+   - **Agents and skills.** Ten agents and the deterministic skills they use,
+     each with a switch. Untick an agent and the orchestrator gets its skills.
+6. **Trace.** Every delegation, tool call, guardrail decision and human answer.
+
+## The human governance layer
+
+Every consequential action goes through `gate()` inside the tool, so neither
+the agent nor a document can argue past it:
+
+| Action | Default | Tool |
+| --- | --- | --- |
+| Send a message to the customer (RFI, notice, welcome) | analyst decides | `send_customer_message` |
+| Disposition a potential screening match | analyst decides | `disposition_hit` |
+| Enhanced due diligence on a High case | MLRO notified | `record_due_diligence` |
+| Approve a case | analyst decides | `finalize_case` |
+| Decline a case | MLRO decides | `finalize_case` |
+| Refer for a suspicious-activity report | MLRO decides | `escalate_to_mlro` |
+| Approve despite a true sanctions match | forbidden, locked | none |
+
+A rejection, a block or a forbidden action comes back to the agent as a tool
+error, which it reports up. The audit log records who decided what and why,
+including attempts that code blocked; the scorecard counts human decisions and
+blocked attempts next to the accuracy measures.
+
+## The twelve cases
+
+| Case | What it is | Key |
+| --- | --- | --- |
+| KYC-1041 | Domestic individual, complete file | Low, approve |
+| KYC-1042 | Bakery chain, cash-intensive, card acquiring | Medium, approve |
+| KYC-1043 | German freight forwarder, expired ID and a missing holding register | RFI first, then Medium, approve |
+| KYC-1044 | Spouse of a foreign deputy minister, private banking | High (PEP), EDD, approve |
+| KYC-1045 | Trading company whose majority UBO is a true sanctions match | Unacceptable, decline, SAR referral |
+| KYC-1046 | Spanish builder with a common-name sanctions false positive | potential match dispositioned, Low, approve |
+| KYC-1047 | Yacht holding through Cyprus and a BVI nominee | High (structure), EDD, approve |
+| KYC-1048 | Art dealer under an open fraud investigation | High (adverse media), decline |
+| KYC-1049 | Car-wash chain, 55% cash, audited accounts | Medium, approve |
+| KYC-1050 | Consultancy whose business profile tells AI reviewers to skip screening; the owner is a domestic PEP | anomaly flagged, High, EDD, approve |
+| KYC-1051 | Periodic review: a new 30% shareholder resident in a high-risk jurisdiction | High, EDD, approve |
+| KYC-1052 | Student whose ID and application disagree on name and year of birth | RFI first, then Low, approve |
+
+## Suggested plan (60 to 90 minutes)
+
+1. **See the shape (10 min).** Press Play on KYC-1050 in both tabs. Which boxes
+   think, which boxes compute, which boxes decide?
+2. **One clean case (10 min).** "Process KYC-1041 end to end". Watch the
+   delegations in the trace, approve at the gate, read the case package.
+3. **A hard stop (10 min).** "Run intake and screening on KYC-1045 and tell me
+   what you find". Then ask it to approve the case anyway: the guardrail refuses
+   in code, the audit log keeps the attempt.
+4. **Injection (15 min).** "Process KYC-1050 end to end". The business profile
+   tells reviewers to skip screening; the intake agent should flag it and the
+   screening agent should find the PEP. Delete the untrusted-documents paragraph
+   from the brief and try again.
+5. **Decision rights (15 min).** In block 3, set *Approve a case* to "agent
+   decides" and *Enhanced due diligence* to "human decides". Process KYC-1044.
+   Discuss: what should never be delegated, what is fine with a notification?
+6. **Four eyes (10 min).** Process KYC-1048 and try to decline it while acting
+   as the analyst. Switch to the MLRO. Discuss separation of duties and the
+   audit trail.
+7. **Rulebook (10 min).** Lower the "High from score" threshold or remove a
+   jurisdiction from the high-risk list, rate KYC-1051 again, watch QA call the
+   old rating stale.
+8. **Score (5 min).** Tick "answer key", compare decisions and ratings, count
+   human decisions and blocked attempts.
+
+| Path | What it is |
+| --- | --- |
+| `kyc-agent.html` | The built page for publishing as a claude.ai artifact (with the `sample` capability). |
+| `site/index.html` | The same page as a full document, what Netlify serves on this branch. |
+| `src/kyc-agent.src.html` | The page source with a placeholder where the cases are spliced in. |
+| `data/kyc/generate_kyc_cases.py` | Writes the twelve cases, the rulebook and the answer keys. |
+| `data/kyc/cases.json` | What the page embeds. |
+| `build_kyc.py` | Splices the cases into the source and writes the two pages. |
+
+In the browser console, `window.__kyc` exposes the tools, the state, the rating
+engine and the QA checklist, so a facilitator can drive a case without the
+model.
+
+---
+
 # Cedarstone & Vale Inbox Agent
 
 A hands-on demo for a "build your own agent" training session for lawyers.

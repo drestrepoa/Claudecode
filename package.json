@@ -2,10 +2,11 @@
   "name": "inbox-agent-workshop",
   "private": true,
   "type": "module",
-  "description": "Build-your-own-agent training demo for lawyers: a 500-email inbox and the agent that organises it",
+  "description": "Build-your-own-agent training demos: a 500-email inbox for lawyers and an 11-agent KYC onboarding system with human-decision gates",
   "scripts": {
     "build": "python3 data/import_xlsx.py && python3 build.py",
-    "dev": "netlify dev"
+    "dev": "netlify dev",
+    "build:kyc": "python3 data/kyc/generate_kyc_cases.py && python3 build_kyc.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0"

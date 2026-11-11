@@ -36,7 +36,7 @@ export default async (req) => {
     max_tokens: 4000,
     system: String(body.system || "").slice(0, 20000),
     messages: body.messages,
-    tools: Array.isArray(body.tools) ? body.tools.slice(0, 16) : [],
+    tools: Array.isArray(body.tools) ? body.tools.slice(0, 32) : [], // the KYC orchestrator can expose up to 10 sub-agents plus its own tools
     // Cache the stable prefix (tools, brief, earlier turns): later rounds of the same request re-read it
     // at a tenth of the price, and cached tokens do not count toward the input-tokens-per-minute limit.
     cache_control: { type: "ephemeral" },
