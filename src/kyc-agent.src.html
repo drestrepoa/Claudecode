@@ -264,6 +264,34 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 .flow-steps b{color:var(--ink);font-weight:500}
 details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6px 0}
 
+/* step by step */
+.flow-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.flow-ctl select{padding:6px 8px;font-size:13px;max-width:320px}
+.flow-ctl input{width:220px;font-size:13px;padding:6px 8px}
+.flow-ctl .hint{width:100%}
+.capbox{margin-top:10px;padding:10px 14px;border-radius:8px;background:var(--agent-soft);border:1px solid var(--agent);font-size:14px}
+.capbox .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--agent);font-weight:600;display:block;margin-bottom:2px}
+.capbox.live{background:var(--det-soft);border-color:var(--det)} .capbox.live .k{color:var(--det)}
+.capbox.node{background:var(--panel-2);border-color:var(--line)} .capbox.node .k{color:var(--muted)}
+.capbox .io{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px;margin-top:4px}
+.capbox .io b{font-weight:500;color:var(--muted)}
+.capbox .io[hidden]{display:none}
+.stepby{margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.stepby summary{cursor:pointer;padding:8px 12px;font-size:13px;font-weight:500;display:flex;justify-content:space-between;align-items:center;list-style:none}
+.stepby summary::-webkit-details-marker{display:none}
+.stepby summary .hint{font-weight:400}
+.stepby[open] summary{border-bottom:1px solid var(--line-2)}
+.rows{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;display:flex;flex-direction:column}
+.rw{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;padding:7px 12px;border-bottom:1px dotted var(--line-2);align-items:baseline}
+.rw:last-child{border-bottom:0}
+.rw .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rw .v{white-space:pre-wrap;word-break:break-word}
+.rw.agent .v{color:var(--agent)} .rw.code .v{color:var(--det)} .rw.person .v{color:var(--human)} .rw.guard .v{color:var(--guard)} .rw.ok .v{color:var(--ok)} .rw.no .v{color:var(--guard);font-weight:600}
+.rw.sel{background:var(--panel-2)} .rw.sel .l{color:var(--ink)}
+.rw b{font-weight:600}
+.flow .n{cursor:pointer}
+.flow .n.sel rect{stroke-width:2.6}
+
 /* kyc additions */
 .lab.stage-new{color:var(--muted)} .lab.stage-progress{color:var(--det);border-color:var(--det)} .lab.stage-awaiting{color:var(--human);border-color:var(--human)} .lab.stage-replied{color:var(--human);border-color:var(--human);border-style:dashed}
 .lab.stage-approved{color:#fff;background:var(--ok);border-color:var(--ok)} .lab.stage-declined{color:#fff;background:var(--guard);border-color:var(--guard)}
@@ -328,10 +356,18 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
   <div class="panel pad flow mode-ai" id="flow">
     <div class="flow-top">
       <div class="tabs" role="tablist"><button type="button" class="tab" data-mode="bp">Business process</button><button type="button" class="tab on" data-mode="ai">Agentic system</button></div>
-      <div class="rowbtns"><label class="select" for="flow-case">case <select id="flow-case"></select></label><button class="btn small primary" id="flow-play">▶ Play</button><button class="btn small" id="flow-stop" hidden>Stop</button><span class="hint" id="flow-hint"></span></div>
+      <span class="hint" id="flow-hint"></span>
     </div>
     <div id="flow-svg"></div>
-    <div class="flow-cap"><span class="step" id="flow-step"></span><span id="flow-cap">Pick a case and press Play. While the agent works on a request, the diagram follows it.</span></div>
+    <div class="flow-ctl">
+      <button class="btn primary" id="flow-play">▶ Play one case through it</button><button class="btn" id="flow-stop" hidden>■ Stop</button>
+      <select id="flow-case" aria-label="case"></select>
+      <input type="text" id="flow-id" placeholder="or type a case number, e.g. KYC-1045" autocomplete="off">
+      <button class="btn" id="flow-random">random case</button>
+      <span class="hint">or click any block to see what goes in and what comes out</span>
+    </div>
+    <div class="capbox" id="flow-capbox"><span class="k" id="flow-step">ready</span><span id="flow-cap">Pick a case and press Play. While the agent works on a request, the diagram and the panel below follow it instead.</span><div class="io" id="flow-io" hidden></div></div>
+    <details class="stepby" id="flow-panel"><summary><span id="flow-panel-title">This case, step by step</span><span class="hint" id="flow-panel-n"></span></summary><div class="rows" id="flow-rows"></div></details>
     <div class="flow-steps" id="flow-bp"></div>
   </div>
 </section>
@@ -422,8 +458,8 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
 </section>
 
 <section>
-  <div class="sec-head"><h2>Workspace — the case queue, the score, the audit</h2><p>Stages, ratings, hits and decisions appear here as the tools run. Click a case to read the file.</p></div>
-  <div class="work">
+  <details class="arch" id="ws"><summary>Show the workspace: case queue, scorecard, customer messages, audit log</summary>
+  <div class="work" style="margin-top:10px">
       <div class="panel inbox">
         <div class="inbox-top">
           <div class="search"><input type="text" id="q" placeholder="Search name, id, country, industry…"><label class="chip" style="cursor:pointer"><input type="checkbox" id="showkey" style="margin:0"> answer key</label></div>
@@ -447,6 +483,7 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
       <div class="panel pad"><div class="block-head"><h3>Audit log</h3><div class="rowbtns"><span class="hint" id="audit-n">empty</span><button class="btn small" id="audit-dl">Download</button></div></div><div class="audit" id="audit" style="margin-top:8px"></div></div>
     </div>
   </div>
+  </details>
 </section>
 
 <section>
@@ -600,7 +637,7 @@ function audit(kind, actor, action, caseId, detail) {
 function setStatus(kind, text) { const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text; }
 
 
-// ------------------------------------------------------------ process flow (business process · agentic system · play)
+// ------------------------------------------------------------ process flow (business process · agentic system · play · step by step)
 const FLOW = (() => {
   const COLS = [
     { n: 1, title: "Receive the case", person: ["90 min · 2% errors · €105 a case", "opens the file, chases documents"] },
@@ -612,33 +649,33 @@ const FLOW = (() => {
   ];
   const X = (i) => 16 + i * 204, CW = 196, NX = (i) => X(i) + 8, NW = 180;
   const NODES = [
-    { id: "trigger", col: 0, y: 176, h: 40, kind: "code", t: "Trigger · code", s: ["onboarding · review · event"] },
-    { id: "intake", col: 0, y: 236, h: 56, kind: "agent", t: "A · Intake agent", s: ["parse · check · verify identity", "flags text aimed at reviewers"] },
-    { id: "db1", col: 0, y: 320, kind: "db", t: "Client input DB", s: ["documents · untrusted"] },
-    { id: "ubo", col: 1, y: 236, h: 56, kind: "agent", t: "B · UBO agent", s: ["walks the chain, effective %", "layers, offshore, nominees"] },
-    { id: "db2", col: 1, y: 320, kind: "db", t: "registers", s: ["UBO declarations"] },
-    { id: "screening", col: 2, y: 236, h: 56, kind: "agent", t: "C · Screening agent", s: ["sanctions · PEP · media", "for every party on the case"] },
-    { id: "db3", col: 2, y: 320, kind: "db", t: "lists & media", s: ["sanctions · PEP · press"] },
-    { id: "hit", col: 2, y: 400, h: 52, kind: "person", t: "Potential hit · a person", s: ["the analyst dispositions it", "a true match cannot be cleared"] },
-    { id: "rating", col: 3, y: 236, h: 56, kind: "agent", t: "D · Risk rating agent", s: ["asks the engine, explains it", "never sets the number"] },
-    { id: "engine", col: 3, y: 316, h: 46, kind: "code", t: "Rulebook engine · code", s: ["score → Low / Medium / High", "PEP, jurisdiction, true match"] },
-    { id: "cdd", col: 3, y: 390, h: 42, kind: "agent", t: "E · CDD agent", s: ["Low / Medium"] },
-    { id: "edd", col: 3, y: 448, h: 42, kind: "agent", t: "F · EDD agent", s: ["High · source of wealth"] },
-    { id: "mlro", col: 3, y: 512, h: 48, kind: "person", t: "MLRO · a person", s: ["sees every EDD, answers questions"] },
-    { id: "qa", col: 4, y: 176, h: 44, kind: "x", t: "Z · QA agent", s: ["independent checklist"] },
-    { id: "finalizer", col: 4, y: 236, h: 56, kind: "agent", t: "G · Finalizer", s: ["proposes, never decides", "case package + rationale"] },
-    { id: "guard", col: 4, y: 316, h: 60, kind: "guard", t: "Guardrails · code", s: ["true match → no approval", "High needs EDD · QA must pass"] },
-    { id: "decision", col: 4, y: 400, h: 56, kind: "person", t: "Decision · a person", s: ["analyst approves", "MLRO declines or refers"] },
-    { id: "approved", col: 4, y: 484, h: 40, kind: "ok", t: "Approved", s: ["monitored, reviewed later"] },
-    { id: "declined", col: 4, y: 544, h: 40, kind: "no", t: "Declined", s: ["SAR referral if warranted"] },
-    { id: "outreach", col: 5, y: 236, h: 56, kind: "x", t: "X · Outreach agent", s: ["drafts the RFI, the welcome,", "the decline notice"] },
-    { id: "gate", col: 5, y: 316, h: 48, kind: "person", t: "Every message · a person", s: ["approves or rejects it"] },
-    { id: "customer", col: 5, y: 392, h: 52, kind: "code", t: "The customer", s: ["replies to an RFI", "never learns of a referral"] },
-    { id: "declinehandler", col: 5, y: 484, h: 56, kind: "x", t: "Y · Decline handler", s: ["decline package", "SAR hand-off to the MLRO"] },
+    { id: "trigger", col: 0, y: 176, h: 40, kind: "code", t: "Trigger · code", s: ["onboarding · review · event"], io: ["a new application, a periodic review date, or an event on an existing customer", "a case in the queue with its stage set to new"] },
+    { id: "intake", col: 0, y: 236, h: 56, kind: "agent", t: "A · Intake agent", s: ["parse · check · verify identity", "flags text aimed at reviewers"], io: ["the case id; it reads the file and every document (untrusted text)", "complete or not, what is missing or expired, identity verified or not, anomalies flagged"] },
+    { id: "db1", col: 0, y: 320, kind: "db", t: "Client input DB", s: ["documents · untrusted"], io: ["read only, through open_case and parse_documents", "declared data, parties, documents with extracted fields and text"] },
+    { id: "ubo", col: 1, y: 236, h: 56, kind: "agent", t: "B · UBO agent", s: ["walks the chain, effective %", "layers, offshore, nominees"], io: ["the case id of a company", "natural persons with effective percentage, who is a UBO, the corporate layers and their jurisdictions, nominee indications"] },
+    { id: "db2", col: 1, y: 320, kind: "db", t: "registers", s: ["UBO declarations"], io: ["read only", "shareholder registers per layer, the UBO declaration"] },
+    { id: "screening", col: 2, y: 236, h: 56, kind: "agent", t: "C · Screening agent", s: ["sanctions · PEP · media", "for every party on the case"], io: ["the case id; it screens every party (customer, owners, directors)", "each sanctions hit with score and classification, PEP hits with role, adverse media with severity; a proposed disposition for a potential match"] },
+    { id: "db3", col: 2, y: 320, kind: "db", t: "lists & media", s: ["sanctions · PEP · press"], io: ["names", "hits with scores, dates of birth, nationalities, sources"] },
+    { id: "hit", col: 2, y: 400, h: 52, kind: "person", t: "Potential hit · a person", s: ["the analyst dispositions it", "a true match cannot be cleared"], io: ["the proposed disposition and the evidence (date of birth, nationality, name parts)", "false positive or true match, recorded with who decided; a true match is refused in code"] },
+    { id: "rating", col: 3, y: 236, h: 56, kind: "agent", t: "D · Risk rating agent", s: ["asks the engine, explains it", "never sets the number"], io: ["the case id and the rulebook", "the rating with the factors explained, and whether it is provisional"] },
+    { id: "engine", col: 3, y: 316, h: 46, kind: "code", t: "Rulebook engine · code", s: ["score → Low / Medium / High", "PEP, jurisdiction, true match"], io: ["jurisdictions, industry, product, cash, PEP and media results, open or true sanctions matches, the thresholds from block 2", "score, band, forced ratings, provisional flag; Unacceptable on a true match"] },
+    { id: "cdd", col: 3, y: 390, h: 42, kind: "agent", t: "E · CDD agent", s: ["Low / Medium"], io: ["a Low or Medium case", "customer due diligence recorded: who, what for, source of funds"] },
+    { id: "edd", col: 3, y: 448, h: 42, kind: "agent", t: "F · EDD agent", s: ["High · source of wealth"], io: ["a High case", "enhanced due diligence recorded, or the advice to decline; the MLRO gate sees it"] },
+    { id: "mlro", col: 3, y: 512, h: 48, kind: "person", t: "MLRO · a person", s: ["sees every EDD, answers questions"], io: ["an EDD to see, a question, or a SAR referral", "a notification acknowledged, an answer, or a referral taken"] },
+    { id: "qa", col: 4, y: 176, h: 44, kind: "x", t: "Z · QA agent", s: ["independent checklist"], io: ["the case as it stands", "pass or fail with the findings: coverage, stale rating, wrong DD level, unflagged anomalies"] },
+    { id: "finalizer", col: 4, y: 236, h: 56, kind: "agent", t: "G · Finalizer", s: ["proposes, never decides", "case package + rationale"], io: ["a case with a passing QA", "a proposed approval with the case package, handed to the guardrails and the gate"] },
+    { id: "guard", col: 4, y: 316, h: 60, kind: "guard", t: "Guardrails · code", s: ["true match → no approval", "High needs EDD · QA must pass"], io: ["a proposed decision", "passed to the gate, or refused with a tool error the agent must report"] },
+    { id: "decision", col: 4, y: 400, h: 56, kind: "person", t: "Decision · a person", s: ["analyst approves", "MLRO declines or refers"], io: ["the proposal, the rating, the due diligence, the QA result", "approved or rejected, with a reason, in the audit log"] },
+    { id: "approved", col: 4, y: 484, h: 40, kind: "ok", t: "Approved", s: ["monitored, reviewed later"], io: ["an approval decision", "the case package, a monitoring level, a review date"] },
+    { id: "declined", col: 4, y: 544, h: 40, kind: "no", t: "Declined", s: ["SAR referral if warranted"], io: ["a decline decision", "the decline package, a SAR referral where a true match or unacceptable risk exists"] },
+    { id: "outreach", col: 5, y: 236, h: 56, kind: "x", t: "X · Outreach agent", s: ["drafts the RFI, the welcome,", "the decline notice"], io: ["what to ask or tell the customer", "a drafted message, waiting at the gate; a notice that could tip off is refused in code"] },
+    { id: "gate", col: 5, y: 316, h: 48, kind: "person", t: "Every message · a person", s: ["approves or rejects it"], io: ["the drafted message", "sent, or rejected with a reason"] },
+    { id: "customer", col: 5, y: 392, h: 52, kind: "code", t: "The customer", s: ["replies to an RFI", "never learns of a referral"], io: ["an RFI, a welcome or a decline notice", "a reply with documents, which lands back at intake"] },
+    { id: "declinehandler", col: 5, y: 484, h: 56, kind: "x", t: "Y · Decline handler", s: ["decline package", "SAR hand-off to the MLRO"], io: ["a case that must be declined", "the decline package for the MLRO's decision, a SAR referral, a request for the notice via X"] },
   ];
   const box = (n) => ({ x: NX(n.col), y: n.y, w: NW, h: n.h || 44, cx: NX(n.col) + NW / 2, cy: n.y + (n.h || 44) / 2 });
   const N = Object.fromEntries(NODES.map((n) => [n.id, n]));
-  // edges: [from, to, kind, label, route] with route "h" (right→left), "v" (bottom→top), "top" (over the orchestrator gap), "bottom" (under everything)
+  N.orchestrator = { id: "orchestrator", kind: "agent", t: "O · Orchestrator agent", io: ["the analyst's request, the brief, the reports of the agents", "one instruction at a time to an agent, and a short reply to the analyst; it never rates, approves or declines"] };
   const EDGES = [
     ["intake", "ubo", "agent", "", "h"], ["ubo", "screening", "agent", "", "h"], ["screening", "rating", "agent", "", "h"],
     ["screening", "hit", "human", "potential match", "vskip"], ["rating", "engine", "", "", "v"], ["engine", "cdd", "", "Low · Medium", "v"], ["cdd", "edd", "", "High", "v"], ["edd", "mlro", "human", "notified", "v"],
@@ -648,16 +685,15 @@ const FLOW = (() => {
     ["outreach", "gate", "human", "", "v"], ["gate", "customer", "", "", "v"], ["customer", "trigger", "", "reply → back to intake", "bottom"],
   ];
   function cyl(n) { const b = box(n); const w = 120, h = 46, x = b.cx - w / 2, y = n.y, ry = 7;
-    return `<g class="n n-db" id="fn-${n.id}"><path d="M${x} ${y + ry} v${h - 2 * ry} a${w / 2} ${ry} 0 0 0 ${w} 0 v-${h - 2 * ry}"/><ellipse cx="${b.cx}" cy="${y + ry}" rx="${w / 2}" ry="${ry}"/><text x="${b.cx}" y="${y + 26}" text-anchor="middle" class="t" font-size="11.5">${esc(n.t)}</text><text x="${b.cx}" y="${y + 39}" text-anchor="middle" class="small">${esc(n.s[0])}</text></g>`; }
+    return `<g class="n n-db" id="fn-${n.id}" data-node="${n.id}"><path d="M${x} ${y + ry} v${h - 2 * ry} a${w / 2} ${ry} 0 0 0 ${w} 0 v-${h - 2 * ry}"/><ellipse cx="${b.cx}" cy="${y + ry}" rx="${w / 2}" ry="${ry}"/><text x="${b.cx}" y="${y + 26}" text-anchor="middle" class="t" font-size="11.5">${esc(n.t)}</text><text x="${b.cx}" y="${y + 39}" text-anchor="middle" class="small">${esc(n.s[0])}</text></g>`; }
   function node(n) { if (n.kind === "db") return cyl(n); const b = box(n); const lines = [`<text x="${b.cx}" y="${b.y + 17}" text-anchor="middle" class="t">${esc(n.t)}</text>`, ...n.s.map((t, i) => `<text x="${b.cx}" y="${b.y + 31 + i * 13}" text-anchor="middle" class="small">${esc(t)}</text>`)];
-    return `<g class="n n-${n.kind}" id="fn-${n.id}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/>${lines.join("")}</g>`; }
+    return `<g class="n n-${n.kind}" id="fn-${n.id}" data-node="${n.id}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/>${lines.join("")}</g>`; }
   function edge([a, b, kind, label, route]) { const A = box(N[a]), B = box(N[b]); let d = "", lx, ly;
     if (route === "h") { d = `M${A.x + A.w} ${A.cy} H${B.x - 2}`; lx = (A.x + A.w + B.x) / 2; ly = A.cy - 5; }
     else if (route === "v") { d = `M${A.cx} ${A.y + A.h} V${B.y - 2}`; lx = A.cx + 6; ly = (A.y + A.h + B.y) / 2 + 4; }
     else if (route === "vskip") { const xx = A.x + A.w - 10; d = `M${xx} ${A.y + A.h} V${B.y - 2}`; lx = xx - 4; ly = B.y - 6; }
     else if (route === "vleft") { d = `M${A.x} ${A.cy + 12} H${A.x - 4} V${B.cy} H${B.x - 2}`; lx = A.x; ly = B.cy; }
     else if (route === "vright") { const xr = A.x + A.w + 5; d = `M${A.x + A.w} ${A.cy} H${xr} V${B.cy} H${B.x + B.w + 2}`; lx = xr; ly = B.cy; }
-    else if (route === "vup") { const xx = A.x + 20; d = `M${xx} ${A.y} V${B.y + B.h + 2}`; lx = xx + 6; ly = (A.y + B.y + B.h) / 2 + 4; }
     else if (route === "hup") { const xm = A.x + A.w + 12; d = `M${A.x + A.w} ${A.cy} H${xm} V${B.cy} H${B.x - 2}`; lx = xm + 4; ly = (A.cy + B.cy) / 2; }
     else if (route === "hright") { const xm = A.x + A.w + 12; d = `M${A.x + A.w} ${A.cy} H${xm} V${B.cy + 14} H${B.x - 2}`; lx = B.x + 2; ly = B.y + B.h + 13; }
     else if (route === "top") { const yy = 166; d = `M${A.cx + 40} ${A.y} V${yy} H${B.cx - 40} V${B.y - 2}`; lx = (A.cx + B.cx) / 2; ly = yy - 4; }
@@ -669,72 +705,162 @@ const FLOW = (() => {
       <defs>${[["m", "var(--muted)"], ["ok", "var(--ok)"], ["human", "var(--human)"], ["guard", "var(--guard)"], ["agent", "var(--agent)"]].map(([k, c]) => `<marker id="fa-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`).join("")}</defs>`];
     COLS.forEach((c, i) => { parts.push(`<rect class="colbg" x="${X(i)}" y="14" width="${CW}" height="600" rx="10"/><g class="num"><circle cx="${X(i) + 18}" cy="34" r="8"/><text x="${X(i) + 18}" y="37.5" text-anchor="middle">${c.n}</text></g><text class="colhead" x="${X(i) + 32}" y="38">${esc(c.title)}</text>`); });
     parts.push(`<g class="layer-bp">`);
-    COLS.forEach((c, i) => { parts.push(`<g class="n n-person" id="fp-${i}"><rect x="${NX(i)}" y="52" width="${NW}" height="54"/><text x="${NX(i) + NW / 2}" y="70" text-anchor="middle" class="t">a person</text><text x="${NX(i) + NW / 2}" y="84" text-anchor="middle" class="small">${esc(c.person[0])}</text><text x="${NX(i) + NW / 2}" y="97" text-anchor="middle" class="small">${esc(c.person[1])}</text></g>`); if (i < 5) parts.push(`<path class="edge" d="M${NX(i) + NW} 79 H${NX(i + 1) - 2}" marker-end="url(#fa-m)"/>`); });
+    COLS.forEach((c, i) => { parts.push(`<g class="n n-person" id="fp-${i}" data-node="p${i}"><rect x="${NX(i)}" y="52" width="${NW}" height="54"/><text x="${NX(i) + NW / 2}" y="70" text-anchor="middle" class="t">a person</text><text x="${NX(i) + NW / 2}" y="84" text-anchor="middle" class="small">${esc(c.person[0])}</text><text x="${NX(i) + NW / 2}" y="97" text-anchor="middle" class="small">${esc(c.person[1])}</text></g>`); if (i < 5) parts.push(`<path class="edge" d="M${NX(i) + NW} 79 H${NX(i + 1) - 2}" marker-end="url(#fa-m)"/>`); });
     parts.push(`</g><g class="layer-ai">`);
-    parts.push(`<g class="n n-agent" id="fn-orchestrator"><rect x="${NX(0)}" y="124" width="${NX(5) + NW - NX(0)}" height="32"/><text x="${NX(0) + 12}" y="144" class="t">O · Orchestrator agent</text><text x="${NX(0) + 190}" y="144" class="small">routes the case column by column from each agent's report · instruction ⇄ report with every agent · stops at every gate · never rates, approves or declines</text></g>`);
+    parts.push(`<g class="n n-agent" id="fn-orchestrator" data-node="orchestrator"><rect x="${NX(0)}" y="124" width="${NX(5) + NW - NX(0)}" height="32"/><text x="${NX(0) + 12}" y="144" class="t">O · Orchestrator agent</text><text x="${NX(0) + 190}" y="144" class="small">routes the case column by column from each agent's report · instruction ⇄ report with every agent · stops at every gate · never rates, approves or declines</text></g>`);
     parts.push(`<path class="edge agent" d="M${box(N.intake).cx} 156 V174" marker-end="url(#fa-agent)"/>`);
     parts.push(...EDGES.map(edge), ...NODES.map(node));
     parts.push(`<g class="token" id="flow-token" style="opacity:0"><rect width="66" height="18"/><text x="33" y="13" text-anchor="middle"></text></g></g></svg>`);
     $("flow-svg").innerHTML = parts.join("");
   }
-  // --- lighting and the token
-  let mode = "ai"; let lit = null; let playing = null; let liveTimer = null;
-  function place(id) { const el = $("fn-" + id) || $("fp-" + id); if (!el) return; const b = el.id.startsWith("fp-") ? { x: NX(Number(id)), y: 52, w: NW } : (N[id].kind === "db" ? { x: box(N[id]).cx - 60, y: N[id].y, w: 120 } : box(N[id])); const tok = $("flow-token"); tok.setAttribute("transform", `translate(${b.x + b.w - 70} ${b.y - 9})`); tok.style.opacity = 1; }
-  function light(id, caption, stepText, caseId, done) {
-    for (const el of document.querySelectorAll("#flow .n.lit")) el.classList.remove("lit");
-    const el = $("fn-" + id) || $("fp-" + id); if (el) { el.classList.add("lit"); if (done) el.classList.add("done"); }
-    if (caseId) $("flow-token").querySelector("text").textContent = caseId;
-    if (el) place(id); lit = id;
-    $("flow-cap").textContent = caption || ""; $("flow-step").textContent = stepText || "";
-  }
-  function clear() { for (const el of document.querySelectorAll("#flow .n.lit, #flow .n.done")) el.classList.remove("lit", "done"); $("flow-token").style.opacity = 0; $("flow-cap").textContent = "Pick a case and press Play. While the agent works on a request, the diagram follows it."; $("flow-step").textContent = ""; }
+  // --- lighting, the token, the caption box
+  let mode = "ai"; let playing = null; let liveMode = false; let rows = []; let steps = []; let shown = 0; let current = null;
+  const PERSON = (i) => ({ id: "p" + i, kind: "person", t: `${COLS[i].n} · ${COLS[i].title} · a person`, io: [COLS[i].person[1], COLS[i].person[0]] });
+  function elOf(id) { return id.startsWith("p") && /^p\d$/.test(id) ? $("fp-" + id.slice(1)) : $("fn-" + id); }
+  function place(id) { const el = elOf(id); if (!el) return; let b; if (/^p\d$/.test(id)) b = { x: NX(Number(id.slice(1))), y: 52, w: NW }; else if (id === "orchestrator") b = { x: NX(5), y: 124, w: NW }; else b = N[id].kind === "db" ? { x: box(N[id]).cx - 60, y: N[id].y, w: 120 } : box(N[id]); const tok = $("flow-token"); tok.setAttribute("transform", `translate(${b.x + b.w - 70} ${b.y - 9})`); tok.style.opacity = 1; }
+  function light(id, caseId) { for (const el of document.querySelectorAll("#flow .n.lit")) el.classList.remove("lit"); const el = elOf(id); if (el) { el.classList.add("lit", "done"); place(id); } if (caseId) $("flow-token").querySelector("text").textContent = caseId; current = id; }
+  function caption(kind, k, text) { const b = $("flow-capbox"); b.className = "capbox " + kind; $("flow-step").textContent = k; $("flow-cap").textContent = text; $("flow-io").hidden = true; }
+  function clear() { for (const el of document.querySelectorAll("#flow .n.lit, #flow .n.done, #flow .n.sel")) el.classList.remove("lit", "done", "sel"); $("flow-token").style.opacity = 0; rows = []; steps = []; shown = 0; liveMode = false; renderRows(); caption("", "ready", "Pick a case and press Play. While the agent works on a request, the diagram and the panel below follow it instead."); $("flow-hint").textContent = ""; }
   function setMode(m) { mode = m; $("flow").classList.toggle("mode-ai", m === "ai"); $("flow").classList.toggle("mode-bp", m === "bp"); for (const b of document.querySelectorAll("#flow .tab")) b.classList.toggle("on", b.dataset.mode === m); $("flow-bp").hidden = m !== "bp"; }
-  // --- scripts
-  function scriptAI(c) {
-    const k = c.key, st = []; const s = (node, cap) => st.push({ node, cap });
-    s("trigger", `${c.id} · ${c.name}: ${c.trigger}. The orchestrator opens the queue and picks it up.`);
-    s("intake", `A reads ${c.documents.length} documents, checks completeness against the rulebook and verifies identity.`);
-    if (k.flags.includes("prompt_injection")) s("intake", "One document carries text addressed to automated reviewers. A flags it as an anomaly and ignores it.");
-    if (k.rfi_first) { s("outreach", "Something is missing or inconsistent: X drafts a request for information."); s("gate", `${ME} reads the message and approves it. The case pauses.`); s("customer", "The customer replies with the missing items."); s("trigger", "The reply lands back at intake."); s("intake", "A checks again: the file is complete and the identity verified."); }
-    if (c.type === "company") s("ubo", `B walks the ownership chain: ${c.ownership.filter((p) => p.kind === "company").length} corporate layer(s), the natural persons at or above ${RB.ubo_threshold_percent}%.`);
-    s("screening", "C screens every party: sanctions lists, PEP database, adverse media.");
-    if (k.flags.includes("potential_match_false_positive")) s("hit", "A potential sanctions match: C proposes a disposition with the evidence; the analyst confirms it at the gate.");
-    if (k.flags.includes("sanctions_true_match")) { s("screening", "TRUE MATCH on a beneficial owner: name, date of birth and nationality match. A hard stop."); s("rating", "D asks the engine."); s("engine", "The engine says Unacceptable. No approval path exists."); s("qa", "Z runs the checklist."); s("declinehandler", "Y proposes the decline and a SAR hand-off."); s("guard", "Guardrails: an approval would be refused in code."); s("decision", `${MLRO.name} declines and takes the referral.`); s("declined", "Declined. The referral is the MLRO's."); s("outreach", "X drafts a short notice that gives no reason."); s("gate", `${ME} approves it: it mentions no screening, no report.`); s("customer", "The customer gets the notice and nothing else."); return st; }
-    if (k.flags.includes("pep")) s("screening", "A PEP hit: a politically exposed person on the case.");
-    if (k.flags.includes("adverse_media")) s("screening", "Adverse media: an open investigation into the activity the account would serve.");
-    s("rating", "D asks the rulebook engine and explains the result.");
-    s("engine", `The engine rates ${k.risk_rating}${k.risk_rating === "High" ? ": EDD required" : ""}. The agent cannot change it.`);
-    if (k.edd_required) { s("edd", "F does enhanced due diligence: source of wealth, the specific concern, mitigations."); s("mlro", `${MLRO.name} is notified of the EDD.`); } else s("cdd", "E records customer due diligence: who the customer is, what the account is for, where the money comes from.");
-    s("qa", "Z runs the independent checklist: coverage, freshness of the rating, anomalies.");
-    if (k.decision === "approve") { s("finalizer", "G proposes the approval with the case package."); s("guard", "Guardrails in code: no true match, EDD where High, QA passed."); s("decision", `${ME} reads the package and approves.`); s("approved", "Approved, with monitoring set by the rating."); s("outreach", "X drafts the welcome."); s("gate", `${ME} approves the message.`); s("customer", "The customer is onboarded."); }
-    else { s("declinehandler", "EDD could not resolve the concern: Y proposes the decline with the internal grounds."); s("guard", "Guardrails in code pass the proposal to the gate."); s("decision", `${MLRO.name} declines.`); s("declined", "Declined."); s("outreach", "X drafts a courteous notice without reasons."); s("gate", `${ME} approves it.`); s("customer", "The customer gets the notice."); }
+  // --- the step-by-step panel
+  function renderRows() {
+    const list = liveMode ? rows : rows.slice(0, shown);
+    $("flow-rows").innerHTML = list.map((r, i) => `<div class="rw ${r.kind || ""}${r.node === current && !liveMode ? " sel" : ""}" data-node="${r.node || ""}"><span class="l">${esc(r.l)}</span><span class="v">${r.html || esc(r.v)}</span></div>`).join("") || `<div class="rw"><span class="l">—</span><span class="v">nothing yet</span></div>`;
+    $("flow-panel-n").textContent = list.length ? `${list.length} row${list.length === 1 ? "" : "s"}${liveMode ? " · live" : ""}` : "";
+    $("flow-panel-title").textContent = liveMode ? "This request, step by step · live" : "This case, step by step";
+    const box = $("flow-rows"); box.scrollTop = box.scrollHeight;
+  }
+  // --- the simulation: the real engine on a scratch copy of the case; every row is computed, not written
+  function simulate(c0) {
+    const c = Object.assign(clone(c0), { stage: "new", steps: {}, anomalies: [], hits: {}, rating: null, dd: null, decision: null, rfi: null });
+    const k = c.key; const st = []; const t = () => now();
+    const s = (node, l, v, kind, cap, html) => st.push({ node, row: { l, v, kind, node, html }, cap });
+    const money = (n) => n >= 1e6 ? `€${(n / 1e6).toFixed(1)}m` : `€${Math.round(n / 1000)}k`;
+    s("trigger", "case", `${c.id} · ${c.name} · ${c.type} · ${c.trigger} · ${c.declared.country}`, "", `${c.id}, ${c.name}: ${c.trigger}. The orchestrator opens the queue and picks it up.`, `<b>${esc(c.id)}</b> · ${esc(c.name)} · ${esc(c.type)} · ${esc(c.trigger)} · ${esc(c.declared.country)}`);
+    const people = parties(c).length; s("db1", "file", `${c.documents.length} documents · ${people} part${people === 1 ? "y" : "ies"} · ${c.declared.industry || c.declared.occupation} · product: ${c.declared.product} · ${c.declared.expected_annual_turnover_eur ? money(c.declared.expected_annual_turnover_eur) + " a year" : money(c.declared.expected_monthly_inflow_eur * 12) + " a year"}${c.declared.cash_intensive ? " · cash-intensive" : ""}`, "code", `The client input DB holds ${c.documents.length} documents and the declared data. All of it is customer-supplied.`);
+    const intake = () => { const comp = completeness(c); const idc = identityCheck(c); c.steps.intake = { at: t(), complete: comp.complete }; c.steps.identity = { at: t(), verified: idc.verified, issues: idc.issues };
+      s("intake", "intake · A", `check_intake → ${comp.complete ? "complete" : "incomplete: " + [...comp.missing.map((m) => "missing " + m), ...comp.expired, ...comp.mismatches].join("; ")} · verify_identity → ${idc.verified ? "verified" : idc.issues.join("; ")}`, comp.complete && idc.verified ? "agent" : "guard", comp.complete && idc.verified ? `A parses ${c.documents.length} documents, checks completeness against the rulebook and verifies identity: the file is complete.` : `A finds the file incomplete or inconsistent: ${[...comp.missing.map((m) => "missing " + m), ...comp.expired, ...comp.mismatches, ...idc.issues].slice(0, 2).join("; ")}.`); return comp.complete && idc.verified; };
+    let ok = intake();
+    const inj = c.documents.filter((d) => /(ai assistant|automated reviewer|system note|skip .{0,20}screening|set .{0,20}risk rating)/i.test(d.text || ""));
+    if (inj.length) { c.anomalies.push({ kind: "prompt_injection", detail: inj[0].filename, at: t() }); s("intake", "anomaly · q", `${inj[0].filename} contains text addressed to automated reviewers ("${(inj[0].text.match(/SYSTEM NOTE[^.]*\./) || ["…"])[0].slice(0, 90)}…") → flag_anomaly(prompt_injection) · instruction ignored`, "guard", "One document carries instructions for AI reviewers. A flags it as an anomaly and ignores it; QA will check that it was flagged."); }
+    if (!ok) { const comp = completeness(c), idc = identityCheck(c); const items = [...comp.missing, ...comp.expired.map((e) => "valid " + e.split(" (")[0]), ...idc.issues];
+      s("outreach", "outreach · X", `send_customer_message(rfi) → items: ${items.join("; ")}`, "agent", "X drafts a request for information listing exactly what is needed and why.");
+      s("gate", "gate", `customer communication → ${ROLE_NAME.analyst} approves the message`, "person", `${ME} reads the RFI and approves it. The case pauses; the orchestrator moves on.`);
+      s("customer", "customer", c.rfi_response ? `replies: ${c.rfi_response.documents.map((d) => d.filename).join(", ")} · ${c.rfi_response.note}` : "no reply yet", "code", "The customer replies with the missing items; they land on the file.");
+      if (c.rfi_response) { applyReply(c); s("trigger", "trigger", "customer replied → the case is back in the queue", "code", "The reply brings the case back to intake."); ok = intake(); } }
+    if (c.type === "company") { const eff = effectiveOwnership(c); const ubos = Object.entries(eff).filter(([, v]) => v >= RB.ubo_threshold_percent).map(([n]) => n); const layers = c.ownership.filter((p) => p.kind === "company"); const off = layers.filter((p) => RB.offshore_jurisdictions.includes(p.country)); c.steps.ubo = { at: t(), ubos, layers: layers.length };
+      s("ubo", "ubo · B", `resolve_ubo → ${Object.entries(eff).map(([n, v]) => `${n} ${v}%${c.ownership.find((p) => p.name === n).via ? " via " + c.ownership.find((p) => p.name === n).via : ""}`).join(" · ")} → UBOs: ${ubos.join(", ") || "none ≥ threshold"} · ${layers.length} corporate layer${layers.length === 1 ? "" : "s"}${off.length ? " · offshore: " + off.map((p) => p.country).join(", ") : ""}${(c.directors || []).some((d) => /nominee|corporate services|trust/i.test(d.role || "")) ? " · nominee director" : ""}`, "agent", `B walks the ownership chain: ${layers.length} corporate layer${layers.length === 1 ? "" : "s"}, ${ubos.length} beneficial owner${ubos.length === 1 ? "" : "s"} at or above ${RB.ubo_threshold_percent}%${off.length ? ", an offshore layer in " + off.map((p) => p.country).join(", ") : ""}.`); }
+    const names = parties(c).map((p) => p.name);
+    const sh = c.screening.sanctions.map((h) => ({ ...h, cls: h.score >= RB.sanctions_true_match_score ? "TRUE MATCH" : h.score >= RB.sanctions_potential_match_score ? "potential match" : "below threshold" }));
+    const tm = sh.filter((h) => h.cls === "TRUE MATCH"), pot = sh.filter((h) => h.cls === "potential match");
+    const sev = c.screening.media.some((a) => a.severity === "high") ? "high" : c.screening.media.some((a) => a.severity === "medium") ? "medium" : c.screening.media.length ? "low" : "none";
+    c.steps.sanctions = { at: t(), names, true_matches: tm.length, potential: pot.length }; c.steps.pep = { at: t(), names, hits: c.screening.pep.length }; c.steps.media = { at: t(), names, articles: c.screening.media.length, max_severity: sev };
+    const sanTxt = sh.length ? sh.map((h) => `${h.hit_id} ${h.screened_name} vs ${h.listed_name} (${h.list}) score ${h.score}, dob ${h.dob_match ? "✓" : "✗"}, nationality ${h.nationality_match ? "✓" : "✗"} → ${h.cls}`).join(" · ") : "none";
+    const pepTxt = c.screening.pep.length ? c.screening.pep.map((h) => `${h.name}${h.relationship !== "self" ? " (" + h.relationship + " " + h.pep_name + ")" : ""}: ${h.level}, ${h.role}`).join(" · ") : "none";
+    const medTxt = c.screening.media.length ? c.screening.media.map((a) => `${a.severity}: "${a.headline}" (${a.source}, ${a.date})`).join(" · ") : "none";
+    s("screening", "screening · C", `screened ${names.length} part${names.length === 1 ? "y" : "ies"}: ${names.join(", ")}\nsanctions → ${sanTxt}\npep → ${pepTxt}\nmedia → ${medTxt}`, tm.length ? "guard" : "agent", tm.length ? `TRUE MATCH: ${tm[0].screened_name} matches ${tm[0].listed_name} on the ${tm[0].list}, date of birth and nationality included. A hard stop.` : `C screens ${names.length} part${names.length === 1 ? "y" : "ies"} against sanctions lists, the PEP database and the press: ${pot.length ? "a potential sanctions match" : "no sanctions hit"}, ${c.screening.pep.length ? "a PEP" : "no PEP"}, ${sev === "none" ? "no adverse media" : sev + "-severity adverse media"}.`);
+    for (const h of pot) { c.hits[h.hit_id] = { disposition: "false_positive", at: t() }; s("hit", "hit · a person", `disposition_hit(${h.hit_id}, false_positive: born ${h.listed_dob} vs ${c.ownership.find((p) => p.name === h.screened_name)?.dob || "?"}, ${h.listed_nationality} vs ${c.ownership.find((p) => p.name === h.screened_name)?.country || "?"}) → ${ROLE_NAME.analyst} confirms at the gate`, "person", "C proposes a disposition with the evidence: different date of birth, different nationality. The analyst confirms it at the gate."); }
+    const r = riskScore(c); c.rating = Object.assign({ at: t() }, r);
+    s("engine", "engine · j", `${r.factors.map((f) => `${f.factor} +${f.points}`).join(" · ") || "no factors"} → score ${r.score} → ${r.rating}${r.forced_high_by.length ? " (forced by " + r.forced_high_by.join(", ") + ")" : ""}${r.unacceptable_reason ? " · " + r.unacceptable_reason : ""}`, r.rating === "Unacceptable" ? "no" : "code", `The rulebook engine rates ${r.rating}${r.forced_high_by.length ? ", forced by " + r.forced_high_by.join(" and ") : " from a score of " + r.score}. D explains it; nobody can change the number.`);
+    if (r.rating === "Unacceptable") {
+      const qa = qaChecklist(c); c.steps.qa = { at: t(), pass: qa.pass }; s("qa", "qa · Z", `run_qa → ${qa.pass ? "pass" : "fail: " + qa.findings.join(" | ")} (${qa.checks.length} checks)`, qa.pass ? "ok" : "guard", "Z runs the independent checklist on the file.");
+      s("declinehandler", "decline · Y", `finalize_case(decline) + escalate_to_mlro(sar_referral) → grounds: ${r.unacceptable_reason}`, "agent", "Y proposes the decline package and a SAR hand-off.");
+      s("guard", "guardrail", `approve → refused in code (true sanctions match) · decline → passed to the gate`, "guard", "Guardrails: any approval would be refused in code; the decline goes to the gate.");
+      s("decision", "decision", `${ROLE_NAME.mlro} decides: DECLINE · SAR referral taken`, "person", `${MLRO.name} declines and takes the referral.`);
+      s("declined", "outcome", `DECLINED`, "no", "Declined. The referral stays with the MLRO.", `<b>DECLINED</b> · SAR referral`);
+      s("outreach", "outreach · X", `send_customer_message(decline_notice) → "unable to open the relationship", no reason · tipping-off check passed`, "agent", "X drafts a short notice that gives no reason. A notice mentioning screening or a report would be refused in code.");
+      s("gate", "gate", `${ROLE_NAME.analyst} approves the notice`, "person", `${ME} approves the notice.`);
+      s("customer", "customer", `receives the notice · learns nothing of the referral`, "code", "The customer gets the notice and nothing else.");
+      s("declined", "key", `answer key: ${k.risk_rating} · ${k.decision}${k.flags.length ? " · flags " + k.flags.join(", ") : ""} → ${r.rating === k.risk_rating ? "matches" : "DIFFERS"}`, r.rating === k.risk_rating ? "ok" : "no", `The answer key agrees: ${k.why}`);
+      return st; }
+    if (r.rating === "High") { c.dd = { level: "EDD", at: t() }; s("edd", "edd · F", `record_due_diligence(EDD) → source of wealth and funds in depth · concern: ${k.flags.join(", ") || "score"} · mitigations and monitoring`, "agent", "F does enhanced due diligence: source of wealth, the specific concern, mitigations."); s("mlro", "mlro", `${ROLE_NAME.mlro} notified of the EDD`, "person", `${MLRO.name} is notified of the EDD, as the governance block says.`); }
+    else { c.dd = { level: "CDD", at: t() }; s("cdd", "cdd · E", `record_due_diligence(CDD) → who the customer is, what the account is for, source of funds: ${c.declared.source_of_funds}`, "agent", "E records customer due diligence: who, what for, where the money comes from."); }
+    const qa = qaChecklist(c); c.steps.qa = { at: t(), pass: qa.pass };
+    s("qa", "qa · Z", `run_qa → ${qa.pass ? "pass" : "fail: " + qa.findings.join(" | ")} (${qa.checks.length} checks: ${qa.checks.map((x) => x.check).slice(0, 4).join(", ")}, …)`, qa.pass ? "ok" : "guard", qa.pass ? "Z runs the independent checklist: coverage, freshness of the rating, the DD level, anomalies. It passes." : "Z finds gaps: " + qa.findings.join("; "));
+    if (k.decision === "approve") {
+      s("finalizer", "finalizer · G", `finalize_case(approve) → case package: rating ${r.rating}, ${c.dd.level} on file, ${c.steps.sanctions.true_matches ? "" : "no true match, "}QA passed`, "agent", "G proposes the approval with the case package.");
+      s("guard", "guardrail", `nothing tripped — no true match, ${r.rating === "High" ? "EDD on file" : "EDD not required"}, QA passed. The proposal goes to the gate.`, "ok", `Guardrails in code: no true match, ${r.rating === "High" ? "EDD on file" : "no EDD needed"}, QA passed. The proposal goes to the gate.`);
+      s("decision", "decision", `${ROLE_NAME.analyst} decides: APPROVE`, "person", `${ME} reads the package and approves.`);
+      s("approved", "outcome", "APPROVED", "ok", `Approved, with ${r.rating === "High" ? "enhanced" : "standard"} monitoring.`, `<b>APPROVED</b> · ${r.rating === "High" ? "enhanced monitoring, review in 12 months" : "standard monitoring"}`);
+      s("outreach", "outreach · X", `send_customer_message(welcome)`, "agent", "X drafts the welcome."); s("gate", "gate", `${ROLE_NAME.analyst} approves the message`, "person", `${ME} approves the message.`); s("customer", "customer", "onboarded", "code", "The customer is onboarded.");
+    } else {
+      s("declinehandler", "decline · Y", `finalize_case(decline) → grounds: ${k.why.split(":")[0]}`, "agent", "EDD could not resolve the concern: Y proposes the decline with the internal grounds.");
+      s("guard", "guardrail", `nothing tripped — the decline goes to the gate`, "ok", "Guardrails in code pass the proposal to the gate.");
+      s("decision", "decision", `${ROLE_NAME.mlro} decides: DECLINE`, "person", `${MLRO.name} declines.`);
+      s("declined", "outcome", "DECLINED", "no", "Declined.", `<b>DECLINED</b>`);
+      s("outreach", "outreach · X", `send_customer_message(decline_notice) → courteous, no reason · tipping-off check passed`, "agent", "X drafts a courteous notice without reasons."); s("gate", "gate", `${ROLE_NAME.analyst} approves the notice`, "person", `${ME} approves it.`); s("customer", "customer", "receives the notice", "code", "The customer gets the notice.");
+    }
+    const match = r.rating === k.risk_rating && (k.decision === "approve") === (k.decision === "approve");
+    s(k.decision === "approve" ? "approved" : "declined", "key", `answer key: ${k.risk_rating} · ${k.decision}${k.rfi_first ? " after an RFI" : ""}${k.flags.length ? " · flags " + k.flags.join(", ") : ""} → ${match ? "matches" : "DIFFERS"}`, match ? "ok" : "no", `The answer key agrees: ${k.why}`);
     return st;
   }
-  function scriptBP(c) { const k = c.key; const st = COLS.map((col, i) => ({ node: String(i), cap: `${col.title}: ${col.person[1]} · ${col.person[0]}` })); if (k.rfi_first) st.splice(1, 0, { node: "5", cap: "Something is missing: a letter to the customer, then days of waiting." }, { node: "0", cap: "The reply comes in; back to step 1." }); return st; }
+  function simulateBP(c) { const k = c.key; const st = []; const s = (i, extra) => st.push({ node: "p" + i, row: { l: `step ${COLS[i].n}`, v: `${COLS[i].title}: ${COLS[i].person[1]} · ${COLS[i].person[0]}${extra ? " · " + extra : ""}`, kind: "person", node: "p" + i }, cap: `${COLS[i].title}: ${COLS[i].person[1]}. ${COLS[i].person[0]}.` });
+    s(0); if (k.rfi_first) { s(5, "a letter asking for the missing items, then days of waiting"); s(0, "the reply comes in; start again"); } if (c.type === "company") s(1); s(2, k.flags.includes("potential_match_false_positive") ? "a common-name hit to clear by hand" : ""); s(3, k.edd_required ? "enhanced due diligence, a long narrative" : ""); s(4, k.decision === "decline" ? "a decline memo for the MLRO" : ""); s(5);
+    const mins = st.reduce((a, x) => a + Number(COLS[Number(x.node.slice(1))].person[0].match(/(\d+) min/)[1]), 0), eur = st.reduce((a, x) => a + Number(COLS[Number(x.node.slice(1))].person[0].match(/€(\d+)/)[1]), 0);
+    st.push({ node: "p5", row: { l: "total", v: `${Math.floor(mins / 60)}h ${mins % 60}min of a person's time · €${eur} · most of it copying, reconciling and waiting`, kind: "", node: "p5" }, cap: `${Math.floor(mins / 60)}h ${mins % 60}min of a person's time and about €${eur}, before any rework. The judgement is a few minutes of it.` });
+    return st; }
+  function caseFor() { const id = ($("flow-id").value || "").trim().toUpperCase(); const c = id && S.cases.find((x) => x.id === id || x.id === "KYC-" + id); if (c) { $("flow-case").value = c.id; $("flow-id").value = ""; return c; } return S.cases.find((x) => x.id === $("flow-case").value) || S.cases[0]; }
+  function prepare() { const c = caseFor(); liveMode = false; steps = mode === "ai" ? simulate(c) : simulateBP(c); rows = steps.map((x) => x.row); return c; }
   function play() {
-    stop(); const c = S.cases.find((x) => x.id === $("flow-case").value) || S.cases[0]; const steps = mode === "ai" ? scriptAI(c) : scriptBP(c); let i = 0; clear();
+    stop(); const c = prepare(); let i = 0; for (const el of document.querySelectorAll("#flow .n.lit, #flow .n.done, #flow .n.sel")) el.classList.remove("lit", "done", "sel"); shown = 0; renderRows(); $("flow-panel").open = true;
     $("flow-play").hidden = true; $("flow-stop").hidden = false; $("flow-hint").textContent = "";
-    const tick = () => { if (i >= steps.length) { $("flow-step").textContent = "done"; stop(); return; } const st = steps[i]; light(st.node, st.cap, `${i + 1} / ${steps.length}`, c.id, true); i++; playing = setTimeout(tick, mode === "ai" ? 1900 : 1500); };
+    const tick = () => { if (i >= steps.length) { stop(); return; } const st = steps[i]; light(st.node, c.id); shown = i + 1; caption("", `step ${i + 1} of ${steps.length}`, st.cap); renderRows(); i++; playing = setTimeout(tick, mode === "ai" ? 2200 : 1600); };
     tick();
   }
   function stop() { if (playing) clearTimeout(playing); playing = null; $("flow-play").hidden = false; $("flow-stop").hidden = true; }
-  // --- live: the real agent lights the node it is on
+  function showNode(id) { // click a block: what goes in, what comes out, and the rows of this case that touch it
+    stop(); if (!rows.length || liveMode) { const c = prepare(); $("flow-panel").open = true; shown = rows.length; }
+    const n = /^p\d$/.test(id) ? PERSON(Number(id.slice(1))) : N[id]; if (!n) return;
+    for (const el of document.querySelectorAll("#flow .n.sel")) el.classList.remove("sel"); const el = elOf(id); if (el) el.classList.add("sel");
+    current = id; const b = $("flow-capbox"); b.className = "capbox node"; $("flow-step").textContent = n.t; $("flow-cap").textContent = "";
+    const io = $("flow-io"); io.hidden = false; io.innerHTML = `<b>in</b><span>${esc(n.io[0])}</span><b>out</b><span>${esc(n.io[1])}</span>`;
+    shown = rows.length; renderRows(); const first = document.querySelector("#flow-rows .rw.sel"); if (first) first.scrollIntoView({ block: "nearest" });
+  }
+  // --- live: the real agent lights the node it is on and writes its results into the panel
   const TOOL_NODE = { parse_documents: "intake", check_intake: "intake", verify_identity: "intake", flag_anomaly: "intake", resolve_ubo: "ubo", screen_sanctions: "screening", screen_pep: "screening", screen_media: "screening", disposition_hit: "hit", rate_risk: "engine", run_qa: "qa", finalize_case: "finalizer", send_customer_message: "outreach", escalate_to_mlro: "mlro", case_queue: "orchestrator", open_case: "orchestrator", lookup_rulebook: "engine" };
   const AGENT_NODE = { intake_agent: "intake", ubo_agent: "ubo", screening_agent: "screening", risk_agent: "rating", cdd_agent: "cdd", edd_agent: "edd", finalizer_agent: "finalizer", outreach_agent: "outreach", decline_agent: "declinehandler", qa_agent: "qa" };
   const GATE_NODE = { outreach: "gate", hit: "hit", edd: "mlro", approve: "decision", decline: "decision", sar: "mlro", override: "guard" };
-  function live(node, caption, caseId) { if (playing) stop(); if (mode !== "ai") setMode("ai"); light(node, caption, "live", caseId || undefined, true); $("flow-hint").textContent = "following the agent"; }
-  function liveTool(name, input) { let node = TOOL_NODE[name]; if (name === "record_due_diligence") node = input && input.level === "EDD" ? "edd" : "cdd"; if (!node) return; live(node, `${name}${input && input.case_id ? " · " + input.case_id : ""}`, input && input.case_id); }
-  function liveAgent(name, caseId) { const node = AGENT_NODE[name]; if (node) live(node, `${name} is working${caseId ? " on " + caseId : ""}`, caseId); }
-  function liveGate(gateId, caseId, title) { const node = GATE_NODE[gateId]; if (node) live(node, `waiting for a person: ${title}`, caseId); }
-  function liveOutcome(node, caseId, caption) { live(node, caption, caseId); }
+  function goLive() { if (playing) stop(); if (mode !== "ai") setMode("ai"); if (!liveMode) { liveMode = true; rows = []; steps = []; for (const el of document.querySelectorAll("#flow .n.lit, #flow .n.done, #flow .n.sel")) el.classList.remove("lit", "done", "sel"); $("flow-panel").open = true; } $("flow-hint").textContent = "following the agent"; }
+  function liveRow(node, l, v, kind) { rows.push({ node, l, v, kind }); if (rows.length > 80) rows.shift(); renderRows(); }
+  function live(node, text, caseId) { goLive(); light(node, caseId); caption("live", "live · " + (N[node] ? N[node].t : node), text); }
+  function liveTool(name, input) { let node = TOOL_NODE[name]; if (name === "record_due_diligence") node = input && input.level === "EDD" ? "edd" : "cdd"; if (!node) return; live(node, `${name}${input && input.case_id ? " on " + input.case_id : ""}`, input && input.case_id); }
+  function liveResult(name, input, out, err) { let node = TOOL_NODE[name] || "orchestrator"; if (name === "record_due_diligence") node = input && input.level === "EDD" ? "edd" : "cdd"; const brief = err ? err : summarise(name, out); liveRow(node, name.replace(/_/g, " "), brief, err ? "guard" : (N[node] && N[node].kind === "person" ? "person" : "code")); }
+  function summarise(name, out) { if (typeof out === "string") return compact(out, 300); const o = out || {}; switch (name) {
+    case "case_queue": return `${o.total} cases · ${Object.entries(o.by_stage || {}).map(([k, v]) => `${k} ${v}`).join(", ")}`;
+    case "open_case": return `${o.id} · ${o.name} · stage ${o.stage} · ${o.documents ? o.documents.length + " documents" : ""} · rating ${o.rating ? o.rating.rating : "none"}`;
+    case "check_intake": return o.complete ? "complete" : "incomplete: " + [...(o.missing || []).map((m) => "missing " + m), ...(o.expired || []), ...(o.mismatches || [])].join("; ");
+    case "verify_identity": return o.verified ? "verified" : (o.issues || []).join("; ");
+    case "resolve_ubo": return `UBOs: ${(o.ubos || []).join(", ") || "none"} · ${(o.corporate_layers || []).length} layer(s)${(o.indications || []).length ? " · " + o.indications.join("; ") : ""}`;
+    case "screen_sanctions": return (o.hits || []).length ? o.hits.map((h) => `${h.hit_id} ${h.screened_name} score ${h.score} → ${h.classification.split(" ·")[0]}`).join(" · ") : "no hits";
+    case "screen_pep": return (o.hits || []).length ? o.hits.map((h) => `${h.name}: ${h.level}`).join(" · ") : "no hits";
+    case "screen_media": return (o.articles || []).length ? `${o.articles.length} article(s), max severity ${o.max_severity}` : "nothing found";
+    case "rate_risk": return `${(o.factors || []).map((f) => `${f.factor} +${f.points}`).join(" · ")} → ${o.score} → ${o.rating}${o.provisional ? " (provisional)" : ""}${(o.forced_high_by || []).length ? " forced by " + o.forced_high_by.join(", ") : ""}`;
+    case "run_qa": return o.pass ? `pass (${(o.checks || []).length} checks)` : "fail: " + (o.findings || []).join(" | ");
+    case "finalize_case": return `${o.finalized} · decided by ${o.decided_by}`;
+    case "disposition_hit": return `${o.hit_id} → ${o.recorded} · decided by ${o.decided_by}`;
+    case "send_customer_message": return `${o.sent} sent · case ${o.case_stage}`;
+    case "record_due_diligence": return `${o.recorded} recorded`;
+    case "escalate_to_mlro": return o.mlro_answer ? "MLRO: " + o.mlro_answer : `${o.recorded} · ${o.mlro_note || ""}`;
+    case "flag_anomaly": return `${o.recorded} · ${o.anomalies_on_file} on file`;
+    default: return compact(o, 240); } }
+  function liveAgent(name, caseId) { const node = AGENT_NODE[name]; if (!node) return; live(node, `${name} is working${caseId ? " on " + caseId : ""}`, caseId); liveRow(node, name.replace(/_/g, " "), `▶ delegated${caseId ? " · " + caseId : ""}`, "agent"); }
+  function liveReport(name, report) { const node = AGENT_NODE[name]; if (!node) return; liveRow(node, name.replace(/_/g, " "), "◀ " + compact(report, 320), "agent"); }
+  function liveGate(gateId, caseId, title) { const node = GATE_NODE[gateId]; if (!node) return; live(node, `waiting for a person: ${title}`, caseId); liveRow(node, "gate", `waiting for ${ROLE_NAME[(GOV.gates[gateId] || {}).role || "analyst"]}: ${title}`, "person"); }
+  function liveDecision(gateId, caseId, ok, who, reason) { const node = GATE_NODE[gateId]; liveRow(node || "decision", "decision", `${ok ? "approved" : "rejected"} by ${who}${reason ? " · " + reason : ""}`, ok ? "ok" : "no"); }
+  function liveOutcome(node, caseId, text) { live(node, text, caseId); liveRow(node, node === "guard" ? "guardrail" : "outcome", text, node === "guard" ? "guard" : node === "declined" ? "no" : node === "approved" ? "ok" : "code"); }
   function init() {
-    build(); for (const b of document.querySelectorAll("#flow .tab")) b.addEventListener("click", () => { setMode(b.dataset.mode); if (playing) play(); });
-    const sel = $("flow-case"); sel.innerHTML = DATA.cases.map((c) => `<option value="${c.id}">${c.id} · ${esc(c.name)}</option>`).join(""); sel.value = "KYC-1050";
+    build(); for (const b of document.querySelectorAll("#flow .tab")) b.addEventListener("click", () => { setMode(b.dataset.mode); if (playing) play(); else if (rows.length && !liveMode) { prepare(); shown = rows.length; for (const el of document.querySelectorAll("#flow .n.lit, #flow .n.done, #flow .n.sel")) el.classList.remove("lit", "done", "sel"); $("flow-token").style.opacity = 0; caption("", "ready", mode === "ai" ? "The agentic system on the same case: press Play, or click any block." : "The business process on the same case: press Play, or click a step."); renderRows(); } });
+    const sel = $("flow-case"); sel.innerHTML = DATA.cases.map((c) => `<option value="${c.id}">${c.id} · ${esc(c.name)} · ${c.type}</option>`).join(""); sel.value = "KYC-1050";
+    sel.addEventListener("change", () => { if (rows.length && !liveMode && !playing) { prepare(); shown = rows.length; renderRows(); } });
     $("flow-play").addEventListener("click", play); $("flow-stop").addEventListener("click", stop);
-    $("flow-bp").innerHTML = `<span><b>${COLS.reduce((a, c) => a + Number(c.person[0].match(/(\d+) min/)[1]), 0) / 60 | 0}h ${COLS.reduce((a, c) => a + Number(c.person[0].match(/(\d+) min/)[1]), 0) % 60}min</b> of a person's time per case, before any rework</span><span><b>€${COLS.reduce((a, c) => a + Number(c.person[0].match(/€(\d+)/)[1]), 0)}</b> a case at €70 an hour</span><span>most of it copying, reconciling and waiting · the judgement is a few minutes of it</span><span class="hint">illustrative figures for the exercise, in the spirit of the eight-hour KYC file</span>`;
+    $("flow-random").addEventListener("click", () => { const c = DATA.cases[Math.floor(Math.random() * DATA.cases.length)]; sel.value = c.id; $("flow-id").value = ""; play(); });
+    $("flow-id").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); play(); } });
+    $("flow-svg").addEventListener("click", (ev) => { const g = ev.target.closest("[data-node]"); if (g) showNode(g.dataset.node); });
+    $("flow-rows").addEventListener("click", (ev) => { const r = ev.target.closest(".rw"); if (r && r.dataset.node && !liveMode) { light(r.dataset.node); showNode(r.dataset.node); } });
+    $("flow-bp").innerHTML = `<span>six steps, one person, one file at a time · the agentic version runs the same steps with the judgement left to the person</span><span class="hint">illustrative figures for the exercise, in the spirit of the eight-hour KYC file</span>`;
     setMode("ai");
   }
-  return { init, liveTool, liveAgent, liveGate, liveOutcome, clear, stop };
+  return { init, liveTool, liveResult, liveAgent, liveReport, liveGate, liveDecision, liveOutcome, clear, stop, simulate, simulateBP };
 })();
 
 // ------------------------------------------------------------ gates (the human node)
@@ -771,7 +897,7 @@ async function gate(gateId, caseId, title, detail) {
   setStatus("wait", "waiting for " + (g.role === "mlro" ? MLRO_FIRST : ME));
   trace("human", "decision?", `${ROLE_NAME[g.role]} · ${title}`); FLOW.liveGate(gateId, caseId, title);
   const d = await decisionCard(gateId, title, detail);
-  audit("human", "human:" + g.role, (d.ok ? "approved: " : "rejected: ") + label, caseId, title + (d.reason ? " · " + d.reason : ""));
+  audit("human", "human:" + g.role, (d.ok ? "approved: " : "rejected: ") + label, caseId, title + (d.reason ? " · " + d.reason : "")); FLOW.liveDecision(gateId, caseId, d.ok, ROLE_NAME[g.role], d.reason);
   trace("human", d.ok ? "approved" : "rejected", `${ROLE_NAME[g.role]}${d.reason ? " · " + d.reason : ""}`);
   setStatus("busy", "agent working");
   if (!d.ok) throw new Error(`rejected by ${ROLE_NAME[g.role]}${d.reason ? ": " + d.reason : ""}. Do not retry unchanged; report it.`);
@@ -825,6 +951,18 @@ function completeness(c) {
   if (c.type === "individual" && c.identity) { const idd = docs.find((d) => d.type === "identity document"); if (idd) { const x = idd.extracted || {}; if (x.full_name && x.full_name.toLowerCase() !== c.identity.full_name.toLowerCase()) mismatches.push(`name: application "${c.identity.full_name}" vs ID "${x.full_name}"`); if (x.dob && x.dob !== c.identity.dob) mismatches.push(`date of birth: application ${c.identity.dob} vs ID ${x.dob}`); if (x.id_number && x.id_number !== c.identity.id_number) mismatches.push(`id number: application ${c.identity.id_number} vs ID ${x.id_number}`); } }
   if (c.type === "company") { const coi = docs.find((d) => d.type === "certificate of incorporation"); if (coi && coi.extracted.registration && !String(c.declared.registration || "").includes(coi.extracted.registration)) mismatches.push(`registration: declared "${c.declared.registration}" vs certificate "${coi.extracted.registration}"`); }
   return { complete: !missing.length && !expired.length && !mismatches.length, missing, expired, mismatches };
+}
+function identityCheck(c) {
+  const issues = []; const people = [];
+  if (c.type === "individual") { const d = c.documents.find((x) => x.type === "identity document"); const x = d ? d.extracted : {}; const probs = []; if (!d) probs.push("no identity document"); else { if (docStatus(d) !== "ok") probs.push(`document ${docStatus(d)}`); if (x.full_name && x.full_name.toLowerCase() !== c.identity.full_name.toLowerCase()) probs.push(`name differs (ID: ${x.full_name})`); if (x.dob && x.dob !== c.identity.dob) probs.push(`date of birth differs (ID: ${x.dob})`); if (x.id_number && x.id_number !== c.identity.id_number) probs.push("id number differs"); } people.push({ name: c.identity.full_name, verified: !probs.length, problems: probs }); issues.push(...probs.map((p) => c.identity.full_name + ": " + p)); }
+  else { for (const p of c.directors || []) { const d = c.documents.find((x) => (x.type === "director identity document" || x.type === "shareholder identity document") && (x.extracted.full_name || "").toLowerCase() === p.name.toLowerCase()); const probs = []; if (!d) probs.push("no identity document on file"); else { if (docStatus(d) !== "ok") probs.push(`document ${docStatus(d)}`); if (d.extracted.dob && p.dob && d.extracted.dob !== p.dob) probs.push("date of birth differs"); } people.push({ name: p.name, role: p.role, verified: !probs.length, problems: probs }); issues.push(...probs.map((q) => p.name + ": " + q)); }
+    for (const p of (c.ownership || []).filter((o) => o.kind === "individual")) { const d = c.documents.find((x) => /identity document/.test(x.type) && (x.extracted.full_name || "").toLowerCase() === p.name.toLowerCase()); people.push({ name: p.name, role: "owner", verified: !!d && docStatus(d) === "ok", problems: d ? (docStatus(d) === "ok" ? [] : [`document ${docStatus(d)}`]) : ["no identity document on file (UBO declaration relied on)"] }); } }
+  return { verified: !issues.length, people, issues };
+}
+function applyReply(c) { // the customer's reply to an RFI lands on the file
+  for (const d of c.rfi_response.documents) { if (/identity document|application correction|shareholder register/.test(d.type)) c.documents = c.documents.filter((o) => !(o.type === d.type && (o.extracted.full_name || o.extracted.company || "") === (d.extracted.full_name || d.extracted.company || ""))); c.documents.push(clone(d)); }
+  if (c.type === "individual" && c.rfi_response.documents.some((d) => d.type === "application correction")) Object.assign(c.identity, c.rfi_response.documents.find((d) => d.type === "application correction").extracted);
+  c.rfi = null; delete c.steps.intake; delete c.steps.identity;
 }
 function effectiveOwnership(c) {
   const own = c.ownership || []; const eff = {};
@@ -891,12 +1029,8 @@ const TOOLS = [
     execute(i) { const c = byId(i.case_id); const r = completeness(c); c.steps.intake = { at: now(), complete: r.complete }; touch(c); audit("tool", "tool:check_intake", r.complete ? "intake complete" : "intake incomplete", c.id, r.complete ? "" : [...r.missing.map((m) => "missing " + m), ...r.expired, ...r.mismatches].join("; ")); return Object.assign({ case_id: c.id, mandatory_for_type: RB.mandatory_documents[c.type] }, r, r.complete ? {} : { next: "information must be requested from the customer (outreach) before the case can proceed" }); } },
   { name: "verify_identity", skill: "b · identity-verification", on: true, desc: "Verify each natural person's identity document against the application: name, date of birth, id number, expiry. Records the identity step.",
     schema: { type: "object", properties: CID, required: ["case_id"] }, io: ["{ case_id }", "{ verified, people[], issues[] }"],
-    execute(i) { const c = byId(i.case_id); const issues = []; const people = [];
-      if (c.type === "individual") { const d = c.documents.find((x) => x.type === "identity document"); const x = d ? d.extracted : {}; const probs = []; if (!d) probs.push("no identity document"); else { if (docStatus(d) !== "ok") probs.push(`document ${docStatus(d)}`); if (x.full_name && x.full_name.toLowerCase() !== c.identity.full_name.toLowerCase()) probs.push(`name differs (ID: ${x.full_name})`); if (x.dob && x.dob !== c.identity.dob) probs.push(`date of birth differs (ID: ${x.dob})`); if (x.id_number && x.id_number !== c.identity.id_number) probs.push("id number differs"); } people.push({ name: c.identity.full_name, verified: !probs.length, problems: probs }); issues.push(...probs.map((p) => c.identity.full_name + ": " + p)); }
-      else { for (const p of c.directors || []) { const d = c.documents.find((x) => (x.type === "director identity document" || x.type === "shareholder identity document") && (x.extracted.full_name || "").toLowerCase() === p.name.toLowerCase()); const probs = []; if (!d) probs.push("no identity document on file"); else { if (docStatus(d) !== "ok") probs.push(`document ${docStatus(d)}`); if (d.extracted.dob && p.dob && d.extracted.dob !== p.dob) probs.push("date of birth differs"); } people.push({ name: p.name, role: p.role, verified: !probs.length, problems: probs }); issues.push(...probs.map((q) => p.name + ": " + q)); }
-        for (const p of (c.ownership || []).filter((o) => o.kind === "individual")) { const d = c.documents.find((x) => /identity document/.test(x.type) && (x.extracted.full_name || "").toLowerCase() === p.name.toLowerCase()); people.push({ name: p.name, role: "owner", verified: !!d && docStatus(d) === "ok", problems: d ? (docStatus(d) === "ok" ? [] : [`document ${docStatus(d)}`]) : ["no identity document on file (UBO declaration relied on)"] }); } }
-      const verified = !issues.length; c.steps.identity = { at: now(), verified, issues }; touch(c); audit("tool", "tool:verify_identity", verified ? "identity verified" : "identity check failed", c.id, issues.join("; "));
-      return { case_id: c.id, verified, people, issues, next: verified ? null : "do not proceed to a decision on an unverified identity: request a correction or a valid document from the customer" }; } },
+    execute(i) { const c = byId(i.case_id); const r = identityCheck(c); c.steps.identity = { at: now(), verified: r.verified, issues: r.issues }; touch(c); audit("tool", "tool:verify_identity", r.verified ? "identity verified" : "identity check failed", c.id, r.issues.join("; "));
+      return { case_id: c.id, verified: r.verified, people: r.people, issues: r.issues, next: r.verified ? null : "do not proceed to a decision on an unverified identity: request a correction or a valid document from the customer" }; } },
   { name: "resolve_ubo", skill: "f · ubo-check", on: true, desc: "Walk the ownership chain of a company: effective percentage per natural person, who is a UBO under the threshold, corporate layers and their jurisdictions, nominee or trust-office indications. Records the UBO step.",
     schema: { type: "object", properties: CID, required: ["case_id"] }, io: ["{ case_id }", "{ ubos[], effective_ownership, layers[], indications[] }"],
     execute(i) { const c = byId(i.case_id); if (c.type !== "company") throw new Error(`${c.id} is an individual: no ownership chain to resolve`); const eff = effectiveOwnership(c); const ubos = Object.entries(eff).filter(([, v]) => v >= RB.ubo_threshold_percent).map(([n]) => n);
@@ -968,7 +1102,7 @@ const TOOLS = [
       if (i.kind === "rfi" && !items.length) throw new Error("an RFI needs the list of items requested");
       await gate("outreach", c.id, `${c.id}: ${i.kind} to ${c.name}`, (items.length ? "items: " + items.join("; ") + "\n\n" : "") + text);
       const entry = { case: c.id, kind: i.kind, to: c.name, items, text, status: "sent", at: now() }; S.outbox.push(entry);
-      if (i.kind === "rfi") { c.rfi = { items, at: now() }; c.stage = "awaiting customer"; }
+      if (i.kind === "rfi") { c.rfi = { items, at: now() }; c.stage = "awaiting customer"; if (c.rfi_response) replyCard(c); }
       audit("ok", "tool:send_customer_message", `${i.kind} sent`, c.id, items.join("; ") || compact(text, 120)); renderAll(); FLOW.liveOutcome("customer", c.id, `${i.kind} sent to ${c.name}`);
       return { case_id: c.id, sent: i.kind, case_stage: c.stage, note: i.kind === "rfi" ? `the case is paused until the customer replies; ${ME} will tell you when the reply is in. Stop working on this case now.` : null }; } },
 ];
@@ -1080,11 +1214,15 @@ function renderList() {
   }).join("");
 }
 $("list").addEventListener("click", (ev) => { const b = ev.target.closest("[data-reply]"); if (b) { ev.stopPropagation(); customerReplies(b.dataset.reply); return; } const r = ev.target.closest(".row"); if (r) openReader(r.dataset.id); });
+function replyCard(c) {
+  const card = document.createElement("div"); card.className = "notify";
+  card.innerHTML = `<b>${esc(c.id)} is waiting for the customer.</b> In the real world this takes days. Here: <button class="btn small" type="button">Customer replies</button>`;
+  card.querySelector("button").addEventListener("click", (ev) => { ev.target.disabled = true; customerReplies(c.id); });
+  $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
+}
 function customerReplies(id) {
   const c = byId(id); if (!c.rfi_response || c.stage !== "awaiting customer") return;
-  for (const d of c.rfi_response.documents) { if (/identity document|application correction|shareholder register/.test(d.type)) { /* a replacement supersedes the old one of the same type and name */ c.documents = c.documents.filter((o) => !(o.type === d.type && (o.extracted.full_name || o.extracted.company || "") === (d.extracted.full_name || d.extracted.company || ""))); } c.documents.push(clone(d)); }
-  if (c.type === "individual" && c.rfi_response.documents.some((d) => d.type === "application correction")) { const x = c.rfi_response.documents.find((d) => d.type === "application correction").extracted; Object.assign(c.identity, x); }
-  c.rfi = null; c.stage = "customer replied"; c.changed = now(); delete c.steps.intake; delete c.steps.identity;
+  applyReply(c); c.stage = "customer replied"; c.changed = now();
   audit("human", "customer", "replied to the RFI", c.id, c.rfi_response.note + " · " + c.rfi_response.documents.map((d) => d.filename).join(", "));
   trace("human", "customer", `${c.id} · ${c.rfi_response.note}`); addMsg("sys", `${c.name} replied to the request for information (${c.rfi_response.documents.map((d) => d.filename).join(", ")}). Ask the agent to continue with ${c.id}.`); renderAll();
 }
@@ -1227,7 +1365,7 @@ async function ask(text) {
   trace("agent", "request", text);
   const tier = $("model").value;
   const wrap = (t, depth) => ({ name: t.name, description: t.desc, ...(t.schema ? { inputSchema: t.schema } : {}),
-    async execute(input, ctx) { const pad = "  ".repeat(depth); trace("call", pad + t.name, compact(input)); FLOW.liveTool(t.name, input); try { const out = await t.execute(input, ctx); trace("call", pad + "↳ result", compact(out)); return out; } catch (err) { trace("err", pad + "↳ error", err.message); throw err; } } });
+    async execute(input, ctx) { const pad = "  ".repeat(depth); trace("call", pad + t.name, compact(input)); FLOW.liveTool(t.name, input); try { const out = await t.execute(input, ctx); trace("call", pad + "↳ result", compact(out)); FLOW.liveResult(t.name, input, out); return out; } catch (err) { trace("err", pad + "↳ error", err.message); FLOW.liveResult(t.name, input, null, err.message); throw err; } } });
   const active = SUBAGENTS.filter((a) => a.on);
   const delegated = new Set(active.flatMap((a) => a.tools));
   const OWN = ["case_queue", "open_case", "lookup_rulebook"];
@@ -1244,7 +1382,7 @@ async function ask(text) {
       async execute(input, ctx) {
         const instruction = String(input.instruction || "");
         trace("agent", "▶ " + a.name, instruction); FLOW.liveAgent(a.name, (instruction.match(/KYC-\d{4}/i) || [""])[0].toUpperCase() || undefined); audit("agent", "orchestrator", "delegated to " + a.name, (instruction.match(/KYC-\d{4}/i) || [null])[0] && (instruction.match(/KYC-\d{4}/i) || [""])[0].toUpperCase(), compact(instruction, 160));
-        try { const report = await runSub(a, instruction, ctx); trace("agent", "◀ " + a.name, compact(report, 300)); return report || "(no report)"; }
+        try { const report = await runSub(a, instruction, ctx); trace("agent", "◀ " + a.name, compact(report, 300)); FLOW.liveReport(a.name, report || "(no report)"); return report || "(no report)"; }
         catch (err) { trace("err", "◀ " + a.name, err.message || String(err)); throw new Error(`${a.name} failed: ${err.message || err.code || err}`); }
       } })),
   ];
@@ -1299,7 +1437,7 @@ S = freshState(); renderTools(); FLOW.init(); renderAll();
 trace("rules", "loaded", `${S.cases.length} cases · today is ${TODAY} · rulebook ${RB.version}`);
 addMsg("sys", "Ask in plain language. The orchestrator delegates to the agents above and shows every step in the trace; gate cards appear here when a person has to decide.");
 $("send").disabled = true;
-window.__kyc = { tools: toolByName, state: () => S, risk: riskScore, qa: qaChecklist, gov: () => GOV, rulebook: () => RB, customerReplies }; // for tests and facilitators (console)
+window.__kyc = { tools: toolByName, state: () => S, risk: riskScore, qa: qaChecklist, gov: () => GOV, rulebook: () => RB, customerReplies, flow: FLOW }; // for tests and facilitators (console)
 
 const MODEL_MENU = [
   ["Anthropic", [["quick", "Claude Haiku 4.5", "quick (cheap)"], ["default", "Claude Sonnet 5", "default (smarter)"], ["complex", "Claude Opus 5", "best (slowest)"]]],

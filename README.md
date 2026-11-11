@@ -35,17 +35,24 @@ ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local 
    process*: a person at each step, with illustrative time, error rate and cost.
    *Agentic system*: the same steps with the orchestrator, the agents A–G, the
    rulebook engine, the guardrails in code, the human-decision gates and the
-   customer. Pick a case and press **Play** to follow it through; while the real
-   agent works, the diagram follows the agent instead.
+   customer. Pick a case (or type its number, or take a random one) and press
+   **Play**: the case travels block by block with a one-line explanation per
+   step, and the **step by step** panel underneath fills with what each block
+   received and produced, computed by the real engine on that case. Click any
+   block to see what goes in and what comes out. While the real agent works on
+   a request, the diagram and the panel follow the agent instead, with every
+   tool result and agent report as a row.
 2. **Architecture view.** The reference architecture: orchestrator, agents,
    skills, data sources, guardrails and gates, collapsed by default.
 3. **KYC assistant.** The orchestrator's chat. Gate cards appear here when a
    person has to decide; the header's *acting as* switch chooses whether you are
    the analyst or the MLRO.
-4. **Workspace.** The case queue with stages, ratings, hits and anomalies; the
-   case reader (every document, every step, the rating breakdown, the audit
-   entries, the answer key when ticked); the scorecard; customer messages; the
-   audit log with a download button.
+4. **Workspace**, collapsed by default. The case queue with stages, ratings,
+   hits and anomalies; the case reader (every document, every step, the rating
+   breakdown, the audit entries, the answer key when ticked); the scorecard;
+   customer messages; the audit log with a download button. The RFI loop does
+   not need it: when a case waits for the customer, a "Customer replies" button
+   appears in the chat.
 5. **Building blocks, edit me.**
    - **The brief** (agent). The orchestrator's standing instructions: the order
      of the workflow, what it delegates, what it never does.
