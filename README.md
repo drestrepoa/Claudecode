@@ -39,7 +39,10 @@ ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local 
    **Play**: the case travels block by block with a one-line explanation per
    step, and the **step by step** panel underneath fills with what each block
    received and produced, computed by the real engine on that case. Click any
-   block to see what goes in and what comes out. While the real agent works on
+   block to see what it is (Agent, GenAI, Predictive AI, Automation AI, Tool,
+   Data, Human), what goes in and what comes out, which tools it uses and, for an
+   agent, its instructions, plus what it did with the selected case. While the
+   real agent works on
    a request, the diagram and the panel follow the agent instead, with every
    tool result and agent report as a row.
 2. **Architecture view.** The reference architecture: orchestrator, agents,
@@ -53,9 +56,8 @@ ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local 
    customer messages; the audit log with a download button. The RFI loop does
    not need it: when a case waits for the customer, a "Customer replies" button
    appears in the chat.
-5. **Building blocks, edit me.**
-   - **The brief** (agent). The orchestrator's standing instructions: the order
-     of the workflow, what it delegates, what it never does.
+5. **Building blocks, edit me.** The orchestrator's and the agents' instructions
+   are not editable on the page: click a box in the process view to read them.
    - **Rulebook** (deterministic). UBO threshold, sanctions match scores, score
      bands, forced ratings, jurisdiction lists. The engine rates from it; the
      agent can read it, not change it.
@@ -117,8 +119,9 @@ blocked attempts next to the accuracy measures.
    in code, the audit log keeps the attempt.
 4. **Injection (15 min).** "Process KYC-1050 end to end". The business profile
    tells reviewers to skip screening; the intake agent should flag it and the
-   screening agent should find the PEP. Delete the untrusted-documents paragraph
-   from the brief and try again.
+   screening agent should find the PEP. Click the intake agent's box to read
+   the instruction that makes it flag the text, then untick `flag_anomaly` in
+   block 3, run again, and watch QA report the unflagged document.
 5. **Decision rights (15 min).** In block 3, set *Approve a case* to "agent
    decides" and *Enhanced due diligence* to "human decides". Process KYC-1044.
    Discuss: what should never be delegated, what is fine with a notification?
