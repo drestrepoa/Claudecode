@@ -400,7 +400,7 @@ details.blk .chat{border:0;border-radius:0 0 10px 10px}
 </header>
 
 <section>
-  <div class="sec-head"><h2>The agentic system — the same six steps, organised around the decision</h2><p>Top row: how a person does it today. Below: the agents propose, rules in code rate and block, a person decides. Press Play to follow one case through, or watch it follow the live agent.</p></div>
+  <div class="sec-head"><h2>The agentic system — the same six steps, organised around the decision</h2><p>Top row: how a person does it today. Below: every agent reports to the orchestrator, which decides the next step and runs nothing itself; rules in code rate and block; a person decides. Press Play to follow one case through, or watch it follow the live agent.</p></div>
   <div class="panel pad flow mode-ai" id="flow">
     <div class="flow-top">
       <div class="tabs" role="tablist"><button type="button" class="tab" data-mode="bp">Business process</button><button type="button" class="tab on" data-mode="ai">Agentic system</button></div>
@@ -686,7 +686,7 @@ const FLOW = (() => {
     { n: 5, title: "Check and decide", person: ["60 min · 2% errors · €70 a case", "four eyes, sign-off"] },
     { n: 6, title: "Tell the customer", person: ["30 min · 1% errors · €35 a case", "RFI, welcome or decline letter"] },
   ];
-  const X = (i) => 16 + i * 204, CW = 196, NX = (i) => X(i) + 8, NW = 180;
+  const X = (i) => 16 + i * 204, CW = 196, NX = (i) => X(i) + 22, NW = 166, BUS = (i) => X(i) + 11;
   const NODES = [
     { id: "trigger", col: 0, y: 176, h: 40, kind: "code", t: "Trigger · code", s: ["onboarding · review · event"], io: ["a new application, a periodic review date, or an event on an existing customer", "a case in the queue with its stage set to new"] },
     { id: "intake", col: 0, y: 236, h: 56, kind: "agent", t: "A · Intake agent", s: ["parse · check · verify identity", "flags text aimed at reviewers"], io: ["the case id; it reads the file and every document (untrusted text)", "complete or not, what is missing or expired, identity verified or not, anomalies flagged"] },
@@ -716,13 +716,12 @@ const FLOW = (() => {
   const N = Object.fromEntries(NODES.map((n) => [n.id, n]));
   N.orchestrator = { id: "orchestrator", kind: "agent", t: "O · Orchestrator agent", io: ["the analyst's request, the brief, the reports of the agents", "one instruction at a time to an agent, and a short reply to the analyst; it never rates, approves or declines"] };
   const EDGES = [
-    ["intake", "ubo", "agent", "", "h"], ["ubo", "screening", "agent", "", "h"], ["screening", "rating", "agent", "", "h"],
-    ["screening", "hit", "human", "potential match", "vskip"], ["rating", "engine", "", "", "v"], ["engine", "cdd", "", "Low · Medium", "v"], ["cdd", "edd", "", "High", "v"], ["edd", "mlro", "human", "notified", "v"],
-    ["cdd", "finalizer", "agent", "", "hup"], ["qa", "finalizer", "agent", "QA before sign-off", "v"], ["finalizer", "guard", "", "proposal", "v"], ["guard", "decision", "human", "within the rules", "v"],
+    ["screening", "hit", "human", "potential match", "vskip"], ["rating", "engine", "", "asks ⇄ answers", "vboth"], ["edd", "mlro", "human", "notified", "v"],
+    ["finalizer", "guard", "", "proposal", "v"], ["declinehandler", "guard", "guard", "decline proposal", "hleftup"], ["guard", "decision", "human", "within the rules", "v"],
     ["decision", "approved", "ok", "", "v"], ["decision", "declined", "guard", "", "vleft"],
-    ["intake", "outreach", "human", "missing → RFI", "top"], ["approved", "outreach", "ok", "welcome", "hright"], ["declined", "declinehandler", "guard", "", "h"], ["declinehandler", "outreach", "", "", "vright"],
-    ["outreach", "gate", "human", "", "v"], ["gate", "customer", "", "", "v"], ["customer", "trigger", "", "reply → back to intake", "bottom"],
+    ["outreach", "gate", "human", "", "v"], ["gate", "customer", "", "", "v"], ["customer", "trigger", "", "reply → back in the queue", "bottom"],
   ];
+  const AGENTS_IN_COL = [["intake"], ["ubo"], ["screening"], ["rating", "cdd", "edd"], ["qa", "finalizer"], ["outreach", "declinehandler"]];
   function cyl(n) { const b = box(n); const w = 120, h = 46, x = b.cx - w / 2, y = n.y, ry = 7;
     return `<g class="n n-db" id="fn-${n.id}" data-node="${n.id}"><path d="M${x} ${y + ry} v${h - 2 * ry} a${w / 2} ${ry} 0 0 0 ${w} 0 v-${h - 2 * ry}"/><ellipse cx="${b.cx}" cy="${y + ry}" rx="${w / 2}" ry="${ry}"/><text x="${b.cx}" y="${y + 26}" text-anchor="middle" class="t" font-size="11.5">${esc(n.t)}</text><text x="${b.cx}" y="${y + 39}" text-anchor="middle" class="small">${esc(n.s[0])}</text></g>`; }
   function node(n) { if (n.kind === "db") return cyl(n); const b = box(n); const lines = [`<text x="${b.cx}" y="${b.y + 17}" text-anchor="middle" class="t">${esc(n.t)}</text>`, ...n.s.map((t, i) => `<text x="${b.cx}" y="${b.y + 31 + i * 13}" text-anchor="middle" class="small">${esc(t)}</text>`)];
@@ -731,6 +730,8 @@ const FLOW = (() => {
     if (route === "h") { d = `M${A.x + A.w} ${A.cy} H${B.x - 2}`; lx = (A.x + A.w + B.x) / 2; ly = A.cy - 5; }
     else if (route === "v") { d = `M${A.cx} ${A.y + A.h} V${B.y - 2}`; lx = A.cx + 6; ly = (A.y + A.h + B.y) / 2 + 4; }
     else if (route === "vskip") { const xx = A.x + A.w - 10; d = `M${xx} ${A.y + A.h} V${B.y - 2}`; lx = xx - 4; ly = B.y - 6; }
+    else if (route === "vboth") { d = `M${A.cx} ${A.y + A.h + 2} V${B.y - 2}`; lx = A.cx + 6; ly = (A.y + A.h + B.y) / 2 + 4; return `<path class="edge ${kind}" d="${d}" marker-start="url(#fa-${kind || "m"})" marker-end="url(#fa-${kind || "m"})"/><text class="elabel ${kind}" x="${lx}" y="${ly}">${esc(label)}</text>`; }
+    else if (route === "hleftup") { const xl = A.x - 6; d = `M${A.x} ${A.cy} H${xl} V${B.cy} H${B.x + B.w + 2}`; lx = xl + 4; ly = B.cy + 36; }
     else if (route === "vleft") { d = `M${A.x} ${A.cy + 12} H${A.x - 4} V${B.cy} H${B.x - 2}`; lx = A.x; ly = B.cy; }
     else if (route === "vright") { const xr = A.x + A.w + 5; d = `M${A.x + A.w} ${A.cy} H${xr} V${B.cy} H${B.x + B.w + 2}`; lx = xr; ly = B.cy; }
     else if (route === "hup") { const xm = A.x + A.w + 12; d = `M${A.x + A.w} ${A.cy} H${xm} V${B.cy} H${B.x - 2}`; lx = xm + 4; ly = (A.cy + B.cy) / 2; }
@@ -738,6 +739,7 @@ const FLOW = (() => {
     else if (route === "top") { const yy = 166; d = `M${A.cx + 40} ${A.y} V${yy} H${B.cx - 40} V${B.y - 2}`; lx = (A.cx + B.cx) / 2; ly = yy - 4; }
     else if (route === "bottom") { const yy = 604; d = `M${A.cx} ${A.y + A.h} V${yy} H${B.x - 10} V${B.cy} H${B.x - 2}`; lx = (A.cx + B.cx) / 2; ly = yy - 4; }
     const anchor = route === "h" || route === "top" || route === "bottom" ? "middle" : route === "vskip" ? "end" : "start";
+    if (route === "hleftup") return `<path class="edge ${kind}" d="${d}" marker-end="url(#fa-${kind || "m"})"/><text class="elabel ${kind}" x="${A.x - 2}" y="${A.y - 6}" text-anchor="end">${esc(label)}</text>`;
     return `<path class="edge ${kind}${route === "bottom" || route === "top" ? " dash" : ""}" d="${d}" marker-end="url(#fa-${kind || "m"})"/>${label ? `<text class="elabel ${kind}" x="${lx}" y="${ly}" text-anchor="${anchor}">${esc(label)}</text>` : ""}`; }
   function build() {
     const parts = [`<svg viewBox="0 0 1240 626" role="img" aria-label="The KYC process in six steps. Top row: a person at each step with time, error rate and cost. Below: the orchestrator routes the case through the intake, UBO, screening, risk-rating, due-diligence and finalizer agents; the rulebook engine rates; guardrails in code block what is not allowed; a person decides and approves every customer message.">
@@ -746,8 +748,10 @@ const FLOW = (() => {
     parts.push(`<g class="layer-bp">`);
     COLS.forEach((c, i) => { parts.push(`<g class="n n-person" id="fp-${i}" data-node="p${i}"><rect x="${NX(i)}" y="52" width="${NW}" height="54"/><text x="${NX(i) + NW / 2}" y="70" text-anchor="middle" class="t">a person</text><text x="${NX(i) + NW / 2}" y="84" text-anchor="middle" class="small">${esc(c.person[0])}</text><text x="${NX(i) + NW / 2}" y="97" text-anchor="middle" class="small">${esc(c.person[1])}</text></g>`); if (i < 5) parts.push(`<path class="edge" d="M${NX(i) + NW} 79 H${NX(i + 1) - 2}" marker-end="url(#fa-m)"/>`); });
     parts.push(`</g><g class="layer-ai">`);
-    parts.push(`<g class="n n-agent" id="fn-orchestrator" data-node="orchestrator"><rect x="${NX(0)}" y="124" width="${NX(5) + NW - NX(0)}" height="32"/><text x="${NX(0) + 12}" y="144" class="t">O · Orchestrator agent</text><text x="${NX(0) + 190}" y="144" class="small">routes the case column by column from each agent's report · instruction ⇄ report with every agent · stops at every gate · never rates, approves or declines</text></g>`);
-    parts.push(`<path class="edge agent" d="M${box(N.intake).cx} 156 V174" marker-end="url(#fa-agent)"/>`);
+    parts.push(`<g class="n n-agent" id="fn-orchestrator" data-node="orchestrator"><rect x="${BUS(0) - 4}" y="124" width="${NX(5) + NW - BUS(0) + 4}" height="32"/><text x="${BUS(0) + 8}" y="144" class="t">O · Orchestrator agent</text><text x="${BUS(0) + 186}" y="144" class="small">every agent reports back here · the orchestrator reads the report and gives the next instruction · it runs no step itself and never rates, approves, declines or messages the customer</text></g>`);
+    AGENTS_IN_COL.forEach((ids, i) => { const bottom = Math.max(...ids.map((id) => box(N[id]).cy)); parts.push(`<path class="edge agent" d="M${BUS(i)} 156 V${bottom}"/>`); for (const id of ids) { const b = box(N[id]); parts.push(`<path class="edge agent" d="M${BUS(i) + 1} ${b.cy} H${b.x - 2}" marker-start="url(#fa-agent)" marker-end="url(#fa-agent)"/>`); } });
+    parts.push(`<text class="elabel agent" x="${BUS(0) + 4}" y="170">instruction ↓ · report ↑</text>`);
+    parts.push(`<path class="edge" d="M${box(N.trigger).x + box(N.trigger).w} ${box(N.trigger).cy} H${box(N.trigger).x + box(N.trigger).w + 8} V160" marker-end="url(#fa-m)"/>`);
     parts.push(...EDGES.map(edge), ...NODES.map(node));
     parts.push(`<g class="token" id="flow-token" style="opacity:0"><rect width="66" height="18"/><text x="33" y="13" text-anchor="middle"></text></g></g></svg>`);
     $("flow-svg").innerHTML = parts.join("");
@@ -774,21 +778,25 @@ const FLOW = (() => {
     const c = Object.assign(clone(c0), { stage: "new", steps: {}, anomalies: [], hits: {}, rating: null, dd: null, decision: null, rfi: null });
     const k = c.key; const st = []; const t = () => now();
     const s = (node, l, v, kind, cap, html) => st.push({ node, row: { l, v, kind, node, html }, cap });
+    const o = (from, next, why) => st.push({ node: "orchestrator", row: { l: "orchestrator · O", v: `reads ${from}'s report → ${next ? "next: " + next : "done"}${why ? " · " + why : ""}`, kind: "agent", node: "orchestrator" }, cap: `The orchestrator reads ${from}'s report and decides: ${next ? next + "." : "the case is done; it reports to " + ME + "."}${why ? " " + why : ""}` });
     const money = (n) => n >= 1e6 ? `€${(n / 1e6).toFixed(1)}m` : `€${Math.round(n / 1000)}k`;
-    s("trigger", "case", `${c.id} · ${c.name} · ${c.type} · ${c.trigger} · ${c.declared.country}`, "", `${c.id}, ${c.name}: ${c.trigger}. The orchestrator opens the queue and picks it up.`, `<b>${esc(c.id)}</b> · ${esc(c.name)} · ${esc(c.type)} · ${esc(c.trigger)} · ${esc(c.declared.country)}`);
+    s("trigger", "case", `${c.id} · ${c.name} · ${c.type} · ${c.trigger} · ${c.declared.country}`, "", `${c.id}, ${c.name}: ${c.trigger}. A new case in the queue.`, `<b>${esc(c.id)}</b> · ${esc(c.name)} · ${esc(c.type)} · ${esc(c.trigger)} · ${esc(c.declared.country)}`);
+    st.push({ node: "orchestrator", row: { l: "orchestrator · O", v: `case_queue · open_case(${c.id}) → next: intake_agent`, kind: "agent", node: "orchestrator" }, cap: `The orchestrator opens the queue, reads the case file and gives its first instruction: intake_agent, ${c.id}.` });
     const people = parties(c).length; s("db1", "file", `${c.documents.length} documents · ${people} part${people === 1 ? "y" : "ies"} · ${c.declared.industry || c.declared.occupation} · product: ${c.declared.product} · ${c.declared.expected_annual_turnover_eur ? money(c.declared.expected_annual_turnover_eur) + " a year" : money(c.declared.expected_monthly_inflow_eur * 12) + " a year"}${c.declared.cash_intensive ? " · cash-intensive" : ""}`, "code", `The client input DB holds ${c.documents.length} documents and the declared data. All of it is customer-supplied.`);
     const intake = () => { const comp = completeness(c); const idc = identityCheck(c); c.steps.intake = { at: t(), complete: comp.complete }; c.steps.identity = { at: t(), verified: idc.verified, issues: idc.issues };
       s("intake", "intake · A", `check_intake → ${comp.complete ? "complete" : "incomplete: " + [...comp.missing.map((m) => "missing " + m), ...comp.expired, ...comp.mismatches].join("; ")} · verify_identity → ${idc.verified ? "verified" : idc.issues.join("; ")}`, comp.complete && idc.verified ? "agent" : "guard", comp.complete && idc.verified ? `A parses ${c.documents.length} documents, checks completeness against the rulebook and verifies identity: the file is complete.` : `A finds the file incomplete or inconsistent: ${[...comp.missing.map((m) => "missing " + m), ...comp.expired, ...comp.mismatches, ...idc.issues].slice(0, 2).join("; ")}.`); return comp.complete && idc.verified; };
     let ok = intake();
-    const inj = c.documents.filter((d) => /(ai assistant|automated reviewer|system note|skip .{0,20}screening|set .{0,20}risk rating)/i.test(d.text || ""));
-    if (inj.length) { c.anomalies.push({ kind: "prompt_injection", detail: inj[0].filename, at: t() }); s("intake", "anomaly · q", `${inj[0].filename} contains text addressed to automated reviewers ("${(inj[0].text.match(/SYSTEM NOTE[^.]*\./) || ["…"])[0].slice(0, 90)}…") → flag_anomaly(prompt_injection) · instruction ignored`, "guard", "One document carries instructions for AI reviewers. A flags it as an anomaly and ignores it; QA will check that it was flagged."); }
-    if (!ok) { const comp = completeness(c), idc = identityCheck(c); const items = [...comp.missing, ...comp.expired.map((e) => "valid " + e.split(" (")[0]), ...idc.issues];
+    const inj0 = c.documents.filter((d) => /(ai assistant|automated reviewer|system note|skip .{0,20}screening|set .{0,20}risk rating)/i.test(d.text || ""));
+    if (inj0.length) { c.anomalies.push({ kind: "prompt_injection", detail: inj0[0].filename, at: t() }); s("intake", "anomaly · q", `${inj0[0].filename} contains text addressed to automated reviewers ("${(inj0[0].text.match(/SYSTEM NOTE[^.]*\./) || ["…"])[0].slice(0, 90)}…") → flag_anomaly(prompt_injection) · instruction ignored`, "guard", "One document carries instructions for AI reviewers. A flags it as an anomaly and ignores it; QA will check that it was flagged."); }
+    if (!ok) { o("intake_agent", "outreach_agent", "the file is incomplete: ask the customer, then stop."); const comp = completeness(c), idc = identityCheck(c); const items = [...comp.missing, ...comp.expired.map((e) => "valid " + e.split(" (")[0]), ...idc.issues];
       s("outreach", "outreach · X", `send_customer_message(rfi) → items: ${items.join("; ")}`, "agent", "X drafts a request for information listing exactly what is needed and why.");
       s("gate", "gate", `customer communication → ${ROLE_NAME.analyst} approves the message`, "person", `${ME} reads the RFI and approves it. The case pauses; the orchestrator moves on.`);
       s("customer", "customer", c.rfi_response ? `replies: ${c.rfi_response.documents.map((d) => d.filename).join(", ")} · ${c.rfi_response.note}` : "no reply yet", "code", "The customer replies with the missing items; they land on the file.");
-      if (c.rfi_response) { applyReply(c); s("trigger", "trigger", "customer replied → the case is back in the queue", "code", "The reply brings the case back to intake."); ok = intake(); } }
+      o("outreach_agent", null, "The case is paused awaiting the customer; the orchestrator moves on to other cases.");
+      if (c.rfi_response) { applyReply(c); s("trigger", "trigger", "customer replied → the case is back in the queue", "code", "The reply brings the case back to the queue."); st.push({ node: "orchestrator", row: { l: "orchestrator · O", v: `${c.id} has a reply → next: intake_agent, again`, kind: "agent", node: "orchestrator" }, cap: `${ME} tells the orchestrator the reply is in. It sends the case back to intake_agent.` }); ok = intake(); } }
+    o("intake_agent", c.type === "company" ? "ubo_agent" : "screening_agent", c.type === "company" ? "A company: resolve the owners first." : "An individual: no ownership chain, straight to screening.");
     if (c.type === "company") { const eff = effectiveOwnership(c); const ubos = Object.entries(eff).filter(([, v]) => v >= RB.ubo_threshold_percent).map(([n]) => n); const layers = c.ownership.filter((p) => p.kind === "company"); const off = layers.filter((p) => RB.offshore_jurisdictions.includes(p.country)); c.steps.ubo = { at: t(), ubos, layers: layers.length };
-      s("ubo", "ubo · B", `resolve_ubo → ${Object.entries(eff).map(([n, v]) => `${n} ${v}%${c.ownership.find((p) => p.name === n).via ? " via " + c.ownership.find((p) => p.name === n).via : ""}`).join(" · ")} → UBOs: ${ubos.join(", ") || "none ≥ threshold"} · ${layers.length} corporate layer${layers.length === 1 ? "" : "s"}${off.length ? " · offshore: " + off.map((p) => p.country).join(", ") : ""}${(c.directors || []).some((d) => /nominee|corporate services|trust/i.test(d.role || "")) ? " · nominee director" : ""}`, "agent", `B walks the ownership chain: ${layers.length} corporate layer${layers.length === 1 ? "" : "s"}, ${ubos.length} beneficial owner${ubos.length === 1 ? "" : "s"} at or above ${RB.ubo_threshold_percent}%${off.length ? ", an offshore layer in " + off.map((p) => p.country).join(", ") : ""}.`); }
+      s("ubo", "ubo · B", `resolve_ubo → ${Object.entries(eff).map(([n, v]) => `${n} ${v}%${c.ownership.find((p) => p.name === n).via ? " via " + c.ownership.find((p) => p.name === n).via : ""}`).join(" · ")} → UBOs: ${ubos.join(", ") || "none ≥ threshold"} · ${layers.length} corporate layer${layers.length === 1 ? "" : "s"}${off.length ? " · offshore: " + off.map((p) => p.country).join(", ") : ""}${(c.directors || []).some((d) => /nominee|corporate services|trust/i.test(d.role || "")) ? " · nominee director" : ""}`, "agent", `B walks the ownership chain: ${layers.length} corporate layer${layers.length === 1 ? "" : "s"}, ${ubos.length} beneficial owner${ubos.length === 1 ? "" : "s"} at or above ${RB.ubo_threshold_percent}%${off.length ? ", an offshore layer in " + off.map((p) => p.country).join(", ") : ""}.`); o("ubo_agent", "screening_agent", `Screen ${ubos.length + 1 + (c.directors || []).filter((d) => !ubos.includes(d.name)).length} parties.`); }
     const names = parties(c).map((p) => p.name);
     const sh = c.screening.sanctions.map((h) => ({ ...h, cls: h.score >= RB.sanctions_true_match_score ? "TRUE MATCH" : h.score >= RB.sanctions_potential_match_score ? "potential match" : "below threshold" }));
     const tm = sh.filter((h) => h.cls === "TRUE MATCH"), pot = sh.filter((h) => h.cls === "potential match");
@@ -799,35 +807,47 @@ const FLOW = (() => {
     const medTxt = c.screening.media.length ? c.screening.media.map((a) => `${a.severity}: "${a.headline}" (${a.source}, ${a.date})`).join(" · ") : "none";
     s("screening", "screening · C", `screened ${names.length} part${names.length === 1 ? "y" : "ies"}: ${names.join(", ")}\nsanctions → ${sanTxt}\npep → ${pepTxt}\nmedia → ${medTxt}`, tm.length ? "guard" : "agent", tm.length ? `TRUE MATCH: ${tm[0].screened_name} matches ${tm[0].listed_name} on the ${tm[0].list}, date of birth and nationality included. A hard stop.` : `C screens ${names.length} part${names.length === 1 ? "y" : "ies"} against sanctions lists, the PEP database and the press: ${pot.length ? "a potential sanctions match" : "no sanctions hit"}, ${c.screening.pep.length ? "a PEP" : "no PEP"}, ${sev === "none" ? "no adverse media" : sev + "-severity adverse media"}.`);
     for (const h of pot) { c.hits[h.hit_id] = { disposition: "false_positive", at: t() }; s("hit", "hit · a person", `disposition_hit(${h.hit_id}, false_positive: born ${h.listed_dob} vs ${c.ownership.find((p) => p.name === h.screened_name)?.dob || "?"}, ${h.listed_nationality} vs ${c.ownership.find((p) => p.name === h.screened_name)?.country || "?"}) → ${ROLE_NAME.analyst} confirms at the gate`, "person", "C proposes a disposition with the evidence: different date of birth, different nationality. The analyst confirms it at the gate."); }
+    o("screening_agent", tm.length ? "decline_agent" : "risk_agent", tm.length ? "A true sanctions match: no rating can help, the decline handler takes over." : pot.length ? "The potential match is dispositioned; now the rating." : "No hard stop: now the rating.");
     const r = riskScore(c); c.rating = Object.assign({ at: t() }, r);
     s("engine", "engine · j", `${r.factors.map((f) => `${f.factor} +${f.points}`).join(" · ") || "no factors"} → score ${r.score} → ${r.rating}${r.forced_high_by.length ? " (forced by " + r.forced_high_by.join(", ") + ")" : ""}${r.unacceptable_reason ? " · " + r.unacceptable_reason : ""}`, r.rating === "Unacceptable" ? "no" : "code", `The rulebook engine rates ${r.rating}${r.forced_high_by.length ? ", forced by " + r.forced_high_by.join(" and ") : " from a score of " + r.score}. D explains it; nobody can change the number.`);
     if (r.rating === "Unacceptable") {
+      o("risk_agent", "qa_agent", "Unacceptable confirmed by the engine. QA before the decline.");
       const qa = qaChecklist(c); c.steps.qa = { at: t(), pass: qa.pass }; s("qa", "qa · Z", `run_qa → ${qa.pass ? "pass" : "fail: " + qa.findings.join(" | ")} (${qa.checks.length} checks)`, qa.pass ? "ok" : "guard", "Z runs the independent checklist on the file.");
+      o("qa_agent", "decline_agent", "QA passed. The decline handler prepares the package and the referral.");
       s("declinehandler", "decline · Y", `finalize_case(decline) + escalate_to_mlro(sar_referral) → grounds: ${r.unacceptable_reason}`, "agent", "Y proposes the decline package and a SAR hand-off.");
       s("guard", "guardrail", `approve → refused in code (true sanctions match) · decline → passed to the gate`, "guard", "Guardrails: any approval would be refused in code; the decline goes to the gate.");
       s("decision", "decision", `${ROLE_NAME.mlro} decides: DECLINE · SAR referral taken`, "person", `${MLRO.name} declines and takes the referral.`);
       s("declined", "outcome", `DECLINED`, "no", "Declined. The referral stays with the MLRO.", `<b>DECLINED</b> · SAR referral`);
+      o("decline_agent", "outreach_agent", "Declined and referred. The customer needs a notice that says nothing about why.");
       s("outreach", "outreach · X", `send_customer_message(decline_notice) → "unable to open the relationship", no reason · tipping-off check passed`, "agent", "X drafts a short notice that gives no reason. A notice mentioning screening or a report would be refused in code.");
       s("gate", "gate", `${ROLE_NAME.analyst} approves the notice`, "person", `${ME} approves the notice.`);
       s("customer", "customer", `receives the notice · learns nothing of the referral`, "code", "The customer gets the notice and nothing else.");
+      o("outreach_agent", null, `It tells ${ME}: declined, referred, notice sent.`);
       s("declined", "key", `answer key: ${k.risk_rating} · ${k.decision}${k.flags.length ? " · flags " + k.flags.join(", ") : ""} → ${r.rating === k.risk_rating ? "matches" : "DIFFERS"}`, r.rating === k.risk_rating ? "ok" : "no", `The answer key agrees: ${k.why}`);
       return st; }
+    o("risk_agent", r.rating === "High" ? "edd_agent" : "cdd_agent", r.rating === "High" ? "High: enhanced due diligence is mandatory." : `${r.rating}: standard due diligence.`);
     if (r.rating === "High") { c.dd = { level: "EDD", at: t() }; s("edd", "edd · F", `record_due_diligence(EDD) → source of wealth and funds in depth · concern: ${k.flags.join(", ") || "score"} · mitigations and monitoring`, "agent", "F does enhanced due diligence: source of wealth, the specific concern, mitigations."); s("mlro", "mlro", `${ROLE_NAME.mlro} notified of the EDD`, "person", `${MLRO.name} is notified of the EDD, as the governance block says.`); }
     else { c.dd = { level: "CDD", at: t() }; s("cdd", "cdd · E", `record_due_diligence(CDD) → who the customer is, what the account is for, source of funds: ${c.declared.source_of_funds}`, "agent", "E records customer due diligence: who, what for, where the money comes from."); }
+    o(r.rating === "High" ? "edd_agent" : "cdd_agent", "qa_agent", "Due diligence on file. Independent QA before any sign-off.");
     const qa = qaChecklist(c); c.steps.qa = { at: t(), pass: qa.pass };
     s("qa", "qa · Z", `run_qa → ${qa.pass ? "pass" : "fail: " + qa.findings.join(" | ")} (${qa.checks.length} checks: ${qa.checks.map((x) => x.check).slice(0, 4).join(", ")}, …)`, qa.pass ? "ok" : "guard", qa.pass ? "Z runs the independent checklist: coverage, freshness of the rating, the DD level, anomalies. It passes." : "Z finds gaps: " + qa.findings.join("; "));
+    o("qa_agent", k.decision === "approve" ? "finalizer_agent" : "decline_agent", k.decision === "approve" ? "QA passed; nothing speaks against the customer. Propose the approval." : "QA passed, but EDD could not resolve the concern. Propose the decline.");
     if (k.decision === "approve") {
       s("finalizer", "finalizer · G", `finalize_case(approve) → case package: rating ${r.rating}, ${c.dd.level} on file, ${c.steps.sanctions.true_matches ? "" : "no true match, "}QA passed`, "agent", "G proposes the approval with the case package.");
       s("guard", "guardrail", `nothing tripped — no true match, ${r.rating === "High" ? "EDD on file" : "EDD not required"}, QA passed. The proposal goes to the gate.`, "ok", `Guardrails in code: no true match, ${r.rating === "High" ? "EDD on file" : "no EDD needed"}, QA passed. The proposal goes to the gate.`);
       s("decision", "decision", `${ROLE_NAME.analyst} decides: APPROVE`, "person", `${ME} reads the package and approves.`);
       s("approved", "outcome", "APPROVED", "ok", `Approved, with ${r.rating === "High" ? "enhanced" : "standard"} monitoring.`, `<b>APPROVED</b> · ${r.rating === "High" ? "enhanced monitoring, review in 12 months" : "standard monitoring"}`);
+      o("finalizer_agent", "outreach_agent", "Approved. Welcome the customer.");
       s("outreach", "outreach · X", `send_customer_message(welcome)`, "agent", "X drafts the welcome."); s("gate", "gate", `${ROLE_NAME.analyst} approves the message`, "person", `${ME} approves the message.`); s("customer", "customer", "onboarded", "code", "The customer is onboarded.");
+      o("outreach_agent", null, `It tells ${ME}: approved as ${r.rating}, welcome sent.`);
     } else {
       s("declinehandler", "decline · Y", `finalize_case(decline) → grounds: ${k.why.split(":")[0]}`, "agent", "EDD could not resolve the concern: Y proposes the decline with the internal grounds.");
       s("guard", "guardrail", `nothing tripped — the decline goes to the gate`, "ok", "Guardrails in code pass the proposal to the gate.");
       s("decision", "decision", `${ROLE_NAME.mlro} decides: DECLINE`, "person", `${MLRO.name} declines.`);
       s("declined", "outcome", "DECLINED", "no", "Declined.", `<b>DECLINED</b>`);
+      o("decline_agent", "outreach_agent", "Declined. The customer needs a notice without reasons.");
       s("outreach", "outreach · X", `send_customer_message(decline_notice) → courteous, no reason · tipping-off check passed`, "agent", "X drafts a courteous notice without reasons."); s("gate", "gate", `${ROLE_NAME.analyst} approves the notice`, "person", `${ME} approves it.`); s("customer", "customer", "receives the notice", "code", "The customer gets the notice.");
+      o("outreach_agent", null, `It tells ${ME}: declined, notice sent.`);
     }
     const match = r.rating === k.risk_rating && (k.decision === "approve") === (k.decision === "approve");
     s(k.decision === "approve" ? "approved" : "declined", "key", `answer key: ${k.risk_rating} · ${k.decision}${k.rfi_first ? " after an RFI" : ""}${k.flags.length ? " · flags " + k.flags.join(", ") : ""} → ${match ? "matches" : "DIFFERS"}`, match ? "ok" : "no", `The answer key agrees: ${k.why}`);
@@ -843,7 +863,7 @@ const FLOW = (() => {
   function play() {
     stop(); const c = prepare(); let i = 0; for (const el of document.querySelectorAll("#flow .n.lit, #flow .n.done, #flow .n.sel")) el.classList.remove("lit", "done", "sel"); shown = 0; renderRows(); $("flow-panel").open = true;
     $("flow-play").hidden = true; $("flow-stop").hidden = false; $("flow-hint").textContent = "";
-    const tick = () => { if (i >= steps.length) { stop(); return; } const st = steps[i]; light(st.node, c.id); shown = i + 1; caption("", `step ${i + 1} of ${steps.length}`, st.cap); renderRows(); i++; playing = setTimeout(tick, mode === "ai" ? 2200 : 1600); };
+    const tick = () => { if (i >= steps.length) { stop(); return; } const st = steps[i]; light(st.node, c.id); shown = i + 1; caption("", `step ${i + 1} of ${steps.length}`, st.cap); renderRows(); i++; playing = setTimeout(tick, mode === "ai" ? 1700 : 1600); };
     tick();
   }
   function stop() { if (playing) clearTimeout(playing); playing = null; $("flow-play").hidden = false; $("flow-stop").hidden = true; }
@@ -883,7 +903,7 @@ const FLOW = (() => {
     const toolNames = ag ? ag.tools : (m.tools || []);
     const tools = toolNames.map((t) => toolByName[t]).filter(Boolean);
     const c = caseFor();
-    const ALIAS = { rating: ["rating", "engine"], orchestrator: ["trigger"], db1: ["db1"], db2: ["ubo"], db3: ["screening"] };
+    const ALIAS = { rating: ["rating", "engine"], orchestrator: ["orchestrator"], db1: ["db1"], db2: ["ubo"], db3: ["screening"] };
     const keys = ALIAS[id] || [id]; const mine = liveMode ? [] : rows.filter((r) => keys.includes(r.node));
     const pi = person ? Number(id.slice(1)) : -1;
     const io = person ? [pi === 0 ? "the application and the documents the customer sent" : `the file as step ${pi} left it`, `${COLS[pi].person[1]}, by hand · ${COLS[pi].person[0]}`] : n.io;
@@ -935,7 +955,7 @@ const FLOW = (() => {
     case "flag_anomaly": return `${o.recorded} · ${o.anomalies_on_file} on file`;
     default: return compact(o, 240); } }
   function liveAgent(name, caseId) { const node = AGENT_NODE[name]; if (!node) return; live(node, `${name} is working${caseId ? " on " + caseId : ""}`, caseId); liveRow(node, name.replace(/_/g, " "), `▶ delegated${caseId ? " · " + caseId : ""}`, "agent"); }
-  function liveReport(name, report) { const node = AGENT_NODE[name]; if (!node) return; liveRow(node, name.replace(/_/g, " "), "◀ " + compact(report, 320), "agent"); }
+  function liveReport(name, report) { const node = AGENT_NODE[name]; if (!node) return; liveRow(node, name.replace(/_/g, " "), "◀ " + compact(report, 320), "agent"); live("orchestrator", `${name} reported back; the orchestrator reads it and decides the next step`); }
   function liveGate(gateId, caseId, title) { const node = GATE_NODE[gateId]; if (!node) return; live(node, `waiting for a person: ${title}`, caseId); liveRow(node, "gate", `waiting for ${ROLE_NAME[(GOV.gates[gateId] || {}).role || "analyst"]}: ${title}`, "person"); }
   function liveDecision(gateId, caseId, ok, who, reason) { const node = GATE_NODE[gateId]; liveRow(node || "decision", "decision", `${ok ? "approved" : "rejected"} by ${who}${reason ? " · " + reason : ""}`, ok ? "ok" : "no"); }
   function liveOutcome(node, caseId, text) { live(node, text, caseId); liveRow(node, node === "guard" ? "guardrail" : "outcome", text, node === "guard" ? "guard" : node === "declined" ? "no" : node === "approved" ? "ok" : "code"); }

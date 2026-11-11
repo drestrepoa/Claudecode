@@ -33,9 +33,11 @@ ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local 
 
 1. **The agentic system.** The six steps of the process with two tabs. *Business
    process*: a person at each step, with illustrative time, error rate and cost.
-   *Agentic system*: the same steps with the orchestrator, the agents A–G, the
-   rulebook engine, the guardrails in code, the human-decision gates and the
-   customer. Pick a case (or type its number, or take a random one) and press
+   *Agentic system*: the same steps with the orchestrator as the hub. Every agent
+   is wired to the orchestrator only (instruction down, report up); there are no
+   agent-to-agent arrows, because the orchestrator reads each report and decides
+   the next step, and runs no step itself. Around the agents: the rulebook
+   engine, the guardrails in code, the human-decision gates and the customer. Pick a case (or type its number, or take a random one) and press
    **Play**: the case travels block by block with a one-line explanation per
    step, and the **step by step** panel underneath fills with what each block
    received and produced, computed by the real engine on that case. Click any
