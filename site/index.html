@@ -93,9 +93,6 @@ section{display:flex;flex-direction:column;gap:12px}
 .caption{color:var(--muted);max-width:80ch}
 
 /* building blocks */
-.blocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;gap:14px}
-.blocks .b-tools{grid-column:2;grid-row:1 / span 3}
-@media (max-width:900px){.blocks{grid-template-columns:1fr}.blocks .b-tools{grid-column:auto;grid-row:auto}}
 .block{display:flex;flex-direction:column;gap:10px}
 .block-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .block-head .t{display:flex;align-items:center;gap:8px}
@@ -326,6 +323,21 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cat.genai{color:#D4A9E8;border-color:#8D5AA8;background:#352441}:root:not([data-theme="light"]) .cat.pred{color:#8CCBE0;border-color:#3E8AA6;background:#17323C}}
 :root[data-theme="dark"] .cat.genai{color:#D4A9E8;border-color:#8D5AA8;background:#352441}:root[data-theme="dark"] .cat.pred{color:#8CCBE0;border-color:#3E8AA6;background:#17323C}
 
+/* collapsible blocks */
+details.blk{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+details.blk>summary{cursor:pointer;list-style:none;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+details.blk>summary::-webkit-details-marker{display:none}
+details.blk>summary::before{content:"";width:7px;height:7px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;flex:none;margin-right:2px}
+details.blk[open]>summary::before{transform:rotate(45deg)}
+details.blk>summary h3{font-size:15px}
+details.blk>summary .hint{flex-basis:100%;margin-left:19px;font-size:12.5px;color:var(--muted)}
+details.blk>summary:hover{background:var(--panel-2);border-radius:10px}
+details.blk[open]>summary{border-bottom:1px solid var(--line-2);border-radius:10px 10px 0 0}
+details.blk>.body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+details.blk>.body .block-head{margin-bottom:2px}
+.blocks{display:flex;flex-direction:column;gap:10px}
+details.blk .chat{border:0;border-radius:0 0 10px 10px}
+
 /* kyc additions */
 .lab.stage-new{color:var(--muted)} .lab.stage-progress{color:var(--det);border-color:var(--det)} .lab.stage-awaiting{color:var(--human);border-color:var(--human)} .lab.stage-replied{color:var(--human);border-color:var(--human);border-style:dashed}
 .lab.stage-approved{color:#fff;background:var(--ok);border-color:var(--ok)} .lab.stage-declined{color:#fff;background:var(--guard);border-color:var(--guard)}
@@ -484,13 +496,14 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
 </section>
 
 <section>
-  <div class="sec-head"><h2 id="assistant-head">KYC assistant — ask in plain language</h2><p>Every request runs through the structure above. Gate cards appear here; the trace at the bottom shows each step.</p></div>
+  <details class="blk" id="asst"><summary><h3>KYC assistant — ask the orchestrator in plain language</h3><span class="tag agent">agent</span><span class="hint">Every request runs through the structure above. Decision cards appear here when a person has to decide; it opens by itself when one does.</span></summary>
   <div class="panel chat">
       <div class="chat-head"><div><h3 id="chat-title">KYC assistant</h3><span class="hint" id="cost">live Claude calls on your account · a few cents per turn</span></div><button class="btn small" id="clear">Clear chat</button></div>
       <div class="msgs" id="msgs"></div>
       <div class="suggest" id="suggest"></div>
       <div class="compose"><input type="text" id="say" placeholder="Ask the agent…" autocomplete="off"><button class="btn primary" id="send">Send</button><button class="btn" id="stop" hidden>Stop</button></div>
     </div>
+  </details>
 </section>
 
 <section>
@@ -523,11 +536,10 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
 </section>
 
 <section>
-  <div class="sec-head"><h2>Building blocks — edit me</h2><p>Three things participants change. Edit, then ask the agent again and watch the trace and the audit log. The orchestrator's instructions are on its box in the diagram above.</p></div>
+  <div class="sec-head"><h2>Building blocks — edit me</h2><p>Three things participants change. Open one, edit, then ask the agent again and watch the trace and the audit log. The orchestrator's instructions are on its box in the diagram above.</p></div>
   <div class="blocks">
-    <div class="panel pad block">
-      <div class="block-head"><div class="t"><h3>1 · Rulebook</h3><span class="tag det">deterministic</span></div><button class="btn small" id="rb-default">Restore default</button></div>
-      <p class="hint">The rating engine and the thresholds. Cheap, instant, repeatable, and the same for every case. The agent can read it, not change it. Lists are illustrative, not a regulator's.</p>
+    <details class="blk"><summary><h3>1 · Rulebook</h3><span class="tag det">deterministic</span><button class="btn small" id="rb-default" style="margin-left:auto">Restore default</button><span class="hint">The rating engine and the thresholds. Cheap, instant, repeatable, and the same for every case. The agent can read it, not change it. Lists are illustrative, not a regulator's.</span></summary>
+    <div class="body">
       <div class="rb">
         <label>UBO threshold (% ownership) <input type="number" id="rb-ubo" min="1" max="100"></label>
         <label>Sanctions true match from score <input type="number" id="rb-true" min="1" max="100"></label>
@@ -540,23 +552,19 @@ details.arch summary{cursor:pointer;color:var(--muted);font-size:13px;padding:6p
         <label class="wide">high-risk jurisdictions (comma-separated)<textarea id="rb-hr" spellcheck="false"></textarea></label>
         <label class="wide">offshore / secrecy jurisdictions<textarea id="rb-off" spellcheck="false"></textarea></label>
       </div>
-    </div>
-    <div class="panel pad block b-tools">
-      <div class="block-head"><div class="t"><h3>3 · Agents and skills</h3><span class="tag agent">agents</span><span class="tag det">deterministic</span></div></div>
-      <p class="hint">Ten agents the orchestrator can delegate to, then the deterministic skills they use. Untick an agent and the orchestrator gets its skills directly; untick a skill and whoever needs it has to work around it. Letters follow the reference architecture.</p>
-      <div class="tools" id="tools"></div>
-    </div>
-    <div class="panel pad block">
-      <div class="block-head"><div class="t"><h3>2 · Governance</h3><span class="tag human">human</span><span class="tag guard">code</span></div><button class="btn small" id="gov-default">Restore default</button></div>
-      <p class="hint">Decision rights. For each consequential action: who decides and how much the agent may do alone. Enforced inside the tools, so the agent cannot talk its way past a gate, and neither can a document.</p>
+    </div></details>
+    <details class="blk"><summary><h3>2 · Governance</h3><span class="tag human">human</span><span class="tag guard">code</span><button class="btn small" id="gov-default" style="margin-left:auto">Restore default</button><span class="hint">Decision rights. For each consequential action: who decides and how much the agent may do alone. Enforced inside the tools, so the agent cannot talk its way past a gate, and neither can a document.</span></summary>
+    <div class="body">
       <div class="gates" id="gates"></div>
-      <div class="guards" style="margin-top:8px">
+      <div class="guards">
         <div class="guard"><label><input type="checkbox" id="gv-qa"> Independent QA must pass before any sign-off</label><span class="how">finalize_case → refuses without a passing run_qa newer than the last change</span></div>
         <div class="guard"><label><input type="checkbox" id="gv-qaall"> QA agent after every workflow step (slower, closer to the reference system)</label><span class="how">the brief tells the orchestrator to call qa_agent after each agent</span></div>
         <div class="guard"><label><input type="checkbox" id="gv-4eyes"> Four eyes: an MLRO gate can only be decided while acting as MLRO</label><span class="how">the card's buttons stay disabled for the analyst · the audit records who decided</span></div>
         <div class="guard"><label><input type="checkbox" checked disabled> A true sanctions match can never be approved · High needs EDD · no tipping off in a notice</label><span class="how">code, not a setting</span></div>
       </div>
-    </div>
+    </div></details>
+    <details class="blk"><summary><h3>3 · Agents and skills</h3><span class="tag agent">agents</span><span class="tag det">deterministic</span><span class="hint">Ten agents the orchestrator can delegate to, then the deterministic skills they use. Untick an agent and the orchestrator gets its skills directly; untick a skill and whoever needs it has to work around it. Letters follow the reference architecture.</span></summary>
+    <div class="body"><div class="tools" id="tools"></div></div></details>
   </div>
 </section>
 
@@ -634,7 +642,7 @@ function renderGov() {
   $("gv-qa").checked = !!GOV.qa_before_signoff; $("gv-qaall").checked = !!GOV.qa_every_step; $("gv-4eyes").checked = !!GOV.four_eyes;
 }
 for (const [id, k] of [["gv-qa", "qa_before_signoff"], ["gv-qaall", "qa_every_step"], ["gv-4eyes", "four_eyes"]]) $(id).addEventListener("change", () => { GOV[k] = $(id).checked; LS.set(LSK + "gov", GOV); });
-$("gov-default").addEventListener("click", () => { GOV = { gates: Object.fromEntries(GATES0.map((g) => [g.id, { role: g.role, level: g.level }])), qa_before_signoff: true, qa_every_step: false, four_eyes: true }; LS.del(LSK + "gov"); renderGov(); });
+$("gov-default").addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); GOV = { gates: Object.fromEntries(GATES0.map((g) => [g.id, { role: g.role, level: g.level }])), qa_before_signoff: true, qa_every_step: false, four_eyes: true }; LS.del(LSK + "gov"); renderGov(); });
 let acting = LS.get(LSK + "role") || "analyst";
 
 // ------------------------------------------------------------ state
@@ -962,14 +970,14 @@ function decisionCard(gateId, title, detail) {
     ok.addEventListener("click", () => done({ ok: true, reason: reason.value.trim() }));
     no.addEventListener("click", () => done({ ok: false, reason: reason.value.trim() }));
     openCards.push(entry); entry.refresh();
-    $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
+    $("asst").open = true; $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
     if (currentCtl) currentCtl.signal.addEventListener("abort", () => { if (!settled) done({ ok: false, reason: "stopped" }); }, { once: true });
   });
 }
 function notifyCard(role, title, detail) {
   const card = document.createElement("div"); card.className = "notify";
   card.innerHTML = `<b>${esc(ROLE_NAME[role])} notified</b> · ${esc(title)}<div class="hint" style="margin-top:4px;white-space:pre-wrap">${esc(detail)}</div>`;
-  $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
+  $("asst").open = true; $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
 }
 // Every consequential tool goes through here. Returns the human's reason when there was one; throws when blocked or rejected.
 async function gate(gateId, caseId, title, detail) {
@@ -1301,7 +1309,7 @@ function replyCard(c) {
   const card = document.createElement("div"); card.className = "notify";
   card.innerHTML = `<b>${esc(c.id)} is waiting for the customer.</b> In the real world this takes days. Here: <button class="btn small" type="button">Customer replies</button>`;
   card.querySelector("button").addEventListener("click", (ev) => { ev.target.disabled = true; customerReplies(c.id); });
-  $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
+  $("asst").open = true; $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
 }
 function customerReplies(id) {
   const c = byId(id); if (!c.rfi_response || c.stage !== "awaiting customer") return;
@@ -1357,7 +1365,7 @@ $("audit-dl").addEventListener("click", () => { const blob = new Blob([JSON.stri
 
 // ------------------------------------------------------------ chat + agent loop
 const turns = []; let sample = null; let dead = false;
-function addMsg(cls, text) { const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = text; $("msgs").appendChild(d); $("msgs").scrollTop = $("msgs").scrollHeight; return d; }
+function addMsg(cls, text) { const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = text; $("msgs").appendChild(d); $("msgs").scrollTop = $("msgs").scrollHeight; if (cls !== "sys") $("asst").open = true; return d; }
 function copyFor(code) {
   return ({ not_granted: "You declined to let this page use Claude. Reload to be asked again.", sampling_disabled: "Claude is not available on this account.", rate_limited: "Too many calls for now. Wait a moment and try again.",
     prompt_too_large: "The conversation grew too long. Clear the chat and ask again.", refused: "Claude declined that request. Rephrase and try again.", tools_unavailable: "This viewer cannot run page tools, so the agent cannot act. Try the claude.ai web or desktop app.",
@@ -1503,7 +1511,7 @@ for (const s of DATA.suggestions) { const b = document.createElement("button"); 
 
 // ------------------------------------------------------------ wiring
 renderRulebook(); for (const id of ["rb-ubo", "rb-true", "rb-pot", "rb-med", "rb-high", "rb-pep", "rb-hrj", "rb-hr", "rb-off"]) $(id).addEventListener("change", readRulebook);
-$("rb-default").addEventListener("click", () => { RB = clone(RB0); LS.del(LSK + "rulebook"); renderRulebook(); });
+$("rb-default").addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); RB = clone(RB0); LS.del(LSK + "rulebook"); renderRulebook(); });
 renderGov();
 $("role").value = acting; $("role").addEventListener("change", () => { acting = $("role").value; LS.set(LSK + "role", acting); audit("human", "human:" + acting, "now acting as " + ROLE_NAME[acting], null, ""); refreshCards(); });
 $("q").addEventListener("input", () => { S.q = $("q").value; renderAll(); });

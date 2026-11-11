@@ -47,17 +47,19 @@ ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local 
    tool result and agent report as a row.
 2. **Architecture view.** The reference architecture: orchestrator, agents,
    skills, data sources, guardrails and gates, collapsed by default.
-3. **KYC assistant.** The orchestrator's chat. Gate cards appear here when a
-   person has to decide; the header's *acting as* switch chooses whether you are
-   the analyst or the MLRO.
+3. **KYC assistant**, folded behind its title. The orchestrator's chat. Gate
+   cards appear here when a person has to decide, and the panel opens by itself
+   when one does; the header's *acting as* switch chooses whether you are the
+   analyst or the MLRO.
 4. **Workspace**, collapsed by default. The case queue with stages, ratings,
    hits and anomalies; the case reader (every document, every step, the rating
    breakdown, the audit entries, the answer key when ticked); the scorecard;
    customer messages; the audit log with a download button. The RFI loop does
    not need it: when a case waits for the customer, a "Customer replies" button
    appears in the chat.
-5. **Building blocks, edit me.** The orchestrator's and the agents' instructions
-   are not editable on the page: click a box in the process view to read them.
+5. **Building blocks, edit me**, each folded behind its title. The orchestrator's
+   and the agents' instructions are not editable on the page: click a box in the
+   process view to read them.
    - **Rulebook** (deterministic). UBO threshold, sanctions match scores, score
      bands, forced ratings, jurisdiction lists. The engine rates from it; the
      agent can read it, not change it.
