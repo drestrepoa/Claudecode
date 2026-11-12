@@ -41,7 +41,7 @@ values below, builds, and gives you a URL. Then skip to step 4.
    - `ANTHROPIC_API_KEY`: an API key from console.anthropic.com
    - `WORKSHOP_CODE`: any word you will say out loud in the room, e.g. `harbor42`
    - `ALLOWED_TIERS` (optional): which model tiers the room may use, e.g.
-     `quick,haiku55,default`. Default is `quick,haiku55` (the two Haiku tiers); the page shows the others locked
+     `quick,haiku55,default`. Default is `haiku55,quick` (Haiku 5.5 first, the two Haiku tiers); the page shows the others locked
    - `ANTHROPIC_WORKSPACE_ID` (only if needed): if the trace says the key "is not
      scoped to a workspace", either create the key inside a workspace in the
      console, or set this to the workspace id (`wrkspc_…`) from Settings →

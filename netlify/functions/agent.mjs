@@ -8,7 +8,7 @@
 // Environment variables (Site settings → Environment variables):
 //   ANTHROPIC_API_KEY   required
 //   WORKSHOP_CODE       recommended; if unset, anyone with the URL can spend the key
-//   ALLOWED_TIERS       optional, comma-separated: quick | haiku55 | default | complex (default: "quick,haiku55")
+//   ALLOWED_TIERS       optional, comma-separated: quick | haiku55 | default | complex (default: "haiku55,quick"; the first one is the fallback when the page asks for a locked tier)
 //   ANTHROPIC_WORKSPACE_ID  only if the key is an organisation-level key that Anthropic says
 //                       "is not scoped to a workspace"; the wrkspc_... id from the console
 
@@ -28,8 +28,8 @@ export default async (req) => {
   try { body = await req.json(); } catch (e) { return json({ error: "body must be JSON" }, 400); }
   if (!Array.isArray(body.messages) || !body.messages.length) return json({ error: "messages required" }, 400);
 
-  // Tiers the room may use. Default: the two Haiku tiers. Set ALLOWED_TIERS="quick,haiku55,default,complex" to open them up.
-  const allowed = (process.env.ALLOWED_TIERS || "quick,haiku55").split(",").map((t) => t.trim()).filter((t) => MODELS[t]);
+  // Tiers the room may use. Default: the two Haiku tiers, Haiku 5.5 first. Set ALLOWED_TIERS="haiku55,quick,default,complex" to open them up.
+  const allowed = (process.env.ALLOWED_TIERS || "haiku55,quick").split(",").map((t) => t.trim()).filter((t) => MODELS[t]);
   const tier = allowed.includes(body.tier) ? body.tier : allowed[0];
   const model = MODELS[tier];
   const params = {
