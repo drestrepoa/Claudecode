@@ -76,6 +76,8 @@ section{display:flex;flex-direction:column;gap:12px}
 .diagram .n-mem rect{fill:var(--human-soft);stroke:var(--human);stroke-dasharray:5 3;stroke-width:1.8}
 .diagram .n-skill rect{fill:var(--agent-soft);stroke:var(--agent);stroke-dasharray:4 3}
 .diagram rect{stroke-width:1.4;rx:6}
+.diagram g.lit rect,.diagram g.busy rect{stroke-width:3.2;filter:drop-shadow(0 0 6px rgba(94,72,184,.55))}
+@media (prefers-reduced-motion:no-preference){.diagram g rect{transition:stroke-width .25s,filter .25s}}
 .diagram .edge{fill:none;stroke:var(--muted);stroke-width:1.3}
 .diagram .edge.result{stroke-dasharray:3 3}
 .diagram .edge.ok{stroke:var(--ok)}
@@ -258,7 +260,7 @@ section.fold>.sec-head:hover{border-color:var(--agent)}
 </header>
 
 
-<section class="fold" id="s-structure">
+<section id="s-structure">
   <div class="sec-head"><h2>1 · Agentic structure — one request, end to end</h2><p>An orchestrator and three sub-agents. Everything else is deterministic code or a human.</p></div>
   <div class="panel pad diagram">
     <svg viewBox="0 0 1100 540" role="img" aria-label="Diagram: the human user asks the orchestrator agent; a brief and skills and a rules engine feed it; it delegates to a triage agent, a deadline agent and a reply agent, each with its own tools; tools that change the world pass a coded guardrail that executes, asks the human, or returns an error; the inbox is the long-term memory reached only through tools.">
@@ -272,44 +274,44 @@ section.fold>.sec-head:hover{border-color:var(--agent)}
       <!-- left column: brief, human, working memory -->
       <g class="n-skill"><rect x="18" y="24" width="172" height="62"/><text x="104" y="45" text-anchor="middle" font-weight="600">Brief &amp; skills</text><text x="104" y="62" text-anchor="middle" class="small">how to triage, when to</text><text x="104" y="75" text-anchor="middle" class="small">escalate, what never to do</text></g>
       <path class="edge agent" d="M190 60 C215 60 215 190 232 190" marker-end="url(#ar-a)"/>
-      <g class="n-human"><rect x="18" y="196" width="150" height="58"/><text x="93" y="220" text-anchor="middle" font-weight="600" id="dia-owner">Human user</text><text x="93" y="237" text-anchor="middle" class="small">asks in plain language</text></g>
+      <g class="n-human" data-node="user"><rect x="18" y="196" width="150" height="58"/><text x="93" y="220" text-anchor="middle" font-weight="600" id="dia-owner">Human user</text><text x="93" y="237" text-anchor="middle" class="small">asks in plain language</text></g>
       <path class="edge agent" d="M168 216 H232" marker-end="url(#ar-a)"/><text x="200" y="210" text-anchor="middle" class="small">request</text>
       <path class="edge agent result" d="M232 240 H168" marker-end="url(#ar-a)"/><text x="200" y="254" text-anchor="middle" class="small">reply</text>
       <g class="n-mem"><rect x="18" y="296" width="172" height="86"/><text x="104" y="317" text-anchor="middle" font-weight="600">Working memory</text><text x="104" y="334" text-anchor="middle" class="small">the brief, the last turns of</text><text x="104" y="347" text-anchor="middle" class="small">this chat, every tool result</text><text x="104" y="360" text-anchor="middle" class="small">rebuilt for every call</text><text x="104" y="373" text-anchor="middle" class="small">sub-agents start empty</text></g>
       <path class="edge result" d="M190 330 C215 330 215 262 232 262" marker-end="url(#ar)"/><path class="edge result" d="M232 268 C215 268 215 340 190 340"/>
       <!-- rules engine -->
-      <g class="n-det"><rect x="232" y="24" width="200" height="52"/><text x="332" y="45" text-anchor="middle" font-weight="600">Rules engine</text><text x="332" y="62" text-anchor="middle" class="small">deterministic · runs before the agents</text></g>
+      <g class="n-det" data-node="rules"><rect x="232" y="24" width="200" height="52"/><text x="332" y="45" text-anchor="middle" font-weight="600">Rules engine</text><text x="332" y="62" text-anchor="middle" class="small">deterministic · runs before the agents</text></g>
       <path class="edge" d="M316 76 V178" marker-end="url(#ar)"/><text x="328" y="130" class="small">labels</text>
       <!-- orchestrator -->
-      <g class="n-agent"><rect x="232" y="180" width="168" height="92"/><text x="316" y="206" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="224" text-anchor="middle" class="small">plans, delegates, reports</text><text x="316" y="238" text-anchor="middle" class="small">never labels or drafts itself</text><text x="316" y="256" text-anchor="middle" class="small">own tools: stats · search · read</text></g>
+      <g class="n-agent" data-node="orch"><rect x="232" y="180" width="168" height="92"/><text x="316" y="206" text-anchor="middle" font-weight="600">Orchestrator agent</text><text x="316" y="224" text-anchor="middle" class="small">plans, delegates, reports</text><text x="316" y="238" text-anchor="middle" class="small">never labels or drafts itself</text><text x="316" y="256" text-anchor="middle" class="small">own tools: stats · search · read</text></g>
       <!-- sub-agents -->
-      <g class="n-agent"><rect x="470" y="40" width="150" height="56"/><text x="545" y="62" text-anchor="middle" font-weight="600">Triage agent</text><text x="545" y="80" text-anchor="middle" class="small">labels and archives in batches</text></g>
-      <g class="n-agent"><rect x="470" y="196" width="150" height="56"/><text x="545" y="218" text-anchor="middle" font-weight="600">Deadline agent</text><text x="545" y="236" text-anchor="middle" class="small">finds dates, creates tasks</text></g>
-      <g class="n-agent"><rect x="470" y="352" width="150" height="56"/><text x="545" y="374" text-anchor="middle" font-weight="600">Reply agent</text><text x="545" y="392" text-anchor="middle" class="small">drafts replies and forwards</text></g>
+      <g class="n-agent" data-node="triage_agent"><rect x="470" y="40" width="150" height="56"/><text x="545" y="62" text-anchor="middle" font-weight="600">Triage agent</text><text x="545" y="80" text-anchor="middle" class="small">labels and archives in batches</text></g>
+      <g class="n-agent" data-node="deadline_agent"><rect x="470" y="196" width="150" height="56"/><text x="545" y="218" text-anchor="middle" font-weight="600">Deadline agent</text><text x="545" y="236" text-anchor="middle" class="small">finds dates, creates tasks</text></g>
+      <g class="n-agent" data-node="reply_agent"><rect x="470" y="352" width="150" height="56"/><text x="545" y="374" text-anchor="middle" font-weight="600">Reply agent</text><text x="545" y="392" text-anchor="middle" class="small">drafts replies and forwards</text></g>
       <path class="edge agent" d="M400 210 C440 210 430 68 468 68" marker-end="url(#ar-a)"/>
       <path class="edge agent" d="M400 224 H468" marker-end="url(#ar-a)"/>
       <path class="edge agent" d="M400 240 C440 240 430 380 468 380" marker-end="url(#ar-a)"/>
       <text x="436" y="150" text-anchor="middle" class="small">instruction ⇄ report</text>
       <!-- tools per sub-agent -->
-      <g class="n-det"><rect x="660" y="14" width="140" height="26"/><text x="730" y="32" text-anchor="middle" class="mono">search_inbox</text></g>
-      <g class="n-det"><rect x="660" y="46" width="140" height="26"/><text x="730" y="64" text-anchor="middle" class="mono">read_email</text></g>
-      <g class="n-det"><rect x="660" y="78" width="140" height="26"/><text x="730" y="96" text-anchor="middle" class="mono">label_emails</text></g>
-      <g class="n-det"><rect x="660" y="110" width="140" height="26"/><text x="730" y="128" text-anchor="middle" class="mono">archive_emails</text></g>
-      <g class="n-det"><rect x="660" y="180" width="140" height="26"/><text x="730" y="198" text-anchor="middle" class="mono">search_inbox</text></g>
-      <g class="n-det"><rect x="660" y="212" width="140" height="26"/><text x="730" y="230" text-anchor="middle" class="mono">read_email</text></g>
-      <g class="n-det"><rect x="660" y="244" width="140" height="26"/><text x="730" y="262" text-anchor="middle" class="mono">create_task</text></g>
-      <g class="n-det"><rect x="660" y="336" width="140" height="26"/><text x="730" y="354" text-anchor="middle" class="mono">read_email</text></g>
-      <g class="n-det"><rect x="660" y="368" width="140" height="26"/><text x="730" y="386" text-anchor="middle" class="mono">draft_reply</text></g>
-      <g class="n-det"><rect x="660" y="400" width="140" height="26"/><text x="730" y="418" text-anchor="middle" class="mono">forward_email</text></g>
+      <g class="n-det" data-tool="search_inbox"><rect x="660" y="14" width="140" height="26"/><text x="730" y="32" text-anchor="middle" class="mono">search_inbox</text></g>
+      <g class="n-det" data-tool="read_email"><rect x="660" y="46" width="140" height="26"/><text x="730" y="64" text-anchor="middle" class="mono">read_email</text></g>
+      <g class="n-det" data-tool="label_emails"><rect x="660" y="78" width="140" height="26"/><text x="730" y="96" text-anchor="middle" class="mono">label_emails</text></g>
+      <g class="n-det" data-tool="archive_emails"><rect x="660" y="110" width="140" height="26"/><text x="730" y="128" text-anchor="middle" class="mono">archive_emails</text></g>
+      <g class="n-det" data-tool="search_inbox"><rect x="660" y="180" width="140" height="26"/><text x="730" y="198" text-anchor="middle" class="mono">search_inbox</text></g>
+      <g class="n-det" data-tool="read_email"><rect x="660" y="212" width="140" height="26"/><text x="730" y="230" text-anchor="middle" class="mono">read_email</text></g>
+      <g class="n-det" data-tool="create_task"><rect x="660" y="244" width="140" height="26"/><text x="730" y="262" text-anchor="middle" class="mono">create_task</text></g>
+      <g class="n-det" data-tool="read_email"><rect x="660" y="336" width="140" height="26"/><text x="730" y="354" text-anchor="middle" class="mono">read_email</text></g>
+      <g class="n-det" data-tool="draft_reply"><rect x="660" y="368" width="140" height="26"/><text x="730" y="386" text-anchor="middle" class="mono">draft_reply</text></g>
+      <g class="n-det" data-tool="forward_email"><rect x="660" y="400" width="140" height="26"/><text x="730" y="418" text-anchor="middle" class="mono">forward_email</text></g>
       <path class="edge" d="M620 62 C640 62 640 27 658 27" marker-end="url(#ar)"/><path class="edge" d="M620 66 C640 66 640 59 658 59" marker-end="url(#ar)"/><path class="edge" d="M620 70 C640 70 640 91 658 91" marker-end="url(#ar)"/><path class="edge" d="M620 74 C640 74 640 123 658 123" marker-end="url(#ar)"/>
       <path class="edge" d="M620 220 C640 220 640 193 658 193" marker-end="url(#ar)"/><path class="edge" d="M620 224 H658" marker-end="url(#ar)"/><path class="edge" d="M620 228 C640 228 640 257 658 257" marker-end="url(#ar)"/>
       <path class="edge" d="M620 376 C640 376 640 349 658 349" marker-end="url(#ar)"/><path class="edge" d="M620 380 H658" marker-end="url(#ar)"/><path class="edge" d="M620 384 C640 384 640 413 658 413" marker-end="url(#ar)"/>
       <text x="730" y="160" text-anchor="middle" class="small">read only · change the world ↓</text>
       <!-- guardrail and outcomes -->
-      <g class="n-guard"><rect x="850" y="206" width="130" height="60"/><text x="915" y="230" text-anchor="middle" font-weight="600">Guardrail</text><text x="915" y="248" text-anchor="middle" class="small">code, not persuasion</text></g>
+      <g class="n-guard" data-node="guard"><rect x="850" y="206" width="130" height="60"/><text x="915" y="230" text-anchor="middle" font-weight="600">Guardrail</text><text x="915" y="248" text-anchor="middle" class="small">code, not persuasion</text></g>
       <path class="edge" d="M800 91 C830 91 830 236 848 236" marker-end="url(#ar)"/><path class="edge" d="M800 123 C830 123 830 236 848 236"/><path class="edge" d="M800 257 C830 257 830 236 848 236"/><path class="edge" d="M800 381 C830 381 830 236 848 236"/><path class="edge" d="M800 413 C830 413 830 236 848 236"/>
-      <g class="n-ok"><rect x="978" y="150" width="120" height="44"/><text x="1040" y="169" text-anchor="middle" font-weight="600">Executed</text><text x="1040" y="184" text-anchor="middle" class="small">within limits</text></g>
-      <g class="n-human"><rect x="978" y="280" width="120" height="44"/><text x="1040" y="299" text-anchor="middle" font-weight="600">Human approval</text><text x="1040" y="314" text-anchor="middle" class="small">above the line</text></g>
+      <g class="n-ok" data-node="exec"><rect x="978" y="150" width="120" height="44"/><text x="1040" y="169" text-anchor="middle" font-weight="600">Executed</text><text x="1040" y="184" text-anchor="middle" class="small">within limits</text></g>
+      <g class="n-human" data-node="human"><rect x="978" y="280" width="120" height="44"/><text x="1040" y="299" text-anchor="middle" font-weight="600">Human approval</text><text x="1040" y="314" text-anchor="middle" class="small">above the line</text></g>
       <path class="edge ok" d="M980 224 C1000 224 1000 172 976 172" marker-end="url(#ar-ok)"/><text x="1040" y="142" text-anchor="middle" class="small">≤ limit</text>
       <path class="edge human" d="M980 248 C1000 248 1000 302 976 302" marker-end="url(#ar-h)"/><text x="1040" y="340" text-anchor="middle" class="small">&gt; limit</text>
       <path class="edge human result" d="M1040 346 V370 H960" marker-end="url(#ar-h)"/><text x="1030" y="384" text-anchor="middle" class="small">approve / reject</text>
@@ -409,7 +411,10 @@ section.fold>.sec-head:hover{border-color:var(--agent)}
 <script>
 (() => {
 "use strict";
-const DATA = JSON.parse(document.getElementById("inbox-data").textContent);
+const ALL = JSON.parse(document.getElementById("inbox-data").textContent);
+const LANG0 = (() => { try { return JSON.parse(localStorage.getItem("agent.lang")) || "en"; } catch (e) { return "en"; } })();
+const DATA = ALL.en ? (LANG0 === "fr" && ALL.fr ? ALL.fr : ALL.en) : ALL; // the French twin of the data, when the build embedded one
+const TD = (en, fr) => (LANG0 === "fr" && fr) ? fr : en;
 const TODAY = DATA.today;
 const LABELS = DATA.labels;
 const FIRM = DATA.firm_domain;
@@ -430,18 +435,18 @@ const LS = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){
 
 // ------------------------------------------------------------ language (EN / FR)
 // Static text is translated by walking the page's text nodes; dynamic text goes through T().
-let LANG = LS.get("agent.lang") || "en";
+let LANG = LANG0;
 const FR = {
   "Build your own agent · simulated inbox": "Construisez votre agent · messagerie simulée", "Build your own agent · HR training · simulated inbox": "Construisez votre agent · formation RH · messagerie simulée",
   "Inbox Agent": "Agent de messagerie", "code": "code", "Connect": "Connecter", "Change": "Changer", "model": "modèle", "agent idle": "agent au repos", "agent working": "agent au travail", "waiting for": "en attente de", "Claude not available": "Claude indisponible",
   "Reset inbox": "Réinitialiser la boîte", "Roll out all": "Tout dérouler", "Fold all": "Tout replier",
   "1 · Agentic structure — one request, end to end": "1 · Structure agentique — une requête, de bout en bout", "An orchestrator and three sub-agents. Everything else is deterministic code or a human.": "Un orchestrateur et trois sous-agents. Tout le reste est du code déterministe ou un humain.",
-  "Brief & skills": "Brief & compétences", "how to triage, when to": "comment trier, quand", "escalate, what never to do": "escalader, ce qu'il ne faut jamais faire", "Human user": "Utilisateur humain", "asks in plain language": "demande en langage courant", "request": "requête", "reply": "réponse",
-  "Working memory": "Mémoire de travail", "the brief, the last turns of": "le brief, les derniers tours de", "this chat, every tool result": "cette conversation, chaque résultat d'outil", "rebuilt for every call": "reconstruite à chaque appel", "sub-agents start empty": "les sous-agents partent de zéro",
-  "Rules engine": "Moteur de règles", "deterministic · runs before the agents": "déterministe · s'exécute avant les agents", "labels": "étiquettes", "Orchestrator agent": "Agent orchestrateur", "plans, delegates, reports": "planifie, délègue, rend compte", "never labels or drafts itself": "n'étiquette ni ne rédige lui-même", "own tools: stats · search · read": "ses outils : stats · recherche · lecture",
-  "Triage agent": "Agent de tri", "labels and archives in batches": "étiquette et archive par lots", "Deadline agent": "Agent des échéances", "finds dates, creates tasks": "repère les dates, crée des tâches", "Reply agent": "Agent de réponse", "drafts replies and forwards": "rédige réponses et transferts", "instruction ⇄ report": "instruction ⇄ rapport",
-  "read only · change the world ↓": "lecture seule · agit sur le monde ↓", "Guardrail": "Garde-fou", "code, not persuasion": "du code, pas de la persuasion", "Executed": "Exécuté", "within limits": "dans les limites", "Human approval": "Validation humaine", "above the line": "au-delà de la limite", "≤ limit": "≤ limite", "> limit": "> limite", "approve / reject": "valider / refuser",
-  "Long-term memory": "Mémoire à long terme", "the inbox state: labels, tasks, drafts": "l'état de la boîte : étiquettes, tâches, brouillons", "read and written only through tools": "lue et écrite uniquement via les outils", "plus what you saved in the blocks: brief, rules, switches": "plus ce que vous avez enregistré dans les blocs : brief, règles, interrupteurs",
+  "Brief & skills": "Brief & compétences", "how to triage, when to": "comment trier, quand", "escalate, what never to do": "escalader, les interdits", "Human user": "Utilisateur humain", "asks in plain language": "demande en langage courant", "request": "requête", "reply": "réponse",
+  "Working memory": "Mémoire de travail", "the brief, the last turns of": "le brief, les derniers tours de", "this chat, every tool result": "ce chat, chaque résultat d'outil", "rebuilt for every call": "reconstruite à chaque appel", "sub-agents start empty": "les sous-agents partent de zéro",
+  "Rules engine": "Moteur de règles", "deterministic · runs before the agents": "déterministe · s'exécute avant les agents", "labels": "étiquettes", "Orchestrator agent": "Agent orchestrateur", "plans, delegates, reports": "planifie, délègue, rend compte", "never labels or drafts itself": "n'étiquette ni ne rédige lui-même", "own tools: stats · search · read": "outils : stats · recherche · lecture",
+  "Triage agent": "Agent de tri", "labels and archives in batches": "étiquette et archive par lots", "Deadline agent": "Agent des échéances", "finds dates, creates tasks": "des dates aux tâches", "Reply agent": "Agent de réponse", "drafts replies and forwards": "rédige réponses et transferts", "instruction ⇄ report": "instruction ⇄ rapport",
+  "read only · change the world ↓": "lecture seule · agit sur le monde ↓", "Guardrail": "Garde-fou", "code, not persuasion": "du code, pas des mots", "Executed": "Exécuté", "within limits": "dans les limites", "Human approval": "Validation humaine", "above the line": "au-delà de la limite", "≤ limit": "≤ limite", "> limit": "> limite", "approve / reject": "valider / refuser",
+  "Long-term memory": "Mémoire à long terme", "the inbox state: labels, tasks, drafts": "l'état de la boîte : étiquettes, tâches, brouillons", "read and written only through tools": "lue et écrite uniquement via les outils", "plus what you saved in the blocks: brief, rules, switches": "plus vos blocs : brief, règles, interrupteurs",
   "blocked or rejected ⇢ tool error to the sub-agent, which reports it up": "bloqué ou refusé ⇢ erreur d'outil renvoyée au sous-agent, qui la remonte",
   "deterministic": "déterministe", "agent (orchestrator and sub-agents)": "agent (orchestrateur et sous-agents)", "brief & skills": "brief & compétences", "memory": "mémoire", "human": "humain", "guardrail": "garde-fou", "executed": "exécuté",
   'The orchestrator reads the brief, plans, and delegates: the triage agent labels in batches, the deadline agent creates tasks, the reply agent drafts. Each sub-agent is its own model call with its own small set of tools, and reports back in words. The model itself remembers nothing between calls: what it "knows" is either re-sent in the working memory (the brief, the last turns, the tool results) or written into the inbox through a tool. The tools that change the world pass through a guardrail written in code. Below the line the action executes. Above it, a person decides. Either way the outcome, including a rejection, goes back to the agent as a tool result, and it carries on.':
@@ -473,6 +478,7 @@ const FR = {
   "▶ Process the inbox": "▶ Traiter la boîte", "Feeds the unlabelled emails through the agent in batches: labels, tasks, replies. Internal replies go out; external ones wait for your approval.": "Fait passer les courriels sans étiquette par l'agent, par lots : étiquettes, tâches, réponses. Les réponses internes partent ; les externes attendent votre validation.",
   "processed": "traités", "emails to process, in batches of": "courriels à traiter, par lots de", "Nothing left to process: every email has a label.": "Plus rien à traiter : chaque courriel a une étiquette.", "the batch came back unlabelled; stopping the run": "le lot est revenu sans étiquette ; arrêt du traitement",
   "internal, within the limits": "interne, dans les limites", "kind": "type", "status": "statut", "in reply to": "en réponse à", "external": "externe", "internal": "interne", "forward": "transfert", "pending": "en attente", "blocked": "bloqué",
+  "A first request is ready below: press Send and watch it move through the structure above.": "Une première requête est prête ci-dessous : appuyez sur Envoyer et regardez-la traverser la structure ci-dessus.",
   "· locked": "· verrouillé", "not available in this workshop": "indisponible dans cet atelier", "quick (cheap)": "rapide (économique)", "default (smarter)": "standard (plus futé)", "best (slowest)": "le meilleur (le plus lent)",
 };
 const T = (s) => (LANG === "fr" && Object.prototype.hasOwnProperty.call(FR, s)) ? FR[s] : s;
@@ -485,7 +491,18 @@ function translateTree(root) {
 }
 
 // ------------------------------------------------------------ defaults
-const DEFAULT_BRIEF = `You are the inbox assistant for ${ME_FULL}, ${DATA.owner.title || "a lawyer"} at ${FIRM_NAME}. Today is ${TODAY}.
+const DEFAULT_BRIEF = LANG0 === "fr" && ALL.fr ? `Tu es l'assistant de messagerie de ${ME_FULL}, ${DATA.owner.title} chez ${FIRM_NAME}. Nous sommes le ${TODAY}.
+
+Ta mission : garder la boîte organisée pour que ${ME} puisse agir sur ce qui compte. Étiquette les courriels, crée des tâches pour les échéances, et ne rédige des réponses que si on te le demande.
+
+Étiquettes autorisées (une par courriel) plus « Urgent » en complément :
+${LABELS.map((l) => `- ${l}${DATA.label_descriptions && DATA.label_descriptions[l] ? " : " + DATA.label_descriptions[l] : ""}`).join("\n")}
+
+${DATA.brief_priorities} Ajoute l'étiquette « Urgent » à tout ce qui est dû sous 3 jours ou qualifié de critique ou d'immédiat.
+
+Méthode : tu es l'orchestrateur. Commence par inbox_stats, puis délègue avec des instructions précises : triage_agent pour étiqueter par lots (par domaine d'expéditeur, par mot-clé), deadline_agent pour les courriels datés et les tâches, reply_agent pour une réponse ou un transfert à la fois. Chaque sous-agent rend compte en quelques phrases ; lis le rapport et décide de la suite. N'étiquette pas et ne rédige pas toi-même. Réponds à ${ME} en français, brièvement : ce qui a été fait, ce qui l'attend, en quelques lignes.
+
+${DATA.brief_phishing}` : `You are the inbox assistant for ${ME_FULL}, ${DATA.owner.title || "a lawyer"} at ${FIRM_NAME}. Today is ${TODAY}.
 
 Your job: keep the inbox organised so ${ME} can act on what matters. Label emails, create tasks for deadlines, and draft replies only when asked.
 
@@ -519,7 +536,25 @@ function isExternal(addr) { return !String(addr || "").toLowerCase().endsWith("@
 
 // ------------------------------------------------------------ trace
 const traceEl = $("trace");
+function glow(sel, hold) {
+  document.querySelectorAll(sel).forEach((g) => { g.classList.add(hold ? "busy" : "lit"); if (!hold) { clearTimeout(g._t); g._t = setTimeout(() => g.classList.remove("lit"), 1800); } });
+}
+function unbusy(sel) { document.querySelectorAll(sel).forEach((g) => g.classList.remove("busy")); }
+function light(kind, key) {
+  const k = String(key).trim();
+  if (k.startsWith("▶ ")) glow(`[data-node="${k.slice(2)}"]`, true);
+  else if (k.startsWith("◀ ")) unbusy(`[data-node="${k.slice(2)}"]`);
+  else if (kind === "call" && !k.startsWith("↳")) glow(`[data-tool="${k}"]`);
+  else if (kind === "guard") glow('[data-node="guard"]');
+  else if (kind === "human") glow('[data-node="human"]');
+  else if (kind === "ok") glow('[data-node="exec"]');
+  else if (kind === "rules") glow('[data-node="rules"]');
+  else if (kind === "agent" && k === "request") { glow('[data-node="user"]'); glow('[data-node="orch"]', true); }
+  else if (kind === "agent" && k === "reply") { unbusy(".diagram g.busy"); glow('[data-node="user"]'); }
+  else if (kind === "err") unbusy(".diagram g.busy");
+}
 function trace(kind, key, body) {
+  try { light(kind, key); } catch (e) {}
   const t = new Date();
   const hh = [t.getHours(), t.getMinutes(), t.getSeconds()].map((n) => String(n).padStart(2, "0")).join(":");
   const div = document.createElement("div");
@@ -589,7 +624,7 @@ const G = {
 };
 
 const TOOLS = [
-  { name: "inbox_stats", on: true, desc: "Counts for the whole inbox: total, unread, unlabelled, per label, deadlines in the next 7 days, and the busiest sender domains among unlabelled mail. Call it first.",
+  { name: "inbox_stats", on: true, desc: TD("Counts for the whole inbox: total, unread, unlabelled, per label, deadlines in the next 7 days, and the busiest sender domains among unlabelled mail. Call it first.", "Les comptes de toute la boîte : total, non lus, sans étiquette, par étiquette, échéances à 7 jours, et les domaines d'expéditeur les plus fréquents parmi les courriels sans étiquette. À appeler en premier."),
     io: ["(no input)", "{ total, unread, unlabelled, by_label, deadlines_7d, top_unlabelled_domains }"],
     execute() {
       const live = S.emails.filter((e) => !e.archived);
@@ -601,7 +636,7 @@ const TOOLS = [
       return { today: TODAY, total: live.length, unread: live.filter((e) => !e.read).length, unlabelled: live.filter((e) => !catLabel(e)).length, by_label: by,
         deadlines_7d: live.filter((e) => e.deadline && daysBetween(TODAY, e.deadline) <= 7 && daysBetween(TODAY, e.deadline) >= 0).length, top_unlabelled_domains: top };
     } },
-  { name: "search_inbox", on: true, desc: "Find emails. Filters: query (every word must appear somewhere in subject, sender, body or attachment names; order does not matter), from (sender substring), label (a label name, or 'unlabelled'), unread_only, deadline_within_days (a date mentioned in the body within N days of today), since_days, limit (max 40), offset. Returns compact rows: id | received | from | subject | labels | flags. Returns the total so you can page.",
+  { name: "search_inbox", on: true, desc: TD("Find emails. Filters: query (every word must appear somewhere in subject, sender, body or attachment names; order does not matter), from (sender substring), label (a label name, or 'unlabelled'), unread_only, deadline_within_days (a date mentioned in the body within N days of today), since_days, limit (max 40), offset. Returns compact rows: id | received | from | subject | labels | flags. Returns the total so you can page.", "Trouve des courriels. Filtres : query (chaque mot doit apparaître dans l'objet, l'expéditeur, le corps ou les pièces jointes, dans n'importe quel ordre), from (fragment d'expéditeur), label (une étiquette, ou 'unlabelled' pour sans étiquette), unread_only, deadline_within_days (une date dans le corps à N jours), since_days, limit (max 40), offset. Renvoie des lignes compactes : id | reçu | de | objet | étiquettes | indicateurs, et le total pour paginer."),
     schema: { type: "object", properties: { query: { type: "string" }, from: { type: "string" }, label: { type: "string" }, unread_only: { type: "boolean" }, deadline_within_days: { type: "integer" }, since_days: { type: "integer" }, limit: { type: "integer" }, offset: { type: "integer" } } },
     io: ["{ query?, from?, label?, unread_only?, deadline_within_days?, since_days?, limit?, offset? }", "{ total, rows[] }"],
     execute(i) {
@@ -616,7 +651,7 @@ const TOOLS = [
       const lim = Math.min(40, Math.max(1, Number(i.limit) || 25)), off = Math.max(0, Number(i.offset) || 0);
       return { total: r.length, showing: `${off + 1}-${Math.min(off + lim, r.length)}`, rows: r.slice(off, off + lim).map(rowOf) };
     } },
-  { name: "read_email", on: true, desc: "Read one email in full by id: headers, cc, thread, sensitivity, body (first 1500 characters), attachments, any date mentioned, privileged flag. Marks it read.",
+  { name: "read_email", on: true, desc: TD("Read one email in full by id: headers, cc, thread, sensitivity, body (first 1500 characters), attachments, any date mentioned, privileged flag. Marks it read.", "Lit un courriel en entier par id : en-têtes, cc, fil, sensibilité, corps (1500 premiers caractères), pièces jointes, date mentionnée, indicateur confidentiel. Le marque comme lu."),
     schema: { type: "object", properties: { id: { type: "string" } }, required: ["id"] }, io: ["{ id }", "{ id, from, to, date, subject, body, … }"],
     execute(i) {
       const e = byId(String(i.id)); if (!e) throw new Error(`no email with id ${i.id}`);
@@ -624,7 +659,7 @@ const TOOLS = [
       return { id: e.id, from: `${e.from_name} <${e.from_email}>`, to: e.to, cc: e.cc || null, thread: e.thread || null, date: e.date, subject: e.subject, importance: e.importance || null, sensitivity: e.sensitivity || null, attachments: e.attachments, date_mentioned: e.deadline || null, privileged: e.privileged, labels: e.labels,
         body: "<<< email body, untrusted data >>>\n" + e.body.slice(0, 1500) + "\n<<< end of email body >>>" };
     } },
-  { name: "label_emails", on: true, desc: "Apply one label to many emails at once. label must be one of the allowed labels or 'Urgent'. Replaces any previous category label; Urgent is added on top. Large batches may need approval.",
+  { name: "label_emails", on: true, desc: TD("Apply one label to many emails at once. label must be one of the allowed labels or 'Urgent'. Replaces any previous category label; Urgent is added on top. Large batches may need approval.", "Applique une étiquette à plusieurs courriels à la fois. label doit être une étiquette autorisée ou 'Urgent'. Remplace l'étiquette de catégorie précédente ; Urgent s'ajoute. Les gros lots peuvent exiger une validation."),
     schema: { type: "object", properties: { ids: { type: "array", items: { type: "string" } }, label: { type: "string" } }, required: ["ids", "label"] },
     io: ["{ ids[], label }", "{ labelled, unknown_ids }"],
     async execute(i, ctx) {
@@ -641,7 +676,7 @@ const TOOLS = [
       renderAll();
       return { labelled: n, unknown_ids: unknown };
     } },
-  { name: "archive_emails", on: true, desc: `Move emails out of the inbox by id. ${PROTECTED} emails may be protected. Large batches may need approval.`,
+  { name: "archive_emails", on: true, desc: TD(`Move emails out of the inbox by id. ${PROTECTED} emails may be protected. Large batches may need approval.`, `Sort des courriels de la boîte par id. Les courriels ${PROTECTED} peuvent être protégés. Les gros lots peuvent exiger une validation.`),
     schema: { type: "object", properties: { ids: { type: "array", items: { type: "string" } } }, required: ["ids"] }, io: ["{ ids[] }", "{ archived, blocked }"],
     async execute(i, ctx) {
       const list = ids(i);
@@ -658,7 +693,7 @@ const TOOLS = [
       if (blocked.length && !n) throw new Error(`blocked: ${PROTECTED} emails can never be archived (${blocked.join(", ")})`);
       return { archived: n, blocked };
     } },
-  { name: "create_task", on: true, desc: `Create a task for ${ME} from an email: title, due date (YYYY-MM-DD), note. Near deadlines are escalated to ${ROLE} automatically. Returns the task and whether it was escalated.`,
+  { name: "create_task", on: true, desc: TD(`Create a task for ${ME} from an email: title, due date (YYYY-MM-DD), note. Near deadlines are escalated to ${ROLE} automatically. Returns the task and whether it was escalated.`, `Crée une tâche pour ${ME} à partir d'un courriel : titre, échéance (AAAA-MM-JJ), note. Les échéances proches sont escaladées à ${ROLE} automatiquement. Renvoie la tâche et si elle a été escaladée.`),
     schema: { type: "object", properties: { email_id: { type: "string" }, title: { type: "string" }, due: { type: "string" }, note: { type: "string" } }, required: ["email_id", "title", "due"] },
     io: ["{ email_id, title, due, note? }", "{ task_id, escalated, assignee }"],
     execute(i) {
@@ -671,7 +706,7 @@ const TOOLS = [
       renderAll();
       return { task_id: t.id, escalated: esc_, assignee: t.assignee };
     } },
-  { name: "draft_reply", on: true, desc: `Reply to an email on ${ME}'s behalf: body text, optional to (defaults to the sender). Replies to addresses outside the organisation may wait for approval; a rejection comes back as an error with the reason.`,
+  { name: "draft_reply", on: true, desc: TD(`Reply to an email on ${ME}'s behalf: body text, optional to (defaults to the sender). Replies to addresses outside the organisation may wait for approval; a rejection comes back as an error with the reason.`, `Répond à un courriel au nom de ${ME} : corps du message, destinataire facultatif (l'expéditeur par défaut). Les réponses vers l'extérieur de l'organisation peuvent attendre une validation ; un refus revient comme une erreur avec le motif.`),
     schema: { type: "object", properties: { email_id: { type: "string" }, body: { type: "string" }, to: { type: "string" } }, required: ["email_id", "body"] },
     io: ["{ email_id, body, to? }", "{ status, to }"],
     async execute(i, ctx) {
@@ -687,7 +722,7 @@ const TOOLS = [
       item.status = "sent"; renderAll();
       return { status: "sent", to };
     } },
-  { name: "forward_email", on: true, desc: `Forward an email to another address with a note. ${SENS} emails can never leave the organisation; other external forwards may wait for approval.`,
+  { name: "forward_email", on: true, desc: TD(`Forward an email to another address with a note. ${SENS} emails can never leave the organisation; other external forwards may wait for approval.`, `Transfère un courriel à une autre adresse avec une note. Les courriels ${SENS} ne sortent jamais de l'organisation ; les autres transferts externes peuvent attendre une validation.`),
     schema: { type: "object", properties: { email_id: { type: "string" }, to: { type: "string" }, note: { type: "string" } }, required: ["email_id", "to"] },
     io: ["{ email_id, to, note? }", "{ status, to }"],
     async execute(i, ctx) {
@@ -711,14 +746,14 @@ const TOOLS = [
 ];
 const SUBAGENTS = [
   { name: "triage_agent", label: "Triage agent", on: true, tools: ["search_inbox", "read_email", "label_emails", "archive_emails"],
-    desc: `Delegate labelling and archiving. Give it one clear instruction, e.g. '${EX.triage}' or '${EX.triage2}'. It searches, reads only when the subject is not enough, labels whole batches, and returns a short report.`,
-    brief: () => `You are the triage sub-agent for ${ME_FULL}'s inbox at ${FIRM_NAME}. Today is ${TODAY}. You label and archive; you never draft or forward.\nLabels you may apply: ${LABELS.join(" · ")} · plus "Urgent" on top.\n${DATA.brief_phishing || ""}\nWork in batches: one search, one label call for the whole batch. Finish with a two-line report: what you labelled, and anything suspicious.` },
+    desc: TD(`Delegate labelling and archiving. Give it one clear instruction, e.g. '${EX.triage}' or '${EX.triage2}'. It searches, reads only when the subject is not enough, labels whole batches, and returns a short report.`, `Délègue l'étiquetage et l'archivage. Donne-lui une instruction claire, p. ex. « ${EX.triage} » ou « ${EX.triage2} ». Il cherche, ne lit que si l'objet ne suffit pas, étiquette par lots entiers et renvoie un bref rapport.`),
+    brief: () => TD(`You are the triage sub-agent for ${ME_FULL}'s inbox at ${FIRM_NAME}. Today is ${TODAY}. You label and archive; you never draft or forward.\nLabels you may apply: ${LABELS.join(" · ")} · plus "Urgent" on top.\n${DATA.brief_phishing || ""}\nWork in batches: one search, one label call for the whole batch. Finish with a two-line report: what you labelled, and anything suspicious.`, `Tu es le sous-agent de tri de la boîte de ${ME_FULL} chez ${FIRM_NAME}. Nous sommes le ${TODAY}. Tu étiquettes et archives ; tu ne rédiges ni ne transfères jamais.\nÉtiquettes autorisées : ${LABELS.join(" · ")} · plus « Urgent » en complément.\n${DATA.brief_phishing || ""}\nTravaille par lots : une recherche, un appel d'étiquetage pour tout le lot. Termine par un rapport de deux lignes, en français : ce que tu as étiqueté, et tout ce qui est suspect.`) },
   { name: "deadline_agent", label: "Deadline agent", on: true, tools: ["search_inbox", "read_email", "create_task"],
-    desc: `Delegate deadline hunting. Give it a scope, e.g. '${EX.deadline}'. It finds dated emails, reads the ones that matter, creates tasks with due dates, and returns the list.`,
-    brief: () => `You are the deadline sub-agent for ${ME_FULL}'s inbox at ${FIRM_NAME}. Today is ${TODAY}. You find dates and create tasks; you never label, draft or forward.\nUse search_inbox with deadline_within_days, read the email when the date or the ask is unclear, then create_task with a precise title and due date (YYYY-MM-DD). Finish with a short list of the tasks you created and who they were assigned to.` },
+    desc: TD(`Delegate deadline hunting. Give it a scope, e.g. '${EX.deadline}'. It finds dated emails, reads the ones that matter, creates tasks with due dates, and returns the list.`, `Délègue la chasse aux échéances. Donne-lui un périmètre, p. ex. « ${EX.deadline} ». Il trouve les courriels datés, lit ceux qui comptent, crée des tâches avec échéance et renvoie la liste.`),
+    brief: () => TD(`You are the deadline sub-agent for ${ME_FULL}'s inbox at ${FIRM_NAME}. Today is ${TODAY}. You find dates and create tasks; you never label, draft or forward.\nUse search_inbox with deadline_within_days, read the email when the date or the ask is unclear, then create_task with a precise title and due date (YYYY-MM-DD). Finish with a short list of the tasks you created and who they were assigned to.`, `Tu es le sous-agent des échéances de la boîte de ${ME_FULL} chez ${FIRM_NAME}. Nous sommes le ${TODAY}. Tu repères les dates et crées des tâches ; tu n'étiquettes, ne rédiges ni ne transfères jamais.\nUtilise search_inbox avec deadline_within_days, lis le courriel si la date ou la demande n'est pas claire, puis create_task avec un titre précis et une échéance (AAAA-MM-JJ). Termine par la liste des tâches créées et de leurs destinataires, en français.`) },
   { name: "reply_agent", label: "Reply agent", on: true, tools: ["read_email", "draft_reply", "forward_email"],
-    desc: "Delegate one reply or forward. Give it the email id and what to say. It reads the email, drafts in ${ME}'s voice, and sends or waits for approval as the rules require. Returns what happened, including a rejection or a block.",
-    brief: () => `You are the reply sub-agent for ${ME_FULL} at ${FIRM_NAME}. Today is ${TODAY}. You read one email and reply or forward as instructed; you never label or create tasks.\n${DATA.brief_phishing || ""}\nDraft short, plain, professional text in ${ME}'s voice. If a tool returns an error or a rejection, do not retry unchanged: report it in one sentence.` },
+    desc: TD("Delegate one reply or forward. Give it the email id and what to say. It reads the email, drafts in ${ME}'s voice, and sends or waits for approval as the rules require. Returns what happened, including a rejection or a block.", "Délègue une réponse ou un transfert. Donne-lui l'id du courriel et quoi dire. Il lit le courriel, rédige dans le style de ${ME}, et envoie ou attend la validation selon les règles. Renvoie ce qui s'est passé, y compris un refus ou un blocage."),
+    brief: () => TD(`You are the reply sub-agent for ${ME_FULL} at ${FIRM_NAME}. Today is ${TODAY}. You read one email and reply or forward as instructed; you never label or create tasks.\n${DATA.brief_phishing || ""}\nDraft short, plain, professional text in ${ME}'s voice. If a tool returns an error or a rejection, do not retry unchanged: report it in one sentence.`, `Tu es le sous-agent de réponse de ${ME_FULL} chez ${FIRM_NAME}. Nous sommes le ${TODAY}. Tu lis un courriel et réponds ou transfères selon l'instruction ; tu n'étiquettes jamais et ne crées pas de tâches.\n${DATA.brief_phishing || ""}\nRédige en français un texte court, simple et professionnel dans le style de ${ME}. Si un outil renvoie une erreur ou un refus, ne réessaie pas à l'identique : rends compte en une phrase.`) },
 ];
 const subOn = LS.get(LSK + "subagents") || {};
 for (const a of SUBAGENTS) if (a.name in subOn) a.on = !!subOn[a.name];
@@ -822,6 +857,14 @@ function addMsg(cls, text) { const d = document.createElement("div"); d.classNam
 function briefTurn() {
   const brief = $("brief").value.trim();
   const g = [];
+  if (LANG0 === "fr" && ALL.fr) {
+    if (G.ext()) g.push(`les réponses et transferts hors de ${FIRM} attendent la validation de ${ME}`);
+    if (G.priv()) g.push(`les courriels ${SENS.toLowerCase()} ne sortent jamais de l'organisation`);
+    g.push(`les échéances à moins de ${G.days()} jours sont escaladées à ${PARTNER}`);
+    g.push(`plus de ${G.bulk()} courriels dans un appel d'étiquetage ou d'archivage exige une validation`);
+    if (G.court()) g.push(`les courriels ${PROTECTED} ne peuvent pas être archivés`);
+    return `${brief}\n\nRègles appliquées dans le code par les outils (tu recevras une erreur si tu les franchis) : ${g.join(" ; ")}.\nTu disposes d'un nombre limité de tours d'outils par requête : travaille par lots, une recherche, un appel d'étiquetage pour tout le lot. Termine par un bref résumé en français pour ${ME}.`;
+  }
   if (G.ext()) g.push(`replies/forwards outside ${FIRM} wait for ${ME}'s approval`);
   if (G.priv()) g.push(`${SENS.toLowerCase()} emails never leave the organisation`);
   g.push(`deadlines within ${G.days()} days are escalated to ${PARTNER}`);
@@ -982,7 +1025,7 @@ async function ask(text) {
     if (e.code === "auth" || e.code === "no_proxy") { $("connect").hidden = false; $("connect-hint").textContent = T(e.code === "auth" ? "not accepted, try again" : "no /api/agent on this site"); }
     setStatus(dead ? "off" : "", dead ? "Claude not available" : "agent idle");
   } finally {
-    currentCtl = null; $("stop").hidden = true; $("send").disabled = dead;
+    currentCtl = null; $("stop").hidden = true; $("send").disabled = dead; unbusy(".diagram g.busy");
     if (turns.length > 16) turns.splice(0, turns.length - 16);
   }
 }
@@ -1033,7 +1076,9 @@ $("g-domain").textContent = FIRM; $("g-partner").textContent = PARTNER; $("g-rol
 S = freshState(); renderRules(); renderTools(); renderAll();
 trace("rules", "loaded", `${S.emails.length} emails · today is ${TODAY} · ${S.emails.filter((e) => !e.read).length} unread`);
 addMsg("sys", "Ask in plain language. The agent works with the tools above and shows every step in the trace.");
+if (SUGGESTIONS.length && !$("say").value) { $("say").value = SUGGESTIONS[0]; addMsg("sys", "A first request is ready below: press Send and watch it move through the structure above."); }
 $("send").disabled = true;
+Object.defineProperty(window, "__agent", { value: { trace, state: () => S, lang: () => LANG, data: () => DATA }, enumerable: false });
 
 // language switch and foldable sections
 function applyLang(lang) {
@@ -1041,8 +1086,8 @@ function applyLang(lang) {
   document.querySelectorAll("#lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === lang));
   translateTree(document.body); renderStatic(); renderAll();
 }
-document.querySelectorAll("#lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
-const FOLD_DEFAULT = { "s-structure": true, "s-assistant": false, "s-workspace": false, "s-blocks": true, "s-trace": true };
+document.querySelectorAll("#lang button").forEach((b) => b.addEventListener("click", () => { if (ALL.fr && b.dataset.lang !== LANG) { LS.set("agent.lang", b.dataset.lang); location.reload(); return; } applyLang(b.dataset.lang); }));
+const FOLD_DEFAULT = { "s-assistant": false, "s-workspace": false, "s-blocks": true, "s-trace": true };
 for (const sec of document.querySelectorAll("section.fold")) {
   const saved = LS.get(LSK + "fold." + sec.id); sec.classList.toggle("collapsed", saved === null || saved === undefined ? FOLD_DEFAULT[sec.id] : !!saved);
   sec.querySelector(".sec-head").addEventListener("click", () => { sec.classList.toggle("collapsed"); LS.set(LSK + "fold." + sec.id, sec.classList.contains("collapsed")); renderStatic(); });

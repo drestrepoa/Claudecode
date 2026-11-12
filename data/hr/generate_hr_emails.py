@@ -299,6 +299,7 @@ data = {
         {"field": "from_email", "op": "ends with", "value": "@" + DOMAIN, "label": "Management Requests"},
     ],
     "suggestions": [
+        "Process HR-037, HR-060 and HR-078: label them, create a task for any deadline, and draft the replies they need.",
         "What needs my attention today?",
         "Triage everything unread from the last 3 days",
         "Which emails carry a statutory or safety deadline this month? Create tasks for them.",
