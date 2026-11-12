@@ -41,7 +41,7 @@ values below, builds, and gives you a URL. Then skip to step 4.
    - `ANTHROPIC_API_KEY`: an API key from console.anthropic.com
    - `WORKSHOP_CODE`: any word you will say out loud in the room, e.g. `harbor42`
    - `ALLOWED_TIERS` (optional): which model tiers the room may use, e.g.
-     `quick,default`. Default is `quick` only; the page shows the others locked
+     `quick,haiku55,default`. Default is `quick,haiku55` (the two Haiku tiers); the page shows the others locked
    - `ANTHROPIC_WORKSPACE_ID` (only if needed): if the trace says the key "is not
      scoped to a workspace", either create the key inside a workspace in the
      console, or set this to the workspace id (`wrkspc_…`) from Settings →
@@ -51,7 +51,7 @@ values below, builds, and gives you a URL. Then skip to step 4.
 
 Without `WORKSHOP_CODE`, anyone with the URL can spend the key. The function
 (`netlify/functions/agent.mjs`) only forwards the model call; the inbox never
-leaves the browser. Model tiers: quick is Claude Haiku 4.5, default is Claude
+leaves the browser. Model tiers: quick is Claude Haiku 4.5, haiku55 is Claude Haiku 5.5 (newer and about ten times cheaper), default is Claude
 Sonnet 5, best is Claude Opus 5. Rough cost per participant for 15 turns: under
 a euro on quick, a few euros on default, more on best.
 

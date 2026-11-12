@@ -8,13 +8,14 @@
 // Environment variables (Site settings → Environment variables):
 //   ANTHROPIC_API_KEY   required
 //   WORKSHOP_CODE       recommended; if unset, anyone with the URL can spend the key
-//   ALLOWED_TIERS       optional, comma-separated: quick | default | complex (default: "quick" only)
+//   ALLOWED_TIERS       optional, comma-separated: quick | haiku55 | default | complex (default: "quick,haiku55")
 //   ANTHROPIC_WORKSPACE_ID  only if the key is an organisation-level key that Anthropic says
 //                       "is not scoped to a workspace"; the wrkspc_... id from the console
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODELS = { quick: "claude-haiku-4-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
+const MODELS = { quick: "claude-haiku-4-5", haiku55: "claude-haiku-5-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
+const EFFORT = { quick: null, haiku55: "low", default: "medium", complex: "medium" }; // Haiku 4.5 takes no effort parameter; Haiku 5.5 thinks by default, low keeps the room fast
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json" } });
 
 export default async (req) => {
@@ -27,8 +28,8 @@ export default async (req) => {
   try { body = await req.json(); } catch (e) { return json({ error: "body must be JSON" }, 400); }
   if (!Array.isArray(body.messages) || !body.messages.length) return json({ error: "messages required" }, 400);
 
-  // Tiers the room may use. Default: quick only. Set ALLOWED_TIERS="quick,default,complex" to open them up.
-  const allowed = (process.env.ALLOWED_TIERS || "quick").split(",").map((t) => t.trim()).filter((t) => MODELS[t]);
+  // Tiers the room may use. Default: the two Haiku tiers. Set ALLOWED_TIERS="quick,haiku55,default,complex" to open them up.
+  const allowed = (process.env.ALLOWED_TIERS || "quick,haiku55").split(",").map((t) => t.trim()).filter((t) => MODELS[t]);
   const tier = allowed.includes(body.tier) ? body.tier : allowed[0];
   const model = MODELS[tier];
   const params = {
@@ -41,7 +42,7 @@ export default async (req) => {
     // at a tenth of the price, and cached tokens do not count toward the input-tokens-per-minute limit.
     cache_control: { type: "ephemeral" },
   };
-  if (tier !== "quick") params.output_config = { effort: "medium" }; // Haiku 4.5 does not take effort
+  if (EFFORT[tier]) params.output_config = { effort: EFFORT[tier] };
 
   const client = new Anthropic(process.env.ANTHROPIC_WORKSPACE_ID ? { defaultHeaders: { "anthropic-workspace-id": process.env.ANTHROPIC_WORKSPACE_ID } } : {});
   try {
