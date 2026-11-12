@@ -302,7 +302,9 @@ data = {
         {"field": "from_email", "op": "ends with", "value": "@" + DOMAIN, "label": "Demandes des managers"},
     ],
     "suggestions": [
-        "Traite HR-037, HR-060 et HR-078 : étiquette-les, crée une tâche s'il y a une échéance, et rédige les réponses nécessaires.",
+        "Traite HR-037 : étiquette-le, crée une tâche s'il y a une échéance, et rédige la réponse nécessaire.",
+        "Traite HR-060 : étiquette-le, crée une tâche s'il y a une échéance, et rédige la réponse nécessaire.",
+        "Traite HR-078 : étiquette-le, crée une tâche s'il y a une échéance, et rédige la réponse nécessaire.",
         "Qu'est-ce qui demande mon attention aujourd'hui ?",
         "Trie tout ce qui est non lu depuis 3 jours",
         "Quels courriels portent une échéance légale ou de sécurité ce mois-ci ? Crée des tâches.",
