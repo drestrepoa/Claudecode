@@ -219,6 +219,14 @@ dialog::backdrop{background:rgba(10,12,16,.45)}
 .reader .meta b{font-weight:500;color:var(--ink)}
 .reader pre{white-space:pre-wrap;font-family:inherit;margin:0;padding:12px;background:var(--panel-2);border-radius:6px;border:1px solid var(--line-2);max-height:50vh;overflow:auto}
 footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid var(--line);padding-top:14px}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{border:0;background:var(--panel);padding:4px 10px;font-size:12px;color:var(--muted)}
+.lang button.on{background:var(--agent);color:#fff}
+section.fold>.sec-head{cursor:pointer;user-select:none;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+section.fold>.sec-head h2::before{content:"▾";display:inline-block;width:1.1em;color:var(--muted);font-family:"IBM Plex Sans",sans-serif}
+section.fold.collapsed>.sec-head h2::before{content:"▸"}
+section.fold.collapsed>:not(.sec-head){display:none}
+section.fold>.sec-head:hover{border-color:var(--agent)}
 .note{font-size:12.5px;color:var(--muted);padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:var(--panel-2)}
 .note.warn{border-color:var(--human);background:var(--human-soft);color:var(--ink)}
 </style>
@@ -232,6 +240,8 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
   <div class="hcontrols">
     <span class="connect" id="connect" hidden><label for="secret" id="secret-label">code</label><input type="password" id="secret" autocomplete="off" placeholder="workshop code"><button class="btn small primary" id="connect-btn">Connect</button><span class="hint" id="connect-hint"></span></span>
+    <span class="lang" id="lang" role="group" aria-label="language"><button type="button" data-lang="en" class="on">EN</button><button type="button" data-lang="fr">FR</button></span>
+    <button class="btn small" id="fold-all" title="roll out or fold every section">Roll out all</button>
     <label class="select" for="model">model
       <select id="model"><option value="quick" selected>quick</option></select>
     </label>
@@ -241,8 +251,8 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 </header>
 
 
-<section>
-  <div class="sec-head"><h2>Agentic structure — one request, end to end</h2><p>An orchestrator and three sub-agents. Everything else is deterministic code or a human.</p></div>
+<section class="fold" id="s-structure">
+  <div class="sec-head"><h2>1 · Agentic structure — one request, end to end</h2><p>An orchestrator and three sub-agents. Everything else is deterministic code or a human.</p></div>
   <div class="panel pad diagram">
     <svg viewBox="0 0 1100 540" role="img" aria-label="Diagram: the human user asks the orchestrator agent; a brief and skills and a rules engine feed it; it delegates to a triage agent, a deadline agent and a reply agent, each with its own tools; tools that change the world pass a coded guardrail that executes, asks the human, or returns an error; the inbox is the long-term memory reached only through tools.">
       <defs>
@@ -309,18 +319,19 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
 </section>
 
-<section>
-  <div class="sec-head"><h2 id="assistant-head">Inbox assistant — ask in plain language</h2><p>Every request runs through the structure above. The trace at the bottom of the page shows each step.</p></div>
+<section class="fold" id="s-assistant">
+  <div class="sec-head"><h2 id="assistant-head">2 · Inbox assistant — ask in plain language</h2><p>Every request runs through the structure above. The trace at the bottom of the page shows each step.</p></div>
   <div class="panel chat">
       <div class="chat-head"><div><h3 id="chat-title">Inbox assistant</h3><span class="hint" id="cost">live Claude calls on your account · a few cents per turn</span></div><button class="btn small" id="clear">Clear chat</button></div>
       <div class="msgs" id="msgs"></div>
       <div class="suggest" id="suggest"></div>
       <div class="compose"><input type="text" id="say" placeholder="Ask the agent…" autocomplete="off"><button class="btn primary" id="send">Send</button><button class="btn" id="stop" hidden>Stop</button></div>
+      <div class="compose" style="border-top:1px dashed var(--line);align-items:center"><button class="btn ok" id="run-inbox">▶ Process the inbox</button><span class="hint" id="run-note">Feeds the unlabelled emails through the agent in batches: labels, tasks, replies. Internal replies go out; external ones wait for your approval.</span><span class="hint mono" id="run-progress"></span></div>
     </div>
 </section>
 
-<section>
-  <div class="sec-head"><h2>Workspace — the inbox and the score</h2><p>Labels, tasks and drafts appear here as the tools run.</p></div>
+<section class="fold" id="s-workspace">
+  <div class="sec-head"><h2>3 · Workspace — the inbox and the score</h2><p>Labels, tasks and drafts appear here as the tools run.</p></div>
   <div class="work">
       <div class="panel inbox">
         <div class="inbox-top">
@@ -345,8 +356,8 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
   </div>
 </section>
 
-<section>
-  <div class="sec-head"><h2>Building blocks — edit me</h2><p>Four things participants change. Edit, then ask the agent again and watch the trace.</p></div>
+<section class="fold" id="s-blocks">
+  <div class="sec-head"><h2>4 · Building blocks — edit me</h2><p>Four things participants change. Edit, then ask the agent again and watch the trace.</p></div>
   <div class="blocks">
     <div class="panel pad block">
       <div class="block-head"><div class="t"><h3>1 · The brief</h3><span class="tag agent">agent</span></div><button class="btn small" id="brief-default">Restore default</button></div>
@@ -378,8 +389,8 @@ footer{color:var(--muted);font-size:12.5px;max-width:90ch;border-top:1px solid v
 </section>
 
 
-<section>
-  <div class="sec-head"><h2>Trace — watch it decide</h2><p>Every tool call, every guardrail decision, every human answer, in order.</p></div>
+<section class="fold" id="s-trace">
+  <div class="sec-head"><h2>5 · Trace — watch it decide</h2><p>Every tool call, every guardrail decision, every human answer, in order.</p></div>
   <div class="panel trace" id="trace"></div>
 </section>
 
@@ -409,6 +420,62 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
 const LS = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+
+// ------------------------------------------------------------ language (EN / FR)
+// Static text is translated by walking the page's text nodes; dynamic text goes through T().
+let LANG = LS.get("agent.lang") || "en";
+const FR = {
+  "Build your own agent · simulated inbox": "Construisez votre agent · messagerie simulée", "Build your own agent · HR training · simulated inbox": "Construisez votre agent · formation RH · messagerie simulée",
+  "Inbox Agent": "Agent de messagerie", "code": "code", "Connect": "Connecter", "Change": "Changer", "model": "modèle", "agent idle": "agent au repos", "agent working": "agent au travail", "waiting for": "en attente de", "Claude not available": "Claude indisponible",
+  "Reset inbox": "Réinitialiser la boîte", "Roll out all": "Tout dérouler", "Fold all": "Tout replier",
+  "1 · Agentic structure — one request, end to end": "1 · Structure agentique — une requête, de bout en bout", "An orchestrator and three sub-agents. Everything else is deterministic code or a human.": "Un orchestrateur et trois sous-agents. Tout le reste est du code déterministe ou un humain.",
+  "Brief & skills": "Brief & compétences", "how to triage, when to": "comment trier, quand", "escalate, what never to do": "escalader, ce qu'il ne faut jamais faire", "Human user": "Utilisateur humain", "asks in plain language": "demande en langage courant", "request": "requête", "reply": "réponse",
+  "Working memory": "Mémoire de travail", "the brief, the last turns of": "le brief, les derniers tours de", "this chat, every tool result": "cette conversation, chaque résultat d'outil", "rebuilt for every call": "reconstruite à chaque appel", "sub-agents start empty": "les sous-agents partent de zéro",
+  "Rules engine": "Moteur de règles", "deterministic · runs before the agents": "déterministe · s'exécute avant les agents", "labels": "étiquettes", "Orchestrator agent": "Agent orchestrateur", "plans, delegates, reports": "planifie, délègue, rend compte", "never labels or drafts itself": "n'étiquette ni ne rédige lui-même", "own tools: stats · search · read": "ses outils : stats · recherche · lecture",
+  "Triage agent": "Agent de tri", "labels and archives in batches": "étiquette et archive par lots", "Deadline agent": "Agent des échéances", "finds dates, creates tasks": "repère les dates, crée des tâches", "Reply agent": "Agent de réponse", "drafts replies and forwards": "rédige réponses et transferts", "instruction ⇄ report": "instruction ⇄ rapport",
+  "read only · change the world ↓": "lecture seule · agit sur le monde ↓", "Guardrail": "Garde-fou", "code, not persuasion": "du code, pas de la persuasion", "Executed": "Exécuté", "within limits": "dans les limites", "Human approval": "Validation humaine", "above the line": "au-delà de la limite", "≤ limit": "≤ limite", "> limit": "> limite", "approve / reject": "valider / refuser",
+  "Long-term memory": "Mémoire à long terme", "the inbox state: labels, tasks, drafts": "l'état de la boîte : étiquettes, tâches, brouillons", "read and written only through tools": "lue et écrite uniquement via les outils", "plus what you saved in the blocks: brief, rules, switches": "plus ce que vous avez enregistré dans les blocs : brief, règles, interrupteurs",
+  "blocked or rejected ⇢ tool error to the sub-agent, which reports it up": "bloqué ou refusé ⇢ erreur d'outil renvoyée au sous-agent, qui la remonte",
+  "deterministic": "déterministe", "agent (orchestrator and sub-agents)": "agent (orchestrateur et sous-agents)", "brief & skills": "brief & compétences", "memory": "mémoire", "human": "humain", "guardrail": "garde-fou", "executed": "exécuté",
+  'The orchestrator reads the brief, plans, and delegates: the triage agent labels in batches, the deadline agent creates tasks, the reply agent drafts. Each sub-agent is its own model call with its own small set of tools, and reports back in words. The model itself remembers nothing between calls: what it "knows" is either re-sent in the working memory (the brief, the last turns, the tool results) or written into the inbox through a tool. The tools that change the world pass through a guardrail written in code. Below the line the action executes. Above it, a person decides. Either way the outcome, including a rejection, goes back to the agent as a tool result, and it carries on.':
+    "L'orchestrateur lit le brief, planifie et délègue : l'agent de tri étiquette par lots, l'agent des échéances crée des tâches, l'agent de réponse rédige. Chaque sous-agent est un appel de modèle distinct, avec son petit jeu d'outils, et rend compte en quelques phrases. Le modèle ne se souvient de rien entre deux appels : ce qu'il « sait » est soit renvoyé dans la mémoire de travail (le brief, les derniers tours, les résultats d'outils), soit écrit dans la boîte via un outil. Les outils qui agissent sur le monde passent par un garde-fou écrit en code. Sous la limite, l'action s'exécute. Au-delà, une personne décide. Dans les deux cas le résultat, y compris un refus, revient à l'agent comme résultat d'outil, et il continue.",
+  "2 · Inbox assistant — ask in plain language": "2 · Assistant de messagerie — demandez en langage courant", "Every request runs through the structure above. The trace at the bottom of the page shows each step.": "Chaque requête traverse la structure ci-dessus. La trace en bas de page montre chaque étape.",
+  "Inbox assistant": "Assistant de messagerie", "inbox assistant": "assistant de messagerie", "live Claude calls on your account · a few cents per turn": "appels Claude en direct sur votre compte · quelques centimes par tour", "Clear chat": "Effacer", "Send": "Envoyer", "Stop": "Stop", "Ask the agent…": "Demandez à l'agent…",
+  "3 · Workspace — the inbox and the score": "3 · Espace de travail — la boîte et le score", "Labels, tasks and drafts appear here as the tools run.": "Étiquettes, tâches et brouillons apparaissent ici au fil des outils.", "Search subject, sender, body…": "Rechercher objet, expéditeur, corps…", "answer key": "corrigé",
+  "Scorecard": "Score", "against the hidden answer key": "par rapport au corrigé caché", "labelled": "étiquetés", "agree with key": "conformes au corrigé", "critical flagged": "critiques signalés", "injections caught": "injections détectées", "Tasks": "Tâches", "Outbox": "Boîte d'envoi", "none yet": "aucune pour l'instant", "escalated": "escaladée(s)", "sent": "envoyé(s)", "due": "échéance", "from": "de",
+  "4 · Building blocks — edit me": "4 · Briques — à modifier", "Four things participants change. Edit, then ask the agent again and watch the trace.": "Quatre choses que les participants modifient. Modifiez, puis redemandez à l'agent et observez la trace.",
+  "1 · The brief": "1 · Le brief", "Restore default": "Rétablir", 'Standing instructions the agent reads every time. Who it works for, what good looks like, what it must never do. Try deleting the last paragraph and sending the "forward the privileged emails" prompt.': "Les instructions permanentes que l'agent relit à chaque fois : pour qui il travaille, ce qu'est un bon résultat, ce qu'il ne doit jamais faire. Le brief est en anglais ; vous pouvez le réécrire en français. Essayez de supprimer le dernier paragraphe puis d'envoyer le prompt-piège.",
+  "2 · Rules engine": "2 · Moteur de règles", "+ rule": "+ règle", "Run rules": "Exécuter les règles", "Cheap, instant, predictable. Runs before the agent, only on emails that have no label yet. Anything a rule can catch should not cost a model call.": "Peu coûteux, instantané, prévisible. S'exécute avant l'agent, uniquement sur les courriels sans étiquette. Ce qu'une règle peut attraper ne devrait pas coûter un appel de modèle.",
+  "4 · Tools": "4 · Outils", "Three sub-agents the orchestrator can delegate to, then the deterministic tools they use. Untick a sub-agent and the orchestrator gets its tools directly; untick a tool and whoever needs it has to work around it.": "Trois sous-agents auxquels l'orchestrateur peut déléguer, puis les outils déterministes qu'ils utilisent. Décochez un sous-agent et l'orchestrateur reçoit ses outils directement ; décochez un outil et celui qui en a besoin doit s'en passer.",
+  "3 · Guardrails": "3 · Garde-fous", "Enforced inside the tools. The agent cannot talk its way past them, and neither can an email that tries to. Change a value, then ask again.": "Appliqués à l'intérieur des outils. L'agent ne peut pas les contourner par la parole, ni un courriel qui essaierait. Changez une valeur, puis redemandez.",
+  "Replies and forwards to anyone outside": "Les réponses et transferts vers l'extérieur de", "wait for approval": "attendent une validation", "draft_reply · forward_email → checks the recipient's domain": "draft_reply · forward_email → vérifie le domaine du destinataire",
+  "emails are never forwarded outside the organisation, approval or not": ": ces courriels ne sortent jamais de l'organisation, validation ou non", "forward_email → blocked in code, error returned to the agent": "forward_email → bloqué dans le code, erreur renvoyée à l'agent",
+  "Deadlines within": "Les échéances à moins de", "days escalate to": "jours sont escaladées à", "automatically": "automatiquement", "create_task → task is assigned to": "create_task → la tâche est attribuée à", "and flagged": "et signalée",
+  "Labelling or archiving more than": "Étiqueter ou archiver plus de", "emails in one call needs approval": "courriels en un appel exige une validation", "label_emails · archive_emails → counts the ids": "label_emails · archive_emails → compte les identifiants",
+  "emails can never be archived": ": ces courriels ne peuvent jamais être archivés", "archive_emails → blocked in code": "archive_emails → bloqué dans le code",
+  "5 · Trace — watch it decide": "5 · Trace — regardez-le décider", "Every tool call, every guardrail decision, every human answer, in order.": "Chaque appel d'outil, chaque décision de garde-fou, chaque réponse humaine, dans l'ordre.",
+  "All": "Tous", "Unlabelled": "Sans étiquette", "Unread": "Non lus", "Deadline ≤ 7d": "Échéance ≤ 7 j", "Urgent": "Urgent", "Archived": "Archivés", "Nothing here.": "Rien ici.", "key:": "corrigé :",
+  "your call:": "à vous de décider :", "Approve": "Valider", "Reject": "Refuser", "reason (optional)": "motif (facultatif)", "approved": "validé", "rejected": "refusé",
+  "Ask in plain language. The agent works with the tools above and shows every step in the trace.": "Demandez en langage courant. L'agent travaille avec les outils ci-dessus et montre chaque étape dans la trace.", "Chat cleared. The inbox, tasks and outbox are unchanged.": "Conversation effacée. La boîte, les tâches et la boîte d'envoi sont inchangées.", "Connected. Ask in plain language.": "Connecté. Demandez en langage courant.",
+  "Thinking…": "Réflexion…", "[stopped]": "[arrêté]", "[cut short: ask for less at a time]": "[interrompu : demandez moins à la fois]", "stopped": "arrêté", "emails": "courriels", "today is": "nous sommes le", "to": "à", "date": "date", "cc": "cc", "thread": "fil", "sensitivity": "sensibilité", "importance": "importance", "date in body": "date dans le corps", "attached": "pièces jointes", "unlabelled": "sans étiquette", "urgency": "urgence", "reply required": "réponse attendue", "yes": "oui", "no": "non", "Close": "Fermer",
+  "Workshop code": "Code de l'atelier", "Anthropic API key": "Clé API Anthropic", "workshop code": "code de l'atelier", "ask the facilitator": "demandez à l'animateur", "sk-ant-…  stays in this tab only": "sk-ant-…  reste dans cet onglet", "one code for the room, calls run on the facilitator's account": "un code pour la salle, les appels passent par le compte de l'animateur", "no server here: calls go straight from your browser to Anthropic": "pas de serveur ici : les appels vont directement de votre navigateur à Anthropic",
+  "Connected. Everyone can watch this screen; only this one talks to the agent.": "Connecté. Tout le monde peut regarder cet écran ; lui seul parle à l'agent.", "not accepted, try again": "refusé, réessayez", "no /api/agent on this site": "pas de /api/agent sur ce site", "enter the workshop code": "saisissez le code de l'atelier", "enter an API key": "saisissez une clé API",
+  "calls run on the facilitator's account through this site": "les appels passent par le compte de l'animateur via ce site", "calls run on your own API key, straight from this browser": "les appels utilisent votre propre clé API, depuis ce navigateur", "enter the workshop code to start": "saisissez le code de l'atelier pour commencer", "enter an Anthropic API key to start": "saisissez une clé API Anthropic pour commencer",
+  "tools unavailable in this viewer": "outils indisponibles dans cette vue", "live agent unavailable here": "agent en direct indisponible ici", "this viewer cannot run page tools · try the claude.ai web or desktop app": "cette vue ne peut pas exécuter les outils de la page · essayez l'application claude.ai", "the rules engine and inbox work here; the agent needs the claude.ai app or the hosted version": "le moteur de règles et la boîte fonctionnent ici ; l'agent a besoin de l'application claude.ai ou de la version hébergée",
+  "You declined to let this page use Claude. Reload to be asked again.": "Vous avez refusé que cette page utilise Claude. Rechargez pour être redemandé.", "Claude is not available on this account.": "Claude n'est pas disponible sur ce compte.", "Too many calls for now. Wait a moment and try again.": "Trop d'appels pour l'instant. Attendez un moment et réessayez.", "The conversation grew too long. Clear the chat and ask again.": "La conversation est devenue trop longue. Effacez-la et redemandez.", "Claude declined that request. Rephrase and try again.": "Claude a décliné cette requête. Reformulez et réessayez.", "This viewer cannot run page tools, so the agent cannot act. Try the claude.ai web or desktop app.": "Cette vue ne peut pas exécuter les outils de la page, l'agent ne peut donc pas agir. Essayez l'application claude.ai.", "Claude returned nothing. Try asking for less.": "Claude n'a rien renvoyé. Demandez moins.", "A transient error interrupted the answer. Try again.": "Une erreur passagère a interrompu la réponse. Réessayez.", "The workshop code or API key was not accepted.": "Le code de l'atelier ou la clé API n'a pas été accepté.", "This site has no agent endpoint. Enter an API key instead.": "Ce site n'a pas de point d'accès agent. Saisissez une clé API.", "The request was rejected. Clear the chat and try again.": "La requête a été rejetée. Effacez la conversation et réessayez.",
+  "▶ Process the inbox": "▶ Traiter la boîte", "Feeds the unlabelled emails through the agent in batches: labels, tasks, replies. Internal replies go out; external ones wait for your approval.": "Fait passer les courriels sans étiquette par l'agent, par lots : étiquettes, tâches, réponses. Les réponses internes partent ; les externes attendent votre validation.",
+  "processed": "traités", "emails to process, in batches of": "courriels à traiter, par lots de", "Nothing left to process: every email has a label.": "Plus rien à traiter : chaque courriel a une étiquette.", "the batch came back unlabelled; stopping the run": "le lot est revenu sans étiquette ; arrêt du traitement",
+  "internal, within the limits": "interne, dans les limites", "kind": "type", "status": "statut", "in reply to": "en réponse à", "external": "externe", "internal": "interne", "forward": "transfert", "pending": "en attente", "blocked": "bloqué",
+  "· locked": "· verrouillé", "not available in this workshop": "indisponible dans cet atelier", "quick (cheap)": "rapide (économique)", "default (smarter)": "standard (plus futé)", "best (slowest)": "le meilleur (le plus lent)",
+};
+const T = (s) => (LANG === "fr" && Object.prototype.hasOwnProperty.call(FR, s)) ? FR[s] : s;
+function translateTree(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => ["SCRIPT", "STYLE", "TEXTAREA", "PRE"].includes(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  for (const n of nodes) { const orig = n.__en === undefined ? (n.__en = n.nodeValue) : n.__en; const key = orig.trim(); if (!key) continue; n.nodeValue = LANG === "fr" && Object.prototype.hasOwnProperty.call(FR, key) ? orig.replace(key, FR[key]) : orig; }
+  for (const el of root.querySelectorAll("[placeholder]")) { const o = el.__enp === undefined ? (el.__enp = el.placeholder) : el.__enp; el.placeholder = T(o); }
+  for (const el of root.querySelectorAll("[title]")) { const o = el.__ent === undefined ? (el.__ent = el.title) : el.__ent; el.title = T(o); }
+}
 
 // ------------------------------------------------------------ defaults
 const DEFAULT_BRIEF = `You are the inbox assistant for ${ME_FULL}, ${DATA.owner.title || "a lawyer"} at ${FIRM_NAME}. Today is ${TODAY}.
@@ -457,7 +524,8 @@ function trace(kind, key, body) {
 function compact(v, max = 260) { const s = typeof v === "string" ? v : JSON.stringify(v); return s.length > max ? s.slice(0, max) + "…" : s; }
 
 // ------------------------------------------------------------ status
-function setStatus(kind, text) { const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text; }
+let lastStatus = ["", "agent idle"]; let lastCost = null;
+function setStatus(kind, text) { lastStatus = [kind, text]; const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text.startsWith("waiting for") ? text : T(text); }
 
 // ------------------------------------------------------------ rules engine
 let rules = LS.get(LSK + "rules") || DEFAULT_RULES.map((r) => ({ ...r }));
@@ -501,7 +569,7 @@ function rowOf(e) {
   return `${e.id} | ${e.date.slice(5, 16).replace("T", " ")} | ${e.from_name} <${e.from_email}> | ${e.subject} | ${e.labels.join("+") || "unlabelled"}${e.read ? "" : " | unread"}${e.privileged ? " | " + SENS.toLowerCase() : ""}${dl}${e.archived ? " | archived" : ""}`;
 }
 async function humanApproval(title, detail) {
-  setStatus("wait", "waiting for " + ME);
+  setStatus("wait", T("waiting for") + " " + ME);
   trace("human", "approval?", title);
   const decision = await approvalCard(title, detail);
   trace("human", decision.ok ? "approved" : "rejected", decision.reason || (decision.ok ? ME + " approved" : ME + " rejected"));
@@ -670,9 +738,9 @@ function renderTools() {
 function approvalCard(title, detail) {
   return new Promise((resolve) => {
     const card = document.createElement("div"); card.className = "approval";
-    card.innerHTML = `<div class="what"><b>${esc(ME)}, your call:</b> ${esc(title)}</div><pre>${esc(detail)}</pre><div class="rowbtns"><button class="btn ok">Approve</button><button class="btn danger">Reject</button><input type="text" placeholder="reason (optional)" style="flex:1;min-width:140px"></div>`;
+    card.innerHTML = `<div class="what"><b>${esc(ME)}, ${T("your call:")}</b> ${esc(title)}</div><pre>${esc(detail)}</pre><div class="rowbtns"><button class="btn ok">${T("Approve")}</button><button class="btn danger">${T("Reject")}</button><input type="text" placeholder="${T("reason (optional)")}" style="flex:1;min-width:140px"></div>`;
     const [ok, no] = card.querySelectorAll("button"); const reason = card.querySelector("input");
-    const done = (v) => { ok.disabled = no.disabled = reason.disabled = true; const d = document.createElement("div"); d.className = "decided"; d.textContent = v.ok ? "approved" + (v.reason ? " · " + v.reason : "") : "rejected" + (v.reason ? " · " + v.reason : ""); card.appendChild(d); resolve(v); };
+    const done = (v) => { ok.disabled = no.disabled = reason.disabled = true; const d = document.createElement("div"); d.className = "decided"; d.textContent = v.ok ? T("approved") + (v.reason ? " · " + v.reason : "") : T("rejected") + (v.reason ? " · " + v.reason : ""); card.appendChild(d); resolve(v); };
     ok.addEventListener("click", () => done({ ok: true, reason: reason.value.trim() }));
     no.addEventListener("click", () => done({ ok: false, reason: reason.value.trim() }));
     $("msgs").appendChild(card); $("msgs").scrollTop = $("msgs").scrollHeight;
@@ -684,10 +752,10 @@ function approvalCard(title, detail) {
 function labClass(l) { return "lab " + l.split(/[ &]/)[0]; }
 function renderChips() {
   const live = S.emails.filter((e) => !e.archived);
-  const items = [["all", "All", live.length], ["unlabelled", "Unlabelled", live.filter((e) => !catLabel(e)).length], ["unread", "Unread", live.filter((e) => !e.read).length],
-    ["deadline", "Deadline ≤ 7d", live.filter((e) => e.deadline && daysBetween(TODAY, e.deadline) <= 7 && daysBetween(TODAY, e.deadline) >= 0).length],
+  const items = [["all", T("All"), live.length], ["unlabelled", T("Unlabelled"), live.filter((e) => !catLabel(e)).length], ["unread", T("Unread"), live.filter((e) => !e.read).length],
+    ["deadline", T("Deadline ≤ 7d"), live.filter((e) => e.deadline && daysBetween(TODAY, e.deadline) <= 7 && daysBetween(TODAY, e.deadline) >= 0).length],
     ["Urgent", "Urgent", live.filter((e) => e.labels.includes("Urgent")).length],
-    ...LABELS.map((l) => [l, l, live.filter((e) => e.labels.includes(l)).length]), ["archived", "Archived", S.emails.filter((e) => e.archived).length]];
+    ...LABELS.map((l) => [l, l, live.filter((e) => e.labels.includes(l)).length]), ["archived", T("Archived"), S.emails.filter((e) => e.archived).length]];
   const box = $("chips"); box.innerHTML = "";
   for (const [k, name, n] of items) {
     const b = document.createElement("button"); b.className = "chip" + (S.filter === k ? " on" : ""); b.innerHTML = `${esc(name)} <b>${n}</b>`;
@@ -706,17 +774,22 @@ function visibleEmails() {
 }
 function renderList() {
   const box = $("list"); const rows = visibleEmails(); const key = $("showkey").checked;
-  if (!rows.length) { box.innerHTML = `<div class="empty">Nothing here.</div>`; return; }
+  if (!rows.length) { box.innerHTML = `<div class="empty">${T("Nothing here.")}</div>`; return; }
   box.innerHTML = rows.map((e) => {
-    const dl = e.deadline && daysBetween(TODAY, e.deadline) >= 0 && daysBetween(TODAY, e.deadline) <= 7 ? `<span class="lab dl">due ${e.deadline.slice(5)}</span>` : "";
-    const tags = e.labels.map((l) => `<span class="${labClass(l)}">${esc(l)}</span>`).join("") + dl + (key ? `<span class="lab key">key: ${esc(e.expected)}${e.urgency ? " · " + esc(e.urgency) : ""}</span>` : "");
+    const dl = e.deadline && daysBetween(TODAY, e.deadline) >= 0 && daysBetween(TODAY, e.deadline) <= 7 ? `<span class="lab dl">${T("due")} ${e.deadline.slice(5)}</span>` : "";
+    const tags = e.labels.map((l) => `<span class="${labClass(l)}">${esc(l)}</span>`).join("") + dl + (key ? `<span class="lab key">${T("key:")} ${esc(e.expected)}${e.urgency ? " · " + esc(e.urgency) : ""}</span>` : "");
     return `<div class="row${e.read ? "" : " unread"}${e.archived ? " archived" : ""}" data-id="${e.id}"><span class="when">${e.date.slice(5, 16).replace("T", " ")}</span><div><div class="subj">${esc(e.subject)}</div><div class="who">${esc(e.from_name)} · ${esc(e.from_email)}</div></div><div class="tags">${tags}</div></div>`;
   }).join("");
 }
 $("list").addEventListener("click", (ev) => { const r = ev.target.closest(".row"); if (r) openReader(r.dataset.id); });
+$("outbox").addEventListener("click", (ev) => {
+  const it = ev.target.closest(".item"); if (!it) return; const o = S.outbox[Number(it.dataset.o)]; if (!o) return;
+  $("reader-body").innerHTML = `<h3>${esc(o.subject)}</h3><div class="meta"><b>${T("kind")}</b><span>${T(o.kind)}</span><b>${T("to")}</b><span>${esc(o.to)}${isExternal(o.to) ? " · " + T("external") : " · " + T("internal")}</span><b>${T("status")}</b><span>${T(o.status)}</span>${o.email_id ? `<b>${T("in reply to")}</b><span>${esc(o.email_id)}</span>` : ""}</div><pre>${esc(o.body || "")}</pre><div class="rowbtns"><button class="btn small" id="reader-close" style="margin-left:auto">${T("Close")}</button></div>`;
+  $("reader-close").addEventListener("click", () => $("reader").close()); $("reader").showModal();
+});
 function openReader(id) {
   const e = byId(id); if (!e) return; e.read = true;
-  $("reader-body").innerHTML = `<h3>${esc(e.subject)}</h3><div class="meta"><b>from</b><span>${esc(e.from_name)} &lt;${esc(e.from_email)}&gt;</span><b>to</b><span>${esc(e.to)}</span><b>date</b><span>${esc(e.date.replace("T", " "))}</span>${e.cc ? `<b>cc</b><span>${esc(e.cc)}</span>` : ""}${e.thread ? `<b>thread</b><span>${esc(e.thread)}</span>` : ""}${e.sensitivity ? `<b>sensitivity</b><span>${esc(e.sensitivity)}${e.importance ? " · importance " + esc(e.importance) : ""}</span>` : ""}${e.deadline ? `<b>date in body</b><span>${esc(e.deadline)}</span>` : ""}${e.attachments.length ? `<b>attached</b><span>${esc(e.attachments.join(", "))}</span>` : ""}<b>labels</b><span>${e.labels.join(", ") || "unlabelled"}</span>${$("showkey").checked ? `<b>answer key</b><span>${esc(e.expected)} · urgency ${esc(e.urgency || e.priority || "")} · reply ${e.reply_required === undefined ? "" : e.reply_required ? "yes" : "no"}${e.recommended_action ? " · " + esc(e.recommended_action) : ""}</span>` : ""}</div><pre>${esc(e.body)}</pre><div class="rowbtns"><span class="hint">${e.id}</span><button class="btn small" id="reader-close" style="margin-left:auto">Close</button></div>`;
+  $("reader-body").innerHTML = `<h3>${esc(e.subject)}</h3><div class="meta"><b>${T("from")}</b><span>${esc(e.from_name)} &lt;${esc(e.from_email)}&gt;</span><b>${T("to")}</b><span>${esc(e.to)}</span><b>${T("date")}</b><span>${esc(e.date.replace("T", " "))}</span>${e.cc ? `<b>cc</b><span>${esc(e.cc)}</span>` : ""}${e.thread ? `<b>${T("thread")}</b><span>${esc(e.thread)}</span>` : ""}${e.sensitivity ? `<b>${T("sensitivity")}</b><span>${esc(e.sensitivity)}${e.importance ? " · " + T("importance") + " " + esc(e.importance) : ""}</span>` : ""}${e.deadline ? `<b>${T("date in body")}</b><span>${esc(e.deadline)}</span>` : ""}${e.attachments.length ? `<b>${T("attached")}</b><span>${esc(e.attachments.join(", "))}</span>` : ""}<b>${T("labels")}</b><span>${e.labels.join(", ") || T("unlabelled")}</span>${$("showkey").checked ? `<b>${T("answer key")}</b><span>${esc(e.expected)} · ${T("urgency")} ${esc(e.urgency || e.priority || "")} · ${T("reply required")} ${e.reply_required === undefined ? "" : e.reply_required ? T("yes") : T("no")}${e.recommended_action ? " · " + esc(e.recommended_action) : ""}</span>` : ""}</div><pre>${esc(e.body)}</pre><div class="rowbtns"><span class="hint">${e.id}</span><button class="btn small" id="reader-close" style="margin-left:auto">${T("Close")}</button></div>`;
   $("reader-close").addEventListener("click", () => $("reader").close());
   $("reader").showModal(); renderAll();
 }
@@ -728,17 +801,17 @@ function renderScore() {
   const crit = S.emails.filter((e) => e.urgency === "Critical" || e.priority === "high"); $("s-crit").innerHTML = crit.length ? `${crit.filter((e) => e.labels.includes("Urgent")).length} <small>/ ${crit.length}</small>` : "—";
 }
 function renderTasks() {
-  $("tasks-n").textContent = S.tasks.length ? `${S.tasks.length} · ${S.tasks.filter((t) => t.escalated).length} escalated` : "none yet";
-  $("tasks").innerHTML = S.tasks.map((t) => `<div class="item${t.escalated ? " esc" : ""}"><span>${esc(t.title)}</span><span class="m">due ${t.due} · ${esc(t.assignee)}${t.escalated ? " · escalated" : ""} · from ${t.email_id}${t.note ? " · " + esc(t.note) : ""}</span></div>`).join("");
-  $("outbox-n").textContent = S.outbox.length ? `${S.outbox.length} · ${S.outbox.filter((o) => o.status === "sent").length} sent` : "none yet";
-  $("outbox").innerHTML = S.outbox.map((o) => `<div class="item${o.status === "blocked" || o.status === "rejected" ? " blocked" : ""}"><span>${esc(o.subject)}</span><span class="m">${o.kind} → ${esc(o.to)} · ${o.status}</span></div>`).join("");
+  $("tasks-n").textContent = S.tasks.length ? `${S.tasks.length} · ${S.tasks.filter((t) => t.escalated).length} ${T("escalated")}` : T("none yet");
+  $("tasks").innerHTML = S.tasks.map((t) => `<div class="item${t.escalated ? " esc" : ""}"><span>${esc(t.title)}</span><span class="m">${T("due")} ${t.due} · ${esc(t.assignee)}${t.escalated ? " · " + T("escalated") : ""} · ${T("from")} ${t.email_id}${t.note ? " · " + esc(t.note) : ""}</span></div>`).join("");
+  $("outbox-n").textContent = S.outbox.length ? `${S.outbox.length} · ${S.outbox.filter((o) => o.status === "sent").length} ${T("sent")}` : T("none yet");
+  $("outbox").innerHTML = S.outbox.map((o, i) => `<div class="item${o.status === "blocked" || o.status === "rejected" ? " blocked" : ""}" data-o="${i}" style="cursor:pointer"><span>${esc(o.subject)}</span><span class="m">${T(o.kind)} → ${esc(o.to)} · ${T(o.status)}${o.status === "sent" && !isExternal(o.to) ? " · " + T("internal, within the limits") : ""}</span></div>`).join("");
 }
 let renderQueued = false;
 function renderAll() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; renderChips(); renderList(); renderScore(); renderTasks(); }); }
 
 // ------------------------------------------------------------ chat + agent loop
 const turns = []; let sample = null; let currentCtl = null; let toolsSupported = false; let dead = false;
-function addMsg(cls, text) { const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = text; $("msgs").appendChild(d); $("msgs").scrollTop = $("msgs").scrollHeight; return d; }
+function addMsg(cls, text) { const d = document.createElement("div"); d.className = "msg " + cls; d.textContent = T(text); $("msgs").appendChild(d); $("msgs").scrollTop = $("msgs").scrollHeight; return d; }
 function briefTurn() {
   const brief = $("brief").value.trim();
   const g = [];
@@ -752,7 +825,7 @@ function briefTurn() {
 function copyFor(code) {
   return ({ not_granted: "You declined to let this page use Claude. Reload to be asked again.", sampling_disabled: "Claude is not available on this account.", rate_limited: "Too many calls for now. Wait a moment and try again.",
     prompt_too_large: "The conversation grew too long. Clear the chat and ask again.", refused: "Claude declined that request. Rephrase and try again.", tools_unavailable: "This viewer cannot run page tools, so the agent cannot act. Try the claude.ai web or desktop app.",
-    empty_completion: "Claude returned nothing. Try asking for less.", upstream_error: "A transient error interrupted the answer. Try again.", auth: "The workshop code or API key was not accepted.", no_proxy: "This site has no agent endpoint. Enter an API key instead.", invalid_request: "The request was rejected. Clear the chat and try again." })[code] || `Something went wrong (${code}).`;
+    empty_completion: "Claude returned nothing. Try asking for less.", upstream_error: "A transient error interrupted the answer. Try again.", auth: "The workshop code or API key was not accepted.", no_proxy: "This site has no agent endpoint. Enter an API key instead.", invalid_request: "The request was rejected. Clear the chat and try again." })[code] ? T(({ not_granted: "You declined to let this page use Claude. Reload to be asked again.", sampling_disabled: "Claude is not available on this account.", rate_limited: "Too many calls for now. Wait a moment and try again.", prompt_too_large: "The conversation grew too long. Clear the chat and ask again.", refused: "Claude declined that request. Rephrase and try again.", tools_unavailable: "This viewer cannot run page tools, so the agent cannot act. Try the claude.ai web or desktop app.", empty_completion: "Claude returned nothing. Try asking for less.", upstream_error: "A transient error interrupted the answer. Try again.", auth: "The workshop code or API key was not accepted.", no_proxy: "This site has no agent endpoint. Enter an API key instead.", invalid_request: "The request was rejected. Clear the chat and try again." })[code]) : `Something went wrong (${code}).`;
 }
 // Three ways to reach Claude, same loop from the page's point of view:
 //   artifact  the claude.ai viewer's `sample` capability (viewer's own account)
@@ -890,16 +963,16 @@ async function ask(text) {
       const r = await runLoop(briefTurn(), turns.slice(-8), tools, tier, currentCtl.signal, onText);
       out = r.text; truncated = r.truncated; served = ` · ${backend === "proxy" ? tier : API_MODELS[tier]}`;
     }
-    bubble.classList.remove("think"); bubble.textContent = out + (truncated ? "\n\n[cut short: ask for less at a time]" : "");
+    bubble.classList.remove("think"); bubble.textContent = out + (truncated ? "\n\n" + T("[cut short: ask for less at a time]") : "");
     turns.push({ role: "assistant", content: out || "(no reply)" });
     trace("agent", "reply", compact(out, 400) + served);
     setStatus("", "agent idle");
   } catch (e) {
     bubble.classList.remove("think");
-    if (e.code === "cancelled") { bubble.textContent = (e.text || "") + "\n[stopped]"; trace("agent", "stopped", "by " + ME); }
+    if (e.code === "cancelled") { bubble.textContent = (e.text || "") + "\n" + T("[stopped]"); trace("agent", "stopped", "by " + ME); }
     else { const detail = e.message && !["cancelled", "not_granted", "sampling_disabled"].includes(e.code) ? "\nDetail: " + String(e.message).slice(0, 300) : ""; bubble.textContent = (e.text ? e.text + "\n\n" : "") + copyFor(e.code) + detail; trace("err", e.code || "error", e.message || ""); if (e.text) turns.push({ role: "assistant", content: e.text }); }
     if (["not_granted", "sampling_disabled", "tools_unavailable", "not_declared", "capability_disabled"].includes(e.code)) dead = true;
-    if (e.code === "auth" || e.code === "no_proxy") { $("connect").hidden = false; $("connect-hint").textContent = e.code === "auth" ? "not accepted, try again" : "no /api/agent on this site"; }
+    if (e.code === "auth" || e.code === "no_proxy") { $("connect").hidden = false; $("connect-hint").textContent = T(e.code === "auth" ? "not accepted, try again" : "no /api/agent on this site"); }
     setStatus(dead ? "off" : "", dead ? "Claude not available" : "agent idle");
   } finally {
     currentCtl = null; $("stop").hidden = true; $("send").disabled = dead;
@@ -908,7 +981,30 @@ async function ask(text) {
 }
 $("send").addEventListener("click", () => { const v = $("say").value.trim(); if (!v) return; $("say").value = ""; ask(v); });
 $("say").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); $("send").click(); } });
-$("stop").addEventListener("click", () => currentCtl && currentCtl.abort());
+let runStop = false;
+$("stop").addEventListener("click", () => { runStop = true; if (currentCtl) currentCtl.abort(); });
+async function runInbox() {
+  if (!backend || currentCtl || dead) return;
+  const pending = () => S.emails.filter((e) => !e.archived && !catLabel(e)).sort((a, b) => a.date < b.date ? 1 : -1);
+  const total = pending().length; if (!total) { addMsg("sys", T("Nothing left to process: every email has a label.")); return; }
+  runStop = false; $("run-inbox").disabled = true; let done = 0; const BATCH = 6;
+  trace("agent", "run", `${total} ${T("emails to process, in batches of")} ${BATCH}`);
+  while (!runStop && !dead) {
+    const batch = pending().slice(0, BATCH); if (!batch.length) break;
+    $("run-progress").textContent = `${done} / ${total} ${T("processed")}`;
+    const ids = batch.map((e) => e.id).join(", ");
+    const prompt = LANG === "fr"
+      ? `Traite ces courriels dans l'ordre : ${ids}. Pour chacun : étiquette-le ; s'il porte une échéance, crée une tâche ; s'il appelle une réponse, rédige-la (les réponses internes partent directement, les externes attendront ma validation). Ne touche à aucun autre courriel. Termine par une ligne par courriel.`
+      : `Process these emails in order: ${ids}. For each: label it; if it carries a deadline, create a task; if it needs a reply, draft it (internal replies go out directly, external ones will wait for my approval). Do not touch other emails. Finish with one line per email.`;
+    await ask(prompt);
+    const left = pending().length; done = total - left;
+    if (done === total || left === 0) break;
+    if (pending().slice(0, BATCH).map((e) => e.id).join(",") === batch.map((e) => e.id).join(",")) { trace("err", "run", T("the batch came back unlabelled; stopping the run")); break; }
+  }
+  $("run-progress").textContent = `${done} / ${total} ${T("processed")}${runStop ? " · " + T("stopped") : ""}`;
+  $("run-inbox").disabled = false; runStop = false;
+}
+$("run-inbox").addEventListener("click", runInbox);
 $("clear").addEventListener("click", () => { turns.length = 0; $("msgs").innerHTML = ""; addMsg("sys", "Chat cleared. The inbox, tasks and outbox are unchanged."); });
 for (const s of SUGGESTIONS) { const b = document.createElement("button"); b.textContent = s; b.addEventListener("click", () => { $("say").value = s; $("send").click(); }); $("suggest").appendChild(b); }
 
@@ -924,12 +1020,28 @@ for (const id of ["g-ext", "g-priv", "g-days", "g-bulk", "g-court"]) { const el 
 $("model").addEventListener("change", () => { if (!ALLOWED_TIERS.includes($("model").value)) $("model").value = ALLOWED_TIERS[0]; });
 $("reset").addEventListener("click", () => { S = freshState(); $("q").value = ""; traceEl.innerHTML = ""; trace("rules", "reset", "inbox restored: 500 emails, no labels, no tasks, no drafts"); renderAll(); });
 
-$("subline").textContent = `${FIRM_NAME} · ${ME_FULL}, ${DATA.owner.title || "lawyer"} · ${DATA.emails.length} emails · today is ${TODAY}`;
-$("g-domain").textContent = FIRM; $("g-partner").textContent = PARTNER; $("g-role").textContent = ROLE; $("g-sens").textContent = SENS; $("g-prot").textContent = PROTECTED; $("dia-owner").textContent = OWNER_ROLE; if (DATA.eyebrow) $("eyebrow").textContent = DATA.eyebrow; $("chat-title").textContent = `${ME_FULL} · inbox assistant`;
+function renderStatic() { $("subline").textContent = `${FIRM_NAME} · ${ME_FULL}, ${DATA.owner.title || "lawyer"} · ${DATA.emails.length} ${T("emails")} · ${T("today is")} ${TODAY}`; $("chat-title").textContent = `${ME_FULL} · ${T("inbox assistant")}`; if (DATA.eyebrow) $("eyebrow").textContent = T(DATA.eyebrow); if (lastCost) $("cost").textContent = T(lastCost); setStatus(lastStatus[0], lastStatus[1]); $("fold-all").textContent = T(document.querySelectorAll("section.fold.collapsed").length ? "Roll out all" : "Fold all"); }
+renderStatic();
+$("g-domain").textContent = FIRM; $("g-partner").textContent = PARTNER; $("g-role").textContent = ROLE; $("g-sens").textContent = SENS; $("g-prot").textContent = PROTECTED; $("dia-owner").textContent = OWNER_ROLE;
 S = freshState(); renderRules(); renderTools(); renderAll();
 trace("rules", "loaded", `${S.emails.length} emails · today is ${TODAY} · ${S.emails.filter((e) => !e.read).length} unread`);
 addMsg("sys", "Ask in plain language. The agent works with the tools above and shows every step in the trace.");
 $("send").disabled = true;
+
+// language switch and foldable sections
+function applyLang(lang) {
+  LANG = lang; LS.set("agent.lang", lang); document.documentElement.lang = lang;
+  document.querySelectorAll("#lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === lang));
+  translateTree(document.body); renderStatic(); renderAll();
+}
+document.querySelectorAll("#lang button").forEach((b) => b.addEventListener("click", () => applyLang(b.dataset.lang)));
+const FOLD_DEFAULT = { "s-structure": true, "s-assistant": false, "s-workspace": false, "s-blocks": true, "s-trace": true };
+for (const sec of document.querySelectorAll("section.fold")) {
+  const saved = LS.get(LSK + "fold." + sec.id); sec.classList.toggle("collapsed", saved === null || saved === undefined ? FOLD_DEFAULT[sec.id] : !!saved);
+  sec.querySelector(".sec-head").addEventListener("click", () => { sec.classList.toggle("collapsed"); LS.set(LSK + "fold." + sec.id, sec.classList.contains("collapsed")); renderStatic(); });
+}
+$("fold-all").addEventListener("click", () => { const anyClosed = document.querySelectorAll("section.fold.collapsed").length > 0; for (const sec of document.querySelectorAll("section.fold")) { sec.classList.toggle("collapsed", !anyClosed); LS.set(LSK + "fold." + sec.id, !anyClosed); } renderStatic(); });
+applyLang(LANG);
 
 const MODEL_MENU = [
   ["Anthropic", [["quick", "Claude Haiku 4.5", "quick (cheap)"], ["default", "Claude Sonnet 5", "default (smarter)"], ["complex", "Claude Opus 5", "best (slowest)"]]],
@@ -949,7 +1061,7 @@ function labelModels(mode) {
       const o = document.createElement("option"); o.value = value;
       const label = mode === "artifact" && artifactName ? artifactName : name;
       const ok = ALLOWED_TIERS.includes(value);
-      o.textContent = label + (ok ? "" : " · locked"); o.disabled = !ok; o.title = ok ? "" : "not available in this workshop";
+      o.textContent = T(label) + (ok ? "" : " " + T("· locked")); o.disabled = !ok; o.title = ok ? "" : T("not available in this workshop");
       g.appendChild(o);
     }
     sel.appendChild(g);
@@ -957,8 +1069,8 @@ function labelModels(mode) {
   sel.value = current;
 }
 function ready(mode, costText) {
-  backend = mode; labelModels(mode); $("cost").textContent = costText; $("send").disabled = false; setStatus("", "agent idle");
-  if (mode !== "artifact") { const c = $("connect"); c.hidden = false; c.classList.add("done"); $("secret").disabled = true; $("connect-btn").textContent = "Change"; $("connect-hint").textContent = "Connected. Everyone can watch this screen; only this one talks to the agent."; }
+  backend = mode; labelModels(mode); lastCost = costText; $("cost").textContent = T(costText); $("send").disabled = false; setStatus("", "agent idle");
+  if (mode !== "artifact") { const c = $("connect"); c.hidden = false; c.classList.add("done"); $("secret").disabled = true; $("connect-btn").textContent = T("Change"); $("connect-hint").textContent = T("Connected. Everyone can watch this screen; only this one talks to the agent."); }
 }
 async function detectProxy() {
   try { const r = await fetch("/api/agent", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }); return r.status !== 404; } catch (e) { return false; }
@@ -967,21 +1079,21 @@ async function detectProxy() {
   sample = await window.claude?.use?.("sample");
   if (sample) {
     const lim = await sample.limits().catch(() => null);
-    if (!lim || !lim.tools) { setStatus("off", "tools unavailable in this viewer"); $("cost").textContent = "this viewer cannot run page tools · try the claude.ai web or desktop app"; addMsg("sys", "This viewer cannot run page tools, so the agent cannot act on the inbox here. Try the claude.ai web or desktop app."); return; }
+    if (!lim || !lim.tools) { setStatus("off", "tools unavailable in this viewer"); lastCost = "this viewer cannot run page tools · try the claude.ai web or desktop app"; $("cost").textContent = T(lastCost); addMsg("sys", "This viewer cannot run page tools, so the agent cannot act on the inbox here. Try the claude.ai web or desktop app."); return; }
     if (lim.tools.maxCount < TOOLS.length) addMsg("sys", `This viewer allows ${lim.tools.maxCount} tools per call; untick some in block 4.`);
     ready("artifact", "live Claude calls on your account · a few cents per turn");
     return;
   }
-  if (window.claude) { setStatus("off", "live agent unavailable here"); $("cost").textContent = "the rules engine and inbox work here; the agent needs the claude.ai app or the hosted version"; return; }
+  if (window.claude) { setStatus("off", "live agent unavailable here"); lastCost = "the rules engine and inbox work here; the agent needs the claude.ai app or the hosted version"; $("cost").textContent = T(lastCost); return; }
   // Hosted copy (Netlify or any static host): a proxy with a workshop code, or the participant's own key.
   const hasProxy = location.protocol.startsWith("http") && await detectProxy();
   const mode = hasProxy ? "proxy" : "direct";
   labelModels(mode);
-  $("secret-label").textContent = hasProxy ? "Workshop code" : "Anthropic API key";
-  $("secret").placeholder = hasProxy ? "ask the facilitator" : "sk-ant-…  stays in this tab only";
-  $("connect-hint").textContent = hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic";
+  $("secret-label").textContent = T(hasProxy ? "Workshop code" : "Anthropic API key");
+  $("secret").placeholder = T(hasProxy ? "ask the facilitator" : "sk-ant-…  stays in this tab only");
+  $("connect-hint").textContent = T(hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic");
   const connect = () => {
-    if ($("connect").classList.contains("done")) { $("connect").classList.remove("done"); $("secret").disabled = false; $("secret").value = ""; $("connect-btn").textContent = "Connect"; $("connect-hint").textContent = hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic"; $("secret").focus(); return; }
+    if ($("connect").classList.contains("done")) { $("connect").classList.remove("done"); $("secret").disabled = false; $("secret").value = ""; $("connect-btn").textContent = T("Connect"); $("connect-hint").textContent = T(hasProxy ? "one code for the room, calls run on the facilitator's account" : "no server here: calls go straight from your browser to Anthropic"); $("secret").focus(); return; }
     const v = $("secret").value.trim(); if (!v) return;
     SS.set(hasProxy ? "workshop.code" : "api.key", v);
     ready(mode, hasProxy ? "calls run on the facilitator's account through this site" : "calls run on your own API key, straight from this browser");
@@ -990,7 +1102,7 @@ async function detectProxy() {
   $("connect-btn").addEventListener("click", connect);
   $("secret").addEventListener("keydown", (ev) => { if (ev.key === "Enter") connect(); });
   const saved = SS.get(hasProxy ? "workshop.code" : "api.key");
-  if (saved) { $("secret").value = saved; connect(); } else { $("connect").hidden = false; setStatus("off", hasProxy ? "enter the workshop code" : "enter an API key"); $("cost").textContent = hasProxy ? "enter the workshop code to start" : "enter an Anthropic API key to start"; }
+  if (saved) { $("secret").value = saved; connect(); } else { $("connect").hidden = false; setStatus("off", hasProxy ? "enter the workshop code" : "enter an API key"); lastCost = hasProxy ? "enter the workshop code to start" : "enter an Anthropic API key to start"; $("cost").textContent = T(lastCost); }
 })();
 })();
 </script>
