@@ -253,7 +253,7 @@ section.fold>.sec-head:hover{border-color:var(--agent)}
     <span class="lang" id="lang" role="group" aria-label="language"><button type="button" data-lang="en" class="on">EN</button><button type="button" data-lang="fr">FR</button></span>
     <button class="btn small" id="fold-all" title="roll out or fold every section">Roll out all</button>
     <label class="select" for="model">model
-      <select id="model"><option value="quick" selected>quick</option></select>
+      <select id="model"><option value="haiku55" selected>quick</option></select>
     </label>
     <span class="pill" id="status"><i></i><span>agent idle</span></span>
     <button class="btn" id="reset">Reset inbox</button>
@@ -951,7 +951,7 @@ const SS = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return nu
 const API_MODELS = { quick: "claude-haiku-4-5", haiku55: "claude-haiku-5-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
 const EFFORT = { quick: null, haiku55: "low", default: "medium", complex: "medium" }; // Haiku 4.5 takes no effort parameter; Haiku 5.5 thinks by default, low keeps the room fast
 const MAX_ROUNDS = 10;
-const ALLOWED_TIERS = ["quick", "haiku55"]; // the other tiers stay visible but cannot be chosen; the Netlify function enforces the same list
+const ALLOWED_TIERS = ["haiku55", "quick"]; // first one is the default // the other tiers stay visible but cannot be chosen; the Netlify function enforces the same list
 const fail = (code, message, text) => Object.assign({ code, message }, text ? { text } : {});
 
 function apiTools(tools) {
@@ -1166,7 +1166,7 @@ $("fold-all").addEventListener("click", () => { const anyClosed = document.query
 applyLang(LANG);
 
 const MODEL_MENU = [
-  ["Anthropic", [["quick", "Claude Haiku 4.5", "quick (cheap)"], ["haiku55", "Claude Haiku 5.5", "quick (cheap)"], ["default", "Claude Sonnet 5", "default (smarter)"], ["complex", "Claude Opus 5", "best (slowest)"]]],
+  ["Anthropic", [["haiku55", "Claude Haiku 5.5", "quick (cheap)"], ["quick", "Claude Haiku 4.5", "quick (cheap)"], ["default", "Claude Sonnet 5", "default (smarter)"], ["complex", "Claude Opus 5", "best (slowest)"]]],
   ["OpenAI", [["openai-gpt5", "GPT-5"], ["openai-gpt5-mini", "GPT-5 mini"]]],
   ["Google", [["google-gemini-pro", "Gemini 2.5 Pro"], ["google-gemini-flash", "Gemini 2.5 Flash"]]],
   ["Moonshot", [["kimi-k2", "Kimi K2"]]],
