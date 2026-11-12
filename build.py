@@ -11,7 +11,9 @@ DATASETS = {"law": root / "data" / "emails.json", "hr": root / "data" / "hr" / "
 choice = (sys.argv[1] if len(sys.argv) > 1 else os.environ.get("DATASET", "law")).lower()
 src_json = DATASETS.get(choice) or Path(choice)
 data = json.loads(src_json.read_text())
-payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+fr_json = src_json.with_name(src_json.stem + ".fr.json")
+embed = {"en": data, "fr": json.loads(fr_json.read_text())} if fr_json.exists() else data  # a French twin of the data rides along when one exists
+payload = json.dumps(embed, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 src = (root / "src" / "inbox-agent.src.html").read_text()
 assert "__INBOX_DATA__" in src
 out = src.replace("__INBOX_DATA__", payload).replace("__TITLE__", (data.get("firm", "Inbox") + " Inbox Agent").replace("&", "&amp;"))
