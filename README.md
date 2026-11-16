@@ -46,7 +46,10 @@ ANTHROPIC_API_KEY=sk-ant-... WORKSHOP_CODE=room1 node tools/serve.mjs   # local 
    agent, its instructions, plus what it did with the selected case. While the
    real agent works on
    a request, the diagram and the panel follow the agent instead, with every
-   tool result and agent report as a row.
+   tool result and agent report as a row. Play honours the switches: an agent
+   or skill unticked in block 3 is not used, and the gate levels in block 2
+   apply, so unticking `flag_anomaly` shows the injection going unflagged and
+   QA refusing the sign-off.
 2. **Architecture view.** The reference architecture: orchestrator, agents,
    skills, data sources, guardrails and gates, collapsed by default.
 3. **KYC assistant**, folded behind its title. The orchestrator's chat. Gate
