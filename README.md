@@ -210,7 +210,7 @@ values below, builds, and gives you a URL. Then skip to step 4.
 
 Without `WORKSHOP_CODE`, anyone with the URL can spend the key. The function
 (`netlify/functions/agent.mjs`) only forwards the model call; the inbox never
-leaves the browser. Model tiers: quick is Claude Haiku 4.5, default is Claude
+leaves the browser. Model tiers: quick is Claude Haiku 5.5, default is Claude
 Sonnet 5, best is Claude Opus 5. Rough cost per participant for 15 turns: under
 a euro on quick, a few euros on default, more on best.
 

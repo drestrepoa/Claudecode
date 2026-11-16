@@ -14,7 +14,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODELS = { quick: "claude-haiku-4-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
+const MODELS = { quick: "claude-haiku-5-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json" } });
 
 export default async (req) => {
@@ -41,7 +41,7 @@ export default async (req) => {
     // at a tenth of the price, and cached tokens do not count toward the input-tokens-per-minute limit.
     cache_control: { type: "ephemeral" },
   };
-  if (tier !== "quick") params.output_config = { effort: "medium" }; // Haiku 4.5 does not take effort
+  params.output_config = { effort: "medium" }; // every tier takes effort; Haiku 5.5 defaults to medium anyway
 
   const client = new Anthropic(process.env.ANTHROPIC_WORKSPACE_ID ? { defaultHeaders: { "anthropic-workspace-id": process.env.ANTHROPIC_WORKSPACE_ID } } : {});
   try {

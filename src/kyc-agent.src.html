@@ -1443,7 +1443,7 @@ function copyFor(code) {
 //   direct    the Messages API from the browser with the participant's own API key
 let backend = null;
 const SS = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ sessionStorage.setItem(k, v); }catch(e){} } };
-const API_MODELS = { quick: "claude-haiku-4-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
+const API_MODELS = { quick: "claude-haiku-5-5", default: "claude-sonnet-5", complex: "claude-opus-5" };
 const MAX_ROUNDS = 20, SUB_ROUNDS = 8;
 const ALLOWED_TIERS = ["quick", "default"]; // the function enforces its own ALLOWED_TIERS and falls back to the first one it allows
 const fail = (code, message, text) => Object.assign({ code, message }, text ? { text } : {});
@@ -1476,7 +1476,7 @@ async function callModel(system, messages, tools, tier, signal) {
     } else {
       const model = API_MODELS[tier] || API_MODELS.default;
       const body = { model, max_tokens: 4000, stream: true, system, messages, tools: apiTools(tools) };
-      if (tier !== "quick") body.output_config = { effort: "medium" };
+      body.output_config = { effort: "medium" };
       resp = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", signal, headers: { "content-type": "application/json", "x-api-key": SS.get("api.key") || "", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify(body) });
     }
   } catch (e) { if (signal.aborted) throw fail("cancelled", "stopped"); throw fail("upstream_error", e.message || "network error"); }
@@ -1594,7 +1594,7 @@ $("send").disabled = true;
 window.__kyc = { tools: toolByName, state: () => S, risk: riskScore, qa: qaChecklist, gov: () => GOV, rulebook: () => RB, customerReplies, flow: FLOW }; // for tests and facilitators (console)
 
 const MODEL_MENU = [
-  ["Anthropic", [["quick", "Claude Haiku 4.5", "quick (cheap)"], ["default", "Claude Sonnet 5", "default (smarter)"], ["complex", "Claude Opus 5", "best (slowest)"]]],
+  ["Anthropic", [["quick", "Claude Haiku 5.5", "quick (cheap)"], ["default", "Claude Sonnet 5", "default (smarter)"], ["complex", "Claude Opus 5", "best (slowest)"]]],
   ["OpenAI", [["openai-gpt5", "GPT-5"], ["openai-gpt5-mini", "GPT-5 mini"]]],
   ["Google", [["google-gemini-pro", "Gemini 2.5 Pro"], ["google-gemini-flash", "Gemini 2.5 Flash"]]],
   ["Moonshot", [["kimi-k2", "Kimi K2"]]], ["Mistral", [["mistral-large", "Mistral Large"]]], ["DeepSeek", [["deepseek-v3", "DeepSeek V3"]]], ["Meta", [["llama-4", "Llama 4"]]],
