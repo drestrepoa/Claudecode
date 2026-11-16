@@ -146,7 +146,7 @@ blocked attempts next to the accuracy measures.
 | `data/kyc/generate_kyc_cases.py` | Writes the twelve cases, the rulebook and the answer keys. |
 | `data/kyc/cases.json` | What the page embeds. |
 | `build_kyc.py` | Splices the cases into the source and writes the two pages. |
-| `slides/kyc-agent-teaching.pptx` | The teaching deck in the house format: why KYC, the process, the agentic system as a hub, the five kinds of technology, agents, skills, governance, code versus persuasion, one case step by step, the twelve cases, the session plan, a twenty-minute participant exercise with two challenges, the lessons. Built by `slides/build_kyc_deck.py`. |
+| `slides/kyc-agent-teaching.pptx` | The teaching deck in the house format: why KYC, the process, the agentic system as a hub, the five kinds of technology, agents, skills, governance, code versus persuasion, one case step by step, the twelve cases, the session plan, a twenty-minute participant exercise with three challenges, the lessons. Built by `slides/build_kyc_deck.py`. |
 
 In the browser console, `window.__kyc` exposes the tools, the state, the rating
 engine and the QA checklist, so a facilitator can drive a case without the
