@@ -1513,8 +1513,9 @@
      "issued": "2026-11-01",
      "expires": null,
      "extracted": {
-      "source_of_wealth": "consulting fees and dividends since 2017; assembly allowance GBP 14k a year declared separately",
-      "property": "one residential property, Manchester, mortgage-free since 2024"
+      "source_of_wealth": "consulting fees and dividends from Quantum Bridge since 2017, per the audited accounts",
+      "assembly_allowance": "GBP 14k a year, paid by the assembly, shown on the bank statements",
+      "property": "one residential property, Manchester, bought 2019 with a mortgage repaid in 2024 from dividends"
      },
      "text": ""
     }
