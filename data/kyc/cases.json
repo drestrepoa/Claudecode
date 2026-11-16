@@ -531,11 +531,14 @@
     "pep": [
      {
       "name": "Amira El-Sayed",
+      "dob": "1981-07-19",
+      "nationality": "Egyptian",
       "relationship": "spouse of",
       "pep_name": "Karim Mansour",
       "role": "Deputy Minister of Trade and Industry (Egypt), in office since 2024",
       "level": "foreign PEP (family member)",
-      "source": "PEP database, record P-77120"
+      "source": "PEP database, record P-77120",
+      "match_quality": "name, date of birth and nationality match the party on file: confirmed"
      }
     ]
    },
@@ -1373,11 +1376,14 @@
     "pep": [
      {
       "name": "Daniel Okafor",
+      "dob": "1976-05-30",
+      "nationality": "British",
       "relationship": "self",
       "pep_name": "Daniel Okafor",
       "role": "Elected member of a regional assembly (UK), since 2024; sits on the public procurement committee",
       "level": "domestic PEP",
-      "source": "PEP database, record P-80311"
+      "source": "PEP database, record P-80311",
+      "match_quality": "name, date of birth and nationality match the party on file: confirmed"
      }
     ]
    },
