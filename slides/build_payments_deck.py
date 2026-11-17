@@ -18,7 +18,8 @@ from build_challenge_deck import (  # noqa: E402
 from pptx.enum.text import PP_ALIGN  # noqa: E402
 
 KIND["skill"] = ("EEEAF9", "5E48B8", True)
-SITE = "agentic-payments.netlify.app"  # the Netlify site for this branch: change it here once the site exists
+SITE = "agenticpayment.netlify.app"  # the Netlify site for this branch
+COURSE = "Navigating Disruptive Innovation in Heavily Regulated Markets"
 
 
 def legend2(s, items, y=6.4):
@@ -33,6 +34,15 @@ def build():
     def blank():
         nonlocal n; n += 1
         s = prs.slides.add_slide(L); number(s, n); return s
+
+    # 0 · cover
+    s = blank(); title(s, "Agentic payments")
+    textbox(s, 0.9, 1.6, 11.6, 0.5, [(COURSE.upper(), {"size": 14, "bold": True, "color": GREY})])
+    textbox(s, 0.9, 2.3, 11.6, 1.2, [("An agent pays on your behalf. Who signs, who verifies, who is liable, and where a person stays in the loop.", {"size": 22, "color": NAVY})])
+    for i, (h, b) in enumerate([("Theory", "The actors, the mandate, the chain from intent to settlement, three rails, what can go wrong."), ("The lab", "A simulation in the browser: ten steps, live signatures, switches that break the flow. No key, no account."), ("Ten minutes", "Everyone plays one purchase, then an open mandate in another currency, then breaks it in pairs.")]):
+        card(s, 0.9 + i * 3.95, 3.9, 3.7, 2.2, h, [(b, {"size": 12.5})], size=12.5)
+    chip(s, SITE, 0.9, 6.45, 4.6, 0.45, fill=NAVY, size=16)
+    notes(s, "Say the link once; the lab needs no code and no key. The theory takes about twenty-five minutes, the exercise ten, the discussion whatever is left.")
 
     # 1 · what is an agentic payment
     s = blank(); title(s, "What is an agentic payment?")
@@ -189,19 +199,19 @@ def build():
     notes(s, "Six questions any board will ask. Several have no settled answer yet in the market; say so. The rule at the bottom connects to the earlier session on claims: stakes and confidence, modes and routing, here expressed as mandate constraints.")
 
     # 13 · the exercise
-    s = blank(); title(s, "The exercise · twenty minutes with the lab")
+    s = blank(); title(s, "The exercise · ten minutes with the lab")
     chip(s, SITE, 0.9, 1.5, 4.6, 0.45, fill=NAVY, size=16)
-    textbox(s, 5.7, 1.52, 6.8, 0.45, [("Open the link on your own laptop. No code, no key. Eight things the user can ask for, from one pair of shoes to a whole birthday party.", {"size": 12.5, "color": GREY})])
-    steps = [("0–5 min", "Alone: one clean purchase", "The trail shoes: human present, Velora Sports (EUR), the card. Press Next step ten times. At each step read who acts and open one signed object."),
-             ("5–10 min", "Alone: an open mandate, another currency", "Pick \"Everything for my son's birthday party\" from the list: human not present, a four-item bundle, USDC or a riyal merchant. Find the constraints in the open mandate and where the conversion happens."),
-             ("10–15 min", "In pairs: break it", "Pick one switch each. Before pressing Play, predict which party catches it and at which step. Then play and compare."),
-             ("15–20 min", "In your group: one point to present", "Which verification would you trust least in your own organisation, and what would you require before letting an agent pay?")]
+    textbox(s, 5.7, 1.47, 6.9, 0.6, [("Open the link on your own laptop: no code, no key. The page opens on the trail shoes, human present, Velora Sports, the Mastercard debit card. Leave that for step one.", {"size": 12, "color": GREY})])
+    steps = [("0–3 min", "Alone: one clean purchase, ten steps", "Press Next step ▶ ten times. At each step read who acts (the lit boxes), and open one signed object: the open mandate, the checkout, the receipt. Step 10 ends with two signed receipts."),
+             ("3–6 min", "Alone: an open mandate in another currency", "Press Reset. In Set the scene choose \"Everything for my son's birthday party, up to €250\", Human not present, the merchant Doha Celebrations (QAR). Play all. Find the constraints in the open payment mandate and the euro amount in Money, currencies and who bears what."),
+             ("6–9 min", "In pairs: break it", "Reset. Each of you ticks one switch under What could go wrong, and says out loud who will catch it and at which step. Play all, read the red check and the receipt. Swap switches."),
+             ("9–10 min", "One sentence per pair", "Which verification would you trust least in your own organisation, and what would you require before letting an agent pay? Read out at the end.")]
     for i, (when, head, body) in enumerate(steps):
         y = 2.25 + i * 1.08
-        chip(s, when, 0.9, y + 0.05, w=1.35, h=0.35, size=12); textbox(s, 2.5, y - 0.02, 6.4, 0.4, [(head, {"bold": True, "size": 14})]); textbox(s, 2.5, y + 0.38, 6.4, 0.68, [(body, {"size": 11.5})])
-    card(s, 9.3, 2.25, 3.4, 4.2, "What to look for", [("Only the shopping agent thinks; every other box verifies", {"size": 11.5}), ("The hash that follows the purchase from step 4 to step 10", {"size": 11.5}), ("The euro amount the user sees before she signs", {"size": 11.5}), ("A rejection is a signed receipt, not a silence", {"size": 11.5})], size=11.5)
+        chip(s, when, 0.9, y + 0.05, w=1.35, h=0.35, size=12); textbox(s, 2.5, y - 0.02, 6.6, 0.4, [(head, {"bold": True, "size": 14})]); textbox(s, 2.5, y + 0.38, 6.6, 0.7, [(body, {"size": 11})])
+    card(s, 9.3, 2.25, 3.4, 4.2, "What to look for", [("Only the shopping agent thinks; every other box verifies in code", {"size": 11.5}), ("The checkout hash that follows the purchase from step 4 to step 10", {"size": 11.5}), ("Human not present: the agent signs the closed mandate itself, inside the limits", {"size": 11.5}), ("A rejection is a signed receipt that names the check, not a silence", {"size": 11.5})], size=11.5)
     textbox(s, 0.9, 6.7, 11.6, 0.35, [("Reset unlocks the scene · the figures are illustrative · a browser that blocks cryptography shows simulated signatures and says so", {"size": 11, "italic": True, "color": GREY})])
-    notes(s, "Individual first so everyone touches the ten steps, then pairs on the switches, then the group question. Keep the link slide up. If a laptop shows the simulated-signature notice, it is the browser, not the lab.")
+    notes(s, "Ten minutes, strict. Step one is individual so everyone sees the ten steps once; the defaults are already the clean purchase, so nobody has to set anything. Step two: the party scenario has three merchants, PartyBox in euros, Festa Kids in dollars, Doha Celebrations in riyals; Doha makes the conversion visible in the Money section, and human not present makes the agent sign the closed mandates itself. Step three: five switches, tamper, over limit, merchant outside the list, expired mandate, replay; each is caught by a different party, and the lab names it in red. Close with one sentence per pair, then the governance slide if time remains.")
 
     # 14 · sources
     s = blank(); title(s, "Sources")

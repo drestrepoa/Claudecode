@@ -678,7 +678,7 @@ const STEPS = [
           objects: [obj("Closed checkout mandate (user-signed)", { jwt: short(S.closedCheckoutJwt, 40), payload: closedCheckout }, "user", "human", true), obj("Closed payment mandate (user-signed)", { jwt: short(S.closedPaymentJwt, 40), payload: closedPayment }, "user", "human")],
           checks: [chk("Rendered by the trusted surface from the merchant checkout the agent presented", true, "trusted surface"), chk("Passkey authentication (SCA with dynamic linking: amount, payee)", true, "trusted surface"), chk(over ? `Amount ${fmt(S.eur, "EUR")} is above the stated limit of €${sc.maxamt}: shown to the user, who approved` : `Amount ${fmt(S.eur, "EUR")} within the stated limit`, true, "user", over), chk("Both mandates carry the same checkout_hash and nonce", true, "trusted surface")] };
       }
-      const agentChecks = [chk(`Payee ${m.name} in allowed_payees`, S.allowed.includes(m.id), "shopping agent (self-check)"), chk(`Amount ${fmt(S.eur, "EUR")} within amount_range max €${sc.maxamt}`, S.eur <= sc.maxamt, "shopping agent (self-check)"), chk("Instrument in allowed_payment_instruments", true, "shopping agent (self-check)"), chk("Open mandates not expired", !sc.expired, "shopping agent (self-check)")];
+      const agentChecks = [chk(`Payee ${m.name} in allowed_payees`, S.allowed.includes(m.id), "shopping agent (self-check)"), chk(`Amount ${fmt(S.eur, "EUR")} within amount_range max €${sc.maxamt}`, S.eur <= sc.maxamt, "shopping agent (self-check)"), chk("Instrument in allowed_payment_instruments", true, "shopping agent (self-check)"), chk(sc.expired ? "Open mandates have EXPIRED: the agent should stop here, but presses on" : "Open mandates not expired", !sc.expired, "shopping agent (self-check)")];
       return { explain: `Nobody is watching. The agent assembles the closed checkout and payment mandates for this exact checkout and signs them with its own key (the one named in the open mandates' cnf claim). It attaches the user-signed open mandates by hash. The verifiers will not take its word: each will check that the closed mandate stays inside the open one. The agent checks too, but its check is advice to itself, not a control.`,
         reason: `Match found inside the lines? ${agentChecks.every((c) => c.ok) ? "Yes: I sign the closed mandates with my key and proceed." : "Not all constraints hold: " + agentChecks.filter((c) => !c.ok).map((c) => c.label).join("; ") + ". A careful agent stops here. This one proceeds, to show what the verifiers do."}`,
         objects: [obj("Closed checkout mandate (agent-signed, bound to the open one)", { jwt: short(S.closedCheckoutJwt, 40), payload: closedCheckout }, "shopping agent", "agent", true), obj("Closed payment mandate (agent-signed, bound to the open one)", { jwt: short(S.closedPaymentJwt, 40), payload: closedPayment }, "shopping agent", "agent")],
@@ -690,7 +690,7 @@ const STEPS = [
       const signer = sc.mode === "hp" ? S.keys.user : S.keys.sa;
       checks.push(chk(sc.mode === "hp" ? "Signature verifies against Lena's enrolled key" : "Signature verifies against the agent key named in the user-signed open mandate (cnf)", await verify(S.closedPaymentJwt, signer), "credential provider"));
       if (sc.mode === "hnp") checks.push(chk("Open payment mandate signature verifies against Lena's key", await verify(S.openPaymentJwt, S.keys.user), "credential provider"));
-      checks.push(chk("Mandate not expired", !sc.expired, "credential provider"));
+      checks.push(chk(sc.expired ? "Mandate EXPIRED: exp is in the past, rejected" : "Mandate not expired", !sc.expired, "credential provider"));
       const seen = S.nonces.has(S.nonce); checks.push(chk(seen ? "Nonce already seen and no rejection receipt for it: replay" : "Nonce fresh; no open mandate in flight", !seen, "credential provider"));
       if (sc.mode === "hnp") {
         checks.push(chk(`payment.amount_range: ${fmt(S.eur, "EUR")} ≤ €${sc.maxamt}`, S.eur <= sc.maxamt, "credential provider"));
@@ -772,7 +772,7 @@ const REPLAY = { id: "replay", title: "Break-it: replay the mandate", who: "The 
     return { explain: "The agent presents the same payment mandate a second time, hoping for a second token. The credential provider has seen the nonce and holds a receipt for it; the agentic token was single use and is spent. Rejected before anything reaches the network. The protocol forbids an agent from presenting a new open mandate while one is in flight, for the same reason: no double spend by a confused or malicious agent.",
       reason: "Rejected: the mandate was already used. I cannot buy twice on one authorisation.",
       objects: [obj("Payment receipt: rejected (replay)", { jwt: short(jwt, 40), payload: receipt }, "credential provider", "det", true)],
-      checks: [chk("Nonce already seen: " + seen, !seen, "credential provider"), chk("Credential single use, already consumed", false, "credential provider")], stop: "Replay refused." };
+      checks: [chk(seen ? "Nonce already seen: this mandate was presented before, rejected" : "Nonce fresh", !seen, "credential provider"), chk("Credential was single use and is already consumed: rejected", false, "credential provider")], stop: "Replay refused." };
   } };
 
 // ------------------------------------------------------------ rendering
@@ -840,8 +840,9 @@ async function next() {
   renderSteps(); renderDetail(cur); setStatus("", "ready"); $("stepnote").textContent = S.results[cur].pending ? "Waiting for " + who(DECIDERS[st.id][0]) + " to decide." : cur === list.length - 1 ? "Complete." : S.results[cur].stop ? "Stopped: Reset to try again." : ""; busy = false;
 }
 function back() { if (!S || cur <= 0) return; cur--; renderDetail(cur); renderSteps(); }
-async function playAll() { if (busy) return; const list = steps(); while (cur < list.length - 1 && !(S && S.results[cur] && (S.results[cur].stop || S.results[cur].pending))) { await next(); await new Promise((r) => setTimeout(r, 650)); } }
-function reset() { S = null; cur = -1; lockScene(false); renderSteps(); $("detail").innerHTML = `<p class="hint">Press Next step to start. The first step gives every party its keys.</p>`; light([], []); $("stepnote").textContent = ""; traceEl.innerHTML = ""; trace("rules", "reset", "scene unlocked; change anything and play again"); renderMoney(); }
+let playRun = 0; // a Reset during Play all ends that run instead of letting it restart the scene
+async function playAll() { if (busy) return; const run = ++playRun; while (run === playRun && cur < steps().length - 1 && !(S && S.results[cur] && (S.results[cur].stop || S.results[cur].pending))) { await next(); await new Promise((r) => setTimeout(r, 650)); } } // steps() is re-read each turn: the replay step only exists once the scene is built
+function reset() { playRun++; S = null; cur = -1; lockScene(false); renderSteps(); $("detail").innerHTML = `<p class="hint">Press Next step to start. The first step gives every party its keys.</p>`; light([], []); $("stepnote").textContent = ""; traceEl.innerHTML = ""; trace("rules", "reset", "scene unlocked; change anything and play again"); renderMoney(); }
 function lockScene(on) { document.querySelectorAll("#scenario,#instruction,#maxamt,#expiry,input[name=mode],input[name=merchant],input[name=instrument],.breaks input").forEach((el) => { el.disabled = on; }); }
 function setStatus(kind, text) { const p = $("status"); p.className = "pill " + kind; p.querySelector("span").textContent = text; }
 
