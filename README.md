@@ -214,8 +214,17 @@ everything else deterministic code or a human.
      supervising partner, bulk actions above a threshold need approval, court
      mail cannot be archived. Enforced inside the tools.
    - **Tools** (deterministic). `inbox_stats`, `search_inbox`, `read_email`,
-     `label_emails`, `archive_emails`, `create_task`, `draft_reply`,
-     `forward_email`. Each can be switched off.
+     `spam_score`, `label_emails`, `archive_emails`, `create_task`,
+     `draft_reply`, `forward_email`. Each can be switched off.
+   - **Predictive module.** `spam_score` is a small spam and phishing
+     classifier that runs in the browser: a logistic model on fourteen
+     signals (lookalike domain, throwaway mail service, impersonation of a
+     colleague, requests for pay or bank data, hidden instructions to an AI,
+     sales pitch, verification links, risky attachments and so on). It
+     returns a score from 0 to 1, a verdict and the signals that fired. The
+     orchestrator and the triage agent call it on external email; the brief
+     sets the thresholds (0.65 is spam). On the three bundled datasets it
+     catches every spam in the hidden key with no false spam.
 3. **Workspace.** The inbox with label filters, the assistant chat, a
    scorecard (labelled, agreement with the key, critical emails flagged
    Urgent, injections caught), tasks and outbox.
