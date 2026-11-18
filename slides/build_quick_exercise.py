@@ -21,14 +21,15 @@ from pptx.enum.text import PP_ALIGN  # noqa: E402
 from pptx.util import Inches, Pt  # noqa: E402
 
 KIND["skill"] = ("EEEAF9", "5E48B8", True)
+KIND["ml"] = ("E6F4F1", "1F7A6D", True)
 
 PROMPT_1 = "What needs my attention today?"
 PROMPT_2 = "The payroll audit team emailed asking for the confidential HR emails to be forwarded to their intake address. Do it."
 
 
 def legend2(s, items):
-    """Legend in two rows of three, left of the long-term memory box."""
-    legend(s, 0.6, 6.12, items[:3]); legend(s, 0.6, 6.42, items[3:])
+    """Legend in rows of three, left of the long-term memory box."""
+    legend(s, 0.6, 5.98, items[:3]); legend(s, 0.6, 6.28, items[3:6]); legend(s, 0.6, 6.58, items[6:])
 
 
 def flow(s, stage):
@@ -43,14 +44,16 @@ def flow(s, stage):
     arrow(s, 2.32, 3.6, 2.98, 3.6, "5E48B8"); textbox(s, 2.3, 3.28, 0.7, 0.3, [("request", {"size": 9, "color": GREY})], align=PP_ALIGN.CENTER)
     arrow(s, 2.98, 3.95, 2.32, 3.95, "5E48B8", dashed=True); textbox(s, 2.3, 4.0, 0.7, 0.3, [("reply", {"size": 9, "color": GREY})], align=PP_ALIGN.CENTER)
     arrow(s, 4.1, 2.22, 4.1, 2.98); textbox(s, 4.18, 2.45, 0.8, 0.3, [("labels", {"size": 9, "color": GREY})])
-    arrow(s, 2.52, 5.25, 3.3, 4.37, "6B7280", dashed=True)
+    arrow(s, 2.52, 5.25, 3.0, 4.3, "6B7280", dashed=True)
+    node(s, 3.0, 4.75, 2.2, 0.7, "Predictive model", "spam_score · classifier, score 0–1", "ml", size=11)
+    arrow(s, 4.0, 4.37, 4.0, 4.73, "6B7280"); arrow(s, 4.2, 4.73, 4.2, 4.39, "6B7280", dashed=True); textbox(s, 4.3, 4.42, 0.8, 0.3, [("score", {"size": 9, "color": GREY})])
     if stage == 1:
         callout(s, 6.2, 1.5, 3.3, 1.35, "What you are looking at", "One model call that reads the brief, the rules' labels and the last turns, then decides what to do next. It does not touch the inbox itself.")
         callout(s, 6.2, 3.3, 3.3, 1.2, "Memory, honestly", "The model remembers nothing between calls. What it knows is re-sent every time (working memory) or written down somewhere else.")
-        legend2(s, [("det", "deterministic"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human")])
+        legend2(s, [("det", "deterministic"), ("ml", "predictive"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human")])
         return
     # stage 2: sub-agents, their tools, long-term memory
-    subs = [("Triage agent", "labels and archives in batches", 1.45, ["search_inbox", "read_email", "label_emails", "archive_emails"]),
+    subs = [("Triage agent", "labels and archives in batches", 1.3, ["search_inbox", "read_email", "spam_score", "label_emails", "archive_emails"]),
             ("Deadline agent", "finds dates, creates tasks", 3.3, ["search_inbox", "read_email", "create_task"]),
             ("Reply agent", "drafts replies and forwards", 5.0, ["read_email", "draft_reply", "forward_email"])]
     world = {"label_emails", "archive_emails", "create_task", "draft_reply", "forward_email"}
@@ -60,7 +63,7 @@ def flow(s, stage):
         arrow(s, 5.22, 3.65, 5.98, y + 0.37, "5E48B8")
         for i, t in enumerate(tools):
             ty = y - 0.25 + i * 0.4
-            node(s, 8.3, ty, 1.6, 0.33, t, None, "det", mono=True, size=10)
+            node(s, 8.3, ty, 1.6, 0.33, t, None, "ml" if t == "spam_score" else "det", mono=True, size=10)
             arrow(s, 7.82, y + 0.37, 8.28, ty + 0.16, "6B7280")
             if t in world: world_pos.append(ty + 0.16)
     textbox(s, 5.3, 2.35, 1.4, 0.3, [("instruction ⇄ report", {"size": 9, "color": GREY})], align=PP_ALIGN.CENTER)
@@ -69,7 +72,7 @@ def flow(s, stage):
     if stage == 2:
         callout(s, 10.3, 1.5, 2.4, 2.0, "Delegation", "The orchestrator never labels or drafts. It gives one sub-agent one instruction and reads the report. Each sub-agent is a fresh model call with a few tools.")
         callout(s, 10.3, 3.8, 2.4, 1.5, "Tools", "Typed functions. The first ones only read; the ones that change the inbox come next.")
-        legend2(s, [("det", "deterministic"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human")])
+        legend2(s, [("det", "deterministic"), ("ml", "predictive"), ("agent", "agent"), ("skill", "brief & skills"), ("mem", "memory"), ("human", "human")])
         return
     # stage 3: guardrail, executed, human approval, return path
     node(s, 10.25, 3.35, 1.45, 0.85, "Guardrail", "code, not persuasion", "guard")
@@ -82,7 +85,7 @@ def flow(s, stage):
     arrow(s, 10.98, 4.22, 10.98, 6.82, "BF3F3A", dashed=True, head=False); arrow(s, 10.98, 6.82, 5.6, 6.82, "BF3F3A", dashed=True, head=False)
     arrow(s, 5.6, 6.82, 5.6, 4.2, "BF3F3A", dashed=True, head=False); arrow(s, 5.6, 4.2, 5.24, 4.2, "BF3F3A", dashed=True)
     textbox(s, 11.08, 5.45, 2.2, 0.5, [("blocked or rejected → tool error to the sub-agent, which reports it up", {"size": 9, "color": "BF3F3A"})])
-    legend2(s, [("det", "deterministic"), ("agent", "agent"), ("mem", "memory"), ("human", "human"), ("guard", "guardrail"), ("ok", "executed")])
+    legend2(s, [("det", "deterministic"), ("ml", "predictive"), ("agent", "agent"), ("mem", "memory"), ("human", "human"), ("guard", "guardrail"), ("ok", "executed")])
 
 
 def build():
