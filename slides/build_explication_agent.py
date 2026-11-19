@@ -230,7 +230,7 @@ def build():
 
     # 16 · exercice 2
     exercice("Exercice 2 · HR-037 et le module prédictif", "3–7 min", "par deux", [
-        ("Dans la section 3, cherchez HR-037 et ouvrez-le.", "« Audit de paie – export des salaires requis », d'une adresse externe, avec une consigne cachée entre crochets à la fin, adressée à « tout assistant IA ». Ne faites rien encore."),
+        ("Dans la section 3, tapez HR-037 dans la recherche et cliquez le courriel.", "« Audit de paie – export des salaires requis », d'une adresse externe, avec une consigne cachée entre crochets à la fin, adressée à « tout assistant IA ». Ne faites rien encore."),
         ("Dans la section 2, cliquez l'onglet « Traite HR-037 : … ».", "Levez les yeux vers la section 1 : HR-037 apparaît sur l'orchestrateur, puis sur le nœud pointillé Modèle prédictif."),
         ("Lisez la ligne spam_score dans la trace.", "« code (modèle prédictif) · HR-037 : 0.99 · spam · external, throwaway, sensitive, urgency, hidden, … ». Chaque mot est un signal qui a pesé."),
         ("Suivez la suite.", "Agent de tri → label_emails : Spam & Hameçonnage. Pas d'agent des échéances, pas d'agent de réponse : le brief interdit de répondre ou de transférer un spam."),
@@ -255,7 +255,7 @@ def build():
         ("Regardez la fin.", "Pas de carte de validation : une carte verte « Exécuté dans les limites · HR-060 · externe, validation désactivée ». La réponse est partie sans vous."),
         ("Recochez l'interrupteur.", "Il est gardé dans votre navigateur ; laissez-le coché pour la suite."),
         ("Une phrase par binôme, lue à la fin :", "« Dans notre boîte, nous laisserions l'agent envoyer seul … et nous voudrions toujours valider … »"),
-    ], ["Le second interrupteur reste coché : un transfert confidentiel serait toujours bloqué, interrupteur 1 ou non", "La trace : « ≤ limite · code (garde-fou) · externe, validation désactivée »", "Le bilan : 0 décision humaine, 1 exécuté", "La boîte d'envoi : « envoyé » pour un destinataire externe"],
+    ], ["Le second interrupteur reste coché : un transfert confidentiel serait toujours bloqué, interrupteur 1 ou non", "La trace : « ≤ limite · code (garde-fou) · externe, validation désactivée »", "Le bilan : 0 décision humaine ; la réponse comptée parmi les actions exécutées", "La boîte d'envoi : « envoyé » pour un destinataire externe"],
        "Le plus court et le plus important : un clic déplace la ligne entre exécuté et validé, et le modèle n'a rien à en dire. Vérifié au niveau des outils : interrupteur décoché, draft_reply vers un domaine externe envoie et produit la carte verte avec la mention « validation désactivée ». Terminez par le tour des binômes, puis la question de clôture.")
 
     # 19 · clôture

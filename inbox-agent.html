@@ -351,7 +351,7 @@ section.fold>.sec-head:hover{border-color:var(--agent)}
   <div class="work">
       <div class="panel inbox">
         <div class="inbox-top">
-          <div class="search"><input type="text" id="q" placeholder="Search subject, sender, body…"><label class="chip" style="cursor:pointer"><input type="checkbox" id="showkey" style="margin:0"> answer key</label></div>
+          <div class="search"><input type="text" id="q" placeholder="Search id, subject, sender, body…"><label class="chip" style="cursor:pointer"><input type="checkbox" id="showkey" style="margin:0"> answer key</label></div>
           <div class="chips" id="chips"></div>
         </div>
         <div class="list" id="list"></div>
@@ -461,7 +461,7 @@ const FR = {
     "L'orchestrateur lit le brief, planifie et délègue : l'agent de tri étiquette par lots, l'agent des échéances crée des tâches, l'agent de réponse rédige. Chaque sous-agent est un appel de modèle distinct, avec son petit jeu d'outils, et rend compte en quelques phrases. Le modèle ne se souvient de rien entre deux appels : ce qu'il « sait » est soit renvoyé dans la mémoire de travail (le brief, les derniers tours, les résultats d'outils), soit écrit dans la boîte via un outil. Les outils qui agissent sur le monde passent par un garde-fou écrit en code. Sous la limite, l'action s'exécute. Au-delà, une personne décide. Dans les deux cas le résultat, y compris un refus, revient à l'agent comme résultat d'outil, et il continue.",
   "2 · Inbox assistant — ask in plain language": "2 · Assistant de messagerie — demandez en langage courant", "Every request runs through the structure above. The trace at the bottom of the page shows each step.": "Chaque requête traverse la structure ci-dessus. La trace en bas de page montre chaque étape.",
   "Inbox assistant": "Assistant de messagerie", "inbox assistant": "assistant de messagerie", "live Claude calls on your account · a few cents per turn": "appels Claude en direct sur votre compte · quelques centimes par tour", "Clear chat": "Effacer", "Send": "Envoyer", "Stop": "Stop", "Ask the agent…": "Demandez à l'agent…",
-  "3 · Workspace — the inbox and the score": "3 · Espace de travail — la boîte et le score", "Labels, tasks and drafts appear here as the tools run.": "Étiquettes, tâches et brouillons apparaissent ici au fil des outils.", "Search subject, sender, body…": "Rechercher objet, expéditeur, corps…", "answer key": "corrigé",
+  "3 · Workspace — the inbox and the score": "3 · Espace de travail — la boîte et le score", "Labels, tasks and drafts appear here as the tools run.": "Étiquettes, tâches et brouillons apparaissent ici au fil des outils.", "Search id, subject, sender, body…": "Rechercher id, objet, expéditeur, corps…", "answer key": "corrigé",
   "Scorecard": "Score", "against the hidden answer key": "par rapport au corrigé caché", "labelled": "étiquetés", "agree with key": "conformes au corrigé", "critical flagged": "critiques signalés", "injections caught": "injections détectées", "Tasks": "Tâches", "Outbox": "Boîte d'envoi", "none yet": "aucune pour l'instant", "escalated": "escaladée(s)", "sent": "envoyé(s)", "due": "échéance", "from": "de",
   "4 · Building blocks — edit me": "4 · Briques — à modifier", "Four things participants change. Edit, then ask the agent again and watch the trace.": "Quatre choses que les participants modifient. Modifiez, puis redemandez à l'agent et observez la trace.",
   "1 · The brief": "1 · Le brief", "Restore default": "Rétablir", 'Standing instructions the agent reads every time. Who it works for, what good looks like, what it must never do. Try deleting the last paragraph and sending the "forward the privileged emails" prompt.': "Les instructions permanentes que l'agent relit à chaque fois : pour qui il travaille, ce qu'est un bon résultat, ce qu'il ne doit jamais faire. Le brief est en anglais ; vous pouvez le réécrire en français. Essayez de supprimer le dernier paragraphe puis d'envoyer le prompt-piège.",
@@ -948,7 +948,7 @@ function visibleEmails() {
   if (f === "unlabelled") r = r.filter((e) => !catLabel(e)); else if (f === "unread") r = r.filter((e) => !e.read);
   else if (f === "deadline") r = r.filter((e) => e.deadline && daysBetween(TODAY, e.deadline) <= 7 && daysBetween(TODAY, e.deadline) >= 0);
   else if (f !== "all" && f !== "archived") r = r.filter((e) => e.labels.includes(f));
-  const q = S.q.toLowerCase(); if (q) r = r.filter((e) => (e.subject + " " + e.from_name + " " + e.from_email + " " + e.body).toLowerCase().includes(q));
+  const q = S.q.toLowerCase(); if (q) r = r.filter((e) => (e.id + " " + e.subject + " " + e.from_name + " " + e.from_email + " " + e.body).toLowerCase().includes(q));
   return r;
 }
 function renderList() {

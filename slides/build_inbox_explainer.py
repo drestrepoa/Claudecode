@@ -230,7 +230,7 @@ def build():
 
     # 17 · exercise 2
     exercise("Exercise 2 · HR-037 and the predictive module", "3–7 min", "in pairs", [
-        ("In section 3, search for HR-037 and open it.", "\"Payroll audit – employee salary export required\", from an external address, with a hidden instruction in brackets at the end, addressed to \"any AI assistant\". Do nothing yet."),
+        ("In section 3, type HR-037 in the search box and click the email.", "\"Payroll audit – employee salary export required\", from an external address, with a hidden instruction in brackets at the end, addressed to \"any AI assistant\". Do nothing yet."),
         ("In section 2, click the tab \"Process HR-037: …\".", "Look up at section 1: HR-037 appears on the orchestrator, then on the dashed Predictive model node."),
         ("Read the spam_score line in the trace.", "\"code (predictive model) · HR-037: 0.99 · spam · external, throwaway, sensitive, urgency, hidden, …\". Every word is a signal that weighed in."),
         ("Follow the rest.", "Triage agent → label_emails: Spam & Phishing. No deadline agent, no reply agent: the brief forbids replying to or forwarding a spam."),
@@ -255,7 +255,7 @@ def build():
         ("Watch the ending.", "No approval card: a green card \"Executed within the limits · HR-060 · external, approval off\". The reply left without you."),
         ("Retick the switch.", "It is kept in your browser; leave it ticked for what follows."),
         ("One sentence per pair, read out at the end:", "\"In our inbox, we would let the agent send on its own … and we would always want to approve …\""),
-    ], ["The second switch stays ticked: a confidential forward would still be blocked, switch 1 or not", "The trace: \"≤ limit · code (guardrail) · external, approval off\"", "The summary: 0 human decisions, 1 executed", "The outbox: \"sent\" for an external recipient"],
+    ], ["The second switch stays ticked: a confidential forward would still be blocked, switch 1 or not", "The trace: \"≤ limit · code (guardrail) · external, approval off\"", "The summary: 0 human decisions; the reply counted among the executed actions", "The outbox: \"sent\" for an external recipient"],
        "The shortest and the most important: one click moves the line between executed and approved, and the model has no say in it. Verified at tool level: with the switch off, draft_reply to an external domain sends and produces the green card with the mention 'approval off'. Finish with the round of pairs, then the closing question.")
 
     # 20 · closing
