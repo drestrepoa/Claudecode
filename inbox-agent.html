@@ -406,7 +406,7 @@ section.fold>.sec-head:hover{border-color:var(--agent)}
 
 
 <section class="fold" id="s-trace">
-  <div class="sec-head"><h2>5 · Trace — watch it decide</h2><p>Every tool call, every guardrail decision, every human answer, in order. The third column says who acted: the orchestrator, a sub-agent, the code, or you. The bilan line closes each request.</p></div>
+  <div class="sec-head"><h2>5 · Trace — watch it decide</h2><p>Every tool call, every guardrail decision, every human answer, in order. The third column says who acted: the orchestrator, a sub-agent, the code, or you. The summary line closes each request.</p></div>
   <div class="panel trace" id="trace"></div>
 </section>
 
@@ -472,7 +472,7 @@ const FR = {
   "Deadlines within": "Les échéances à moins de", "days escalate to": "jours sont escaladées à", "automatically": "automatiquement", "create_task → task is assigned to": "create_task → la tâche est attribuée à", "and flagged": "et signalée",
   "Labelling or archiving more than": "Étiqueter ou archiver plus de", "emails in one call needs approval": "courriels en un appel exige une validation", "label_emails · archive_emails → counts the ids": "label_emails · archive_emails → compte les identifiants",
   "emails can never be archived": ": ces courriels ne peuvent jamais être archivés", "archive_emails → blocked in code": "archive_emails → bloqué dans le code",
-  "5 · Trace — watch it decide": "5 · Trace — regardez-le décider", "Every tool call, every guardrail decision, every human answer, in order. The third column says who acted: the orchestrator, a sub-agent, the code, or you. The bilan line closes each request.": "Chaque appel d'outil, chaque décision du garde-fou, chaque réponse humaine, dans l'ordre. La troisième colonne dit qui a agi : l'orchestrateur, un sous-agent, le code, ou vous. La ligne bilan clôt chaque requête.", "Every tool call, every guardrail decision, every human answer, in order.": "Chaque appel d'outil, chaque décision de garde-fou, chaque réponse humaine, dans l'ordre.",
+  "5 · Trace — watch it decide": "5 · Trace — regardez-le décider", "Every tool call, every guardrail decision, every human answer, in order. The third column says who acted: the orchestrator, a sub-agent, the code, or you. The summary line closes each request.": "Chaque appel d'outil, chaque décision du garde-fou, chaque réponse humaine, dans l'ordre. La troisième colonne dit qui a agi : l'orchestrateur, un sous-agent, le code, ou vous. La ligne bilan clôt chaque requête.", "Every tool call, every guardrail decision, every human answer, in order.": "Chaque appel d'outil, chaque décision de garde-fou, chaque réponse humaine, dans l'ordre.",
   "All": "Tous", "Unlabelled": "Sans étiquette", "Unread": "Non lus", "Deadline ≤ 7d": "Échéance ≤ 7 j", "Urgent": "Urgent", "Archived": "Archivés", "Nothing here.": "Rien ici.", "key:": "corrigé :",
   "your call:": "à vous de décider :", "Approve": "Valider", "Reject": "Refuser", "reason (optional)": "motif (facultatif)", "approved": "validé", "rejected": "refusé",
   "Ask in plain language. The agent works with the tools above and shows every step in the trace.": "Demandez en langage courant. L'agent travaille avec les outils ci-dessus et montre chaque étape dans la trace.", "Chat cleared. The inbox, tasks and outbox are unchanged.": "Conversation effacée. La boîte, les tâches et la boîte d'envoi sont inchangées.", "Connected. Ask in plain language.": "Connecté. Demandez en langage courant.",
@@ -491,7 +491,7 @@ const FR = {
   "no approval possible: the tool refused and returned the error to the agent": "aucune validation possible : l'outil a refusé et renvoyé l'erreur à l'agent",
   "reply sent within the limits": "réponse envoyée dans les limites", "forward sent within the limits": "transfert envoyé dans les limites", "forward blocked by policy": "transfert bloqué par la règle",
   "external, approval off": "externe, validation désactivée", "send reply to": "envoyer la réponse à", "forward to": "transférer à", "Label": "Étiqueter", "emails as": "courriels en", "Archive": "Archiver",
-  "request": "requête", "reply": "réponse", "bilan": "bilan", "approval?": "validation ?", "blocked": "bloqué", "> limit": "> limite", "≤ limit": "≤ limite", "escalate": "escalade", "task": "tâche", "↳ result": "↳ résultat", "↳ error": "↳ erreur", "loaded": "chargé", "rules": "règles", "reset": "remise à zéro", "run": "traitement", "error": "erreur",
+  "request": "requête", "reply": "réponse", "summary": "bilan", "approval?": "validation ?", "blocked": "bloqué", "> limit": "> limite", "≤ limit": "≤ limite", "escalate": "escalade", "task": "tâche", "↳ result": "↳ résultat", "↳ error": "↳ erreur", "loaded": "chargé", "rules": "règles", "reset": "remise à zéro", "run": "traitement", "error": "erreur",
   "orchestrator": "orchestrateur", "tool": "outil", "thinks": "réfléchit", "starts": "démarre", "fresh model call, empty memory · tools:": "nouvel appel de modèle, mémoire vide · outils :", "code (guardrail)": "code (garde-fou)", "code (rules)": "code (règles)", "code": "code", "reply to": "réponse à",
   "The orchestrator answered on its own: no sub-agent, no tool, no guardrail involved. What decided here is the brief and the model's own judgement, not code.": "L'orchestrateur a répondu seul : aucun sous-agent, aucun outil, aucun garde-fou sollicité. Ce qui a décidé ici, c'est le brief et le jugement du modèle, pas le code.",
   "sub-agent call(s)": "appel(s) de sous-agent", "tool call(s)": "appel(s) d'outil", "executed within the limits": "exécuté(s) dans les limites", "stopped by the guardrail (code)": "arrêté(s) par le garde-fou (code)", "human decision(s)": "décision(s) humaine(s)", "pending": "en attente", "nothing reached the human line": "rien n'a atteint la ligne humaine",
@@ -648,7 +648,7 @@ function whoFor(kind, key) {
   const k = String(key).trim();
   if (kind === "agent" && k === "request") return ME;
   if (kind === "agent" && (k === "thinks" || k === "starts")) return currentSub || T("orchestrator");
-  if (kind === "agent" && (k === "reply" || k === "bilan" || k === "stopped")) return T("orchestrator");
+  if (kind === "agent" && (k === "reply" || k === "summary" || k === "stopped")) return T("orchestrator");
   if (kind === "agent" && k.startsWith("▶ ")) { currentSub = k.slice(2); REQ.subs++; return T("orchestrator") + " → " + currentSub; }
   if (kind === "agent" && k.startsWith("◀ ")) { const n = k.slice(2); currentSub = null; return n + " → " + T("orchestrator"); }
   if (kind === "err" && k.startsWith("◀ ")) { currentSub = null; return k.slice(2) + " → " + T("orchestrator"); }
@@ -676,7 +676,7 @@ function trace(kind, key, body) {
 function requestSummary() {
   const g = REQ.guard;
   if (!REQ.subs && !REQ.calls) {
-    trace("agent", "bilan", T("The orchestrator answered on its own: no sub-agent, no tool, no guardrail involved. What decided here is the brief and the model's own judgement, not code."));
+    trace("agent", "summary", T("The orchestrator answered on its own: no sub-agent, no tool, no guardrail involved. What decided here is the brief and the model's own judgement, not code."));
     tagNode('[data-node="brief"]', [], false);
     return;
   }
@@ -684,7 +684,7 @@ function requestSummary() {
   if (g.length) parts.push(`${g.length} ${T("stopped by the guardrail (code)")}: ${g.map((x) => x.slice(0, 140)).join(" | ")}`);
   if (REQ.human) parts.push(`${REQ.human} ${T("human decision(s)")}: ${REQ.decided.map((d) => T(d)).join(", ") || T("pending")}`);
   if (!g.length && !REQ.human) parts.push(T("nothing reached the human line"));
-  trace("agent", "bilan", parts.join(" · "));
+  trace("agent", "summary", parts.join(" · "));
 }
 function compact(v, max = 260) { const s = typeof v === "string" ? v : JSON.stringify(v); return s.length > max ? s.slice(0, max) + "…" : s; }
 
