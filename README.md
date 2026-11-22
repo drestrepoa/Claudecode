@@ -47,6 +47,6 @@ Titles use Cambria (Caladea from Google Fonts where Cambria is missing). Labels 
 
 ## Publishing
 
-- **Netlify**: import the repository, pick the `optima-horizons` branch; `netlify.toml` publishes the root folder.
+- **Netlify** (live): the site deploys from the `optima-horizons` branch and is served at https://optima-advisory.eu. The page's canonical and sharing-preview addresses use that domain; change them in the `<head>` of `index.html` if the domain changes.
 - **GitHub Pages**: Settings, Pages, deploy from the `optima-horizons` branch, root folder.
 - **Any other host** (Cloud Run, a bucket, a shared host): upload `index.html` and `assets/`.
