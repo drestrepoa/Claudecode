@@ -9,11 +9,11 @@ It is one static page, `index.html`, with its images in `assets/`. There is no b
 | Section | Content |
 | --- | --- |
 | Hero | Scholarly Insight. Strategic Advantage. |
-| About | Bridging Theory & Practice; Research Backed, Every Sector, Excellence Driven |
+| About | Bridging Theory & Practice; international experience; Research Backed, Every Sector, Excellence Driven |
 | Services | I. Strategic Architecture, II. Operational Guidance, III. Solutions Development |
 | Framework | Strategy, Data, Technology, Skills: from today to what must change |
 | Sectors | Eight industries, from legal and financial services to the public sector |
-| Method | Three phases, the AI leverage measure, what a released hour is worth |
+| Method | Three phases, from decision to lasting value |
 | Contact | Email and a form that opens the visitor's email app, addressed to admin@optima-be.com |
 | Footer | Navigation, copyright, and a discreet link to the Smart Law Hub |
 

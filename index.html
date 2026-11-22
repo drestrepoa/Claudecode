@@ -88,13 +88,11 @@
   .hero-mark { position: absolute; top: 50%; right: calc(37.5% / 2); transform: translate(50%, -50%); width: min(30vw, 440px); opacity: .32; }
   .hero .wrap { position: relative; width: 100%; padding-top: 120px; padding-bottom: 96px; }
   .hero-copy { max-width: 780px; }
-  .hero .eyebrow, .leverage-def .eyebrow { color: var(--haze); }
+  .hero .eyebrow { color: var(--haze); }
   .hero h1 { color: var(--white); font-size: clamp(44px, 7vw, 84px); line-height: 1.04; letter-spacing: -.01em; margin-bottom: 28px; }
   .hero h1 em { font-style: italic; color: var(--line); }
   .hero-lead { font-size: clamp(18px, 2vw, 21px); color: var(--haze); max-width: 580px; margin-bottom: 40px; }
   .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; }
-  .hero-meta { margin-top: 64px; font: 600 11px/1.6 var(--label); letter-spacing: .24em; text-transform: uppercase; color: var(--mist); }
-  .hero-meta span { margin: 0 10px; }
   .scroll-cue { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); color: var(--haze); opacity: .7; animation: cue 2.4s ease-in-out infinite; }
   @keyframes cue { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 8px); } }
   @media (max-width: 920px) {
@@ -164,23 +162,7 @@
   .phase .when { font: 600 11px/1 var(--label); letter-spacing: .2em; text-transform: uppercase; color: var(--mist); }
   .phase h3 { font-size: 24px; margin: 12px 0 10px; }
   .phase p { color: var(--muted); font-size: 15.5px; margin: 0; }
-  .leverage { margin-top: 48px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 0; border-radius: 6px; overflow: hidden; }
-  .leverage-def { background: var(--ink); color: var(--haze); padding: 40px 36px; }
-  .leverage-def h3 { color: var(--white); font-size: 30px; margin-bottom: 14px; }
-  .formula { display: flex; align-items: center; gap: 18px; margin-top: 26px; font-family: var(--serif); color: var(--white); }
-  .formula .frac { display: inline-flex; flex-direction: column; text-align: center; font-size: 18px; }
-  .formula .frac span:first-child { border-bottom: 1px solid var(--mist); padding-bottom: 6px; margin-bottom: 6px; }
-  .formula .eq { font-size: 22px; white-space: nowrap; }
-  .leverage-def small { display: block; margin-top: 18px; color: var(--mist); font-size: 14px; }
-  .values { background: var(--white); padding: 40px 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .values .v { border-top: 1px solid var(--line); padding-top: 16px; }
-  .values .v b { display: block; font: 400 30px/1.1 var(--serif); color: var(--ink); margin-bottom: 8px; }
-  .values .v span { display: block; font: 600 11px/1.4 var(--label); letter-spacing: .18em; text-transform: uppercase; color: var(--slate); margin-bottom: 8px; }
-  .values .v p { font-size: 14.5px; color: var(--muted); margin: 0; }
-  .values .head { grid-column: 1 / -1; }
-  .values .head h4 { font-size: 22px; }
-  @media (max-width: 920px) { .phases, .leverage { grid-template-columns: 1fr; } }
-  @media (max-width: 560px) { .values { grid-template-columns: 1fr; } }
+  @media (max-width: 920px) { .phases { grid-template-columns: 1fr; } }
 
   /* Contact */
   .contact { position: relative; overflow: hidden; }
@@ -287,7 +269,6 @@
           <a class="btn btn-light" href="#services">Our expertise</a>
           <a class="btn btn-ghost" href="#about">About us</a>
         </div>
-        <p class="hero-meta">Strategy<span>·</span>Data<span>·</span>Technology<span>·</span>Skills</p>
       </div>
     </div>
     <a class="scroll-cue" href="#about" aria-label="Scroll to About">
@@ -302,6 +283,7 @@
         <p class="eyebrow">Who we are</p>
         <h2>Bridging Theory &amp; Practice</h2>
         <p>At Optima Horizons, we operate at the intersection of high-level academic research and practical implementation. As scholars and practitioners, we apply rigorous strategic, economic and data methods to the question every organisation now faces: <strong>what AI should change in how it creates value</strong>, and how to capture that value.</p>
+        <p>We have worked with <strong>international and leading organisations around the world</strong>, across sectors and continents.</p>
         <p>We don't just advise; we educate and accompany. Our approach is rooted in a deep understanding of the technological, regulatory and competitive landscapes, ensuring that our clients are not only compliant but strategically positioned for the future.</p>
       </div>
       <div class="pillars reveal">
@@ -404,7 +386,7 @@
       <div class="framework-note reveal">
         <div><strong>Start from the process, not the tool.</strong>The unit of change is a process from request to deliverable, not a job or a licence.</div>
         <div><strong>Let the client priority decide.</strong>Cost, speed, quality or risk: each process changes for a reason your clients value.</div>
-        <div><strong>Decide who keeps the gain.</strong>A released hour is only worth something once you decide what happens to it.</div>
+        <div><strong>Decide who keeps the gain.</strong>Efficiency creates value only once you decide where it goes: margin, price or new services.</div>
       </div>
     </div>
   </section>
@@ -436,31 +418,13 @@
     <div class="wrap">
       <div class="section-head reveal">
         <p class="eyebrow">How we work</p>
-        <h2>From decision to measured value, in three phases</h2>
+        <h2>From decision to lasting value, in three phases</h2>
         <p>Each engagement is paced by your own calendar: budget cycles, vendor renewals and board decisions.</p>
       </div>
       <div class="phases">
         <div class="phase reveal"><span class="when">Phase 1</span><h3>Decide and baseline</h3><p>Confirm the strategic choices, select two or three processes, name their owners and measure where you start: effort, turnaround, quality and margin.</p></div>
-        <div class="phase reveal"><span class="when">Phase 2</span><h3>Pilot and measure</h3><p>Redesign the selected processes with AI, run the pilots against the baseline and decide in advance what happens to the capacity released.</p></div>
+        <div class="phase reveal"><span class="when">Phase 2</span><h3>Pilot and measure</h3><p>Redesign the selected processes with AI, run the pilots against the baseline and decide in advance where the freed capacity goes.</p></div>
         <div class="phase reveal"><span class="when">Phase 3</span><h3>Scale and capture</h3><p>Extend what works, set pricing and incentives, and build the operating model that keeps standards central while teams own their problems.</p></div>
-      </div>
-      <div class="leverage reveal">
-        <div class="leverage-def">
-          <p class="eyebrow">The measure</p>
-          <h3>AI leverage: output per hour, not licences</h3>
-          <p>Adoption metrics say who uses AI. They do not say whether it pays. We measure what each hour produces, at a constant quality standard.</p>
-          <div class="formula" aria-label="AI leverage equals standard hours earned divided by actual hours">
-            <span class="eq">AI leverage =</span>
-            <span class="frac"><span>Standard hours earned</span><span>Actual hours worked</span></span>
-          </div>
-          <small>Only work that passes the agreed quality gate earns hours. Rework counts against the ratio.</small>
-        </div>
-        <div class="values">
-          <div class="head"><p class="eyebrow">What a released hour is worth</p><h4>The same efficiency, three different outcomes</h4></div>
-          <div class="v"><span>Idle</span><b>Nothing</b><p>The hour is released and not reused. The ratio improves; profit does not.</p></div>
-          <div class="v"><span>Cost avoided</span><b>Its cost</b><p>Hiring deferred, attrition not replaced: the direct cost of delivery is saved.</p></div>
-          <div class="v"><span>Redeployed</span><b>Its revenue</b><p>The hour moves to work clients pay for. This is where the strategy aims.</p></div>
-        </div>
       </div>
     </div>
   </section>
@@ -478,7 +442,7 @@
         </div>
         <div class="contact-item">
           <div class="icon"><svg><use href="#i-pin"/></svg></div>
-          <div><h4>Where we work</h4><p>With organisations internationally,<br>on site and remotely</p></div>
+          <div><h4>Where we work</h4><p>With international and leading organisations<br>around the world, on site and remotely</p></div>
         </div>
       </div>
       <div class="reveal">
