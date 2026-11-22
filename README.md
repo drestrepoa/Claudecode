@@ -8,14 +8,20 @@ It is one static page, `index.html`, with its images in `assets/`. There is no b
 
 | Section | Content |
 | --- | --- |
-| Hero | Scholarly Insight. Strategic Advantage. |
-| About | Bridging Theory & Practice; international experience; Research Backed, Every Sector, Excellence Driven |
+| Hero | Scholarly Insight. Strategic Advantage., over a slowly turning sphere of points behind the O |
+| Sector ticker | A moving band of the sectors served |
+| About | The challenge (everyone can buy AI, few turn it into advantage); Bridging Theory & Practice; international experience; three pillars |
 | Services | I. Strategic Architecture, II. Operational Guidance, III. Solutions Development |
-| Framework | Strategy, Data, Technology, Skills: from today to what must change |
-| Sectors | Eight industries, from legal and financial services to the public sector |
-| Method | Three phases, from decision to lasting value |
+| Framework | Four questions (Strategy, Data, Technology, Skills) as interactive tabs |
+| Sectors | Eight industries, each card fills on hover |
+| Method | Discover, Design, Deliver, on a timeline that draws itself |
+| Perspectives | Three short points of view that open in place |
+| Questions | Four frequent questions that open in place |
+| Call to action | Ready to set your horizon? |
 | Contact | Email and a form that opens the visitor's email app, addressed to admin@optima-be.com |
 | Footer | Navigation, copyright, and a discreet link to the Smart Law Hub |
+
+Every movement stops for visitors whose system asks for reduced motion.
 
 ## Brand
 
