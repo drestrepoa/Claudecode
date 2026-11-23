@@ -8,7 +8,7 @@ It is one static page, `index.html`, with its images in `assets/`. There is no b
 
 | Section | Content |
 | --- | --- |
-| Hero | Our Field Expertise & Scholarly Insight. Your Strategic Advantage., over a slowly turning sphere of points behind the O |
+| Hero | Proven in Practice. Grounded in Research. Your Strategic Advantage., over a slowly turning sphere of points behind the O |
 | Ticker | A moving band of the business areas covered |
 | About | The challenge (everyone can buy AI, few turn it into advantage); Bridging Theory & Practice; international experience; three pillars |
 | Services | I. Strategic Architecture, II. Operational Guidance, III. Solutions Development |
