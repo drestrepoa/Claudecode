@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Optima Horizons | AI Strategy Consulting</title>
-<meta name="description" content="Optima Horizons Consulting helps organisations in every sector turn artificial intelligence into lasting advantage: strategy, implementation and the solutions that set them apart.">
+<meta name="description" content="Optima Horizons is an AI-native strategy consultancy. Field expertise and scholarly insight, supported by our own AI agents, turned into your strategic advantage.">
 <meta property="og:title" content="Optima Horizons | AI Strategy Consulting">
-<meta property="og:description" content="Scholarly insight, strategic advantage: AI strategy for every sector.">
+<meta property="og:description" content="Our field expertise and scholarly insight, your strategic advantage. AI-native strategy consulting for every sector.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://optima-advisory.eu/assets/social-card.jpg">
 <meta property="og:url" content="https://optima-advisory.eu/">
@@ -102,16 +102,18 @@
   .hero-mark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(26vw, 400px); opacity: .34; animation: breathe 9s ease-in-out infinite; }
   @keyframes breathe { 0%, 100% { opacity: .30; } 50% { opacity: .42; } }
   .hero .wrap { position: relative; width: 100%; padding-top: 120px; padding-bottom: 120px; }
-  .hero-copy { max-width: 62%; }
+  .hero-copy { max-width: 66%; }
+  @media (min-width: 961px) { .hero h1 .line > span { white-space: nowrap; } }
   @media (max-width: 960px) { .hero-copy { max-width: 720px; } }
-  .hero h1 { color: var(--white); font-size: clamp(44px, 6.2vw, 84px); line-height: 1.03; letter-spacing: -.01em; margin-bottom: 28px; }
+  .hero h1 { color: var(--white); font-size: clamp(31px, 5vw, 68px); line-height: 1.06; letter-spacing: -.01em; margin-bottom: 28px; }
   .hero h1 .line { display: block; overflow: hidden; }
   .hero h1 .line > span { display: inline-block; transform: translateY(105%); animation: rise 1s var(--ease) forwards; }
   .hero h1 .line:nth-child(2) > span { animation-delay: .15s; }
+  .hero h1 .line:nth-child(3) > span { animation-delay: .3s; }
   .hero h1 em { font-style: italic; color: var(--line); }
   @keyframes rise { to { transform: none; } }
   .fade-in { opacity: 0; animation: fadein 1s var(--ease) forwards; }
-  .fade-in.d1 { animation-delay: .45s; } .fade-in.d2 { animation-delay: .6s; } .fade-in.d3 { animation-delay: .1s; }
+  .fade-in.d1 { animation-delay: .6s; } .fade-in.d2 { animation-delay: .75s; } .fade-in.d3 { animation-delay: .1s; }
   @keyframes fadein { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
   .hero-lead { font-size: clamp(18px, 2vw, 21px); color: var(--haze); max-width: 580px; margin-bottom: 40px; }
   .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; }
@@ -120,7 +122,7 @@
     .hero-mark { left: auto; right: -12vw; transform: translate(0, -50%); width: 70vw; opacity: .12; animation: none; }
   }
 
-  /* Ticker of sectors */
+  /* Ticker */
   .ticker { background: var(--slate); color: var(--line); overflow: hidden; border-top: 1px solid rgba(213,224,228,.12); }
   .ticker-track { display: flex; width: max-content; animation: ticker 48s linear infinite; }
   .ticker:hover .ticker-track { animation-play-state: paused; }
@@ -203,21 +205,21 @@
     .panel-cols { grid-template-columns: 1fr; }
   }
 
-  /* Sectors */
-  .sector-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-  .sector { position: relative; padding: 30px 26px 28px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; transition: color .35s; }
-  .sector::before { content: ""; position: absolute; inset: 0; background: var(--ink); transform: translateY(101%); transition: transform .45s var(--ease); }
-  .sector > * { position: relative; }
-  .sector h3 { font-size: 21px; margin: 16px 0 8px; transition: color .35s; }
-  .sector p { font-size: 15px; color: var(--muted); margin: 0; transition: color .35s; }
-  .sector .icon { transition: background .35s, color .35s, border-color .35s; }
-  .sector:hover::before { transform: none; }
-  .sector:hover h3 { color: var(--white); }
-  .sector:hover p { color: var(--haze); }
-  .sector:hover .icon { background: transparent; color: var(--line); border-color: rgba(213,224,228,.3); }
-  .sector-foot { margin-top: 36px; text-align: center; color: var(--muted); font-size: 16px; }
-  @media (max-width: 1000px) { .sector-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 560px) { .sector-grid { grid-template-columns: 1fr; } }
+  /* Focus areas */
+  .area-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .area { position: relative; padding: 30px 26px 28px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; transition: color .35s; }
+  .area::before { content: ""; position: absolute; inset: 0; background: var(--ink); transform: translateY(101%); transition: transform .45s var(--ease); }
+  .area > * { position: relative; }
+  .area h3 { font-size: 21px; margin: 16px 0 8px; transition: color .35s; }
+  .area p { font-size: 15px; color: var(--muted); margin: 0; transition: color .35s; }
+  .area .icon { transition: background .35s, color .35s, border-color .35s; }
+  .area:hover::before { transform: none; }
+  .area:hover h3 { color: var(--white); }
+  .area:hover p { color: var(--haze); }
+  .area:hover .icon { background: transparent; color: var(--line); border-color: rgba(213,224,228,.3); }
+  .area-foot { margin-top: 36px; text-align: center; color: var(--muted); font-size: 16px; }
+  @media (max-width: 1000px) { .area-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .area-grid { grid-template-columns: 1fr; } }
 
   /* Method: a timeline that draws itself */
   .method { background: var(--paper); }
@@ -239,6 +241,26 @@
     .timeline.in::after { transform: scaleY(1); }
     .step::before { top: 2px; left: -44px; }
   }
+
+  /* The team: people and AI agents */
+  .team { margin-top: clamp(56px, 8vw, 88px); background: var(--ink); color: var(--haze); border-radius: 6px; overflow: hidden; }
+  .team-head { padding: clamp(28px, 4vw, 48px) clamp(24px, 4vw, 48px) 0; max-width: 820px; }
+  .team-head .eyebrow { color: var(--haze); margin-bottom: 18px; }
+  .team-head h3 { color: var(--white); font-size: clamp(28px, 3.6vw, 40px); margin-bottom: 16px; }
+  .team-head p { font-size: 17.5px; margin: 0; }
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(213,224,228,.12); margin-top: clamp(28px, 4vw, 44px); border-top: 1px solid rgba(213,224,228,.12); }
+  .member { background: var(--ink); padding: 30px clamp(24px, 4vw, 48px) 34px; transition: background .35s; }
+  .member:hover { background: #24363c; }
+  .member .icon { background: transparent; border-color: rgba(213,224,228,.3); color: var(--line); }
+  .member h4 { color: var(--white); font-size: 23px; margin: 16px 0 8px; }
+  .member p { font-size: 15.5px; margin: 0; }
+  .member.ai { background: var(--slate); color: var(--line); }
+  .member.ai:hover { background: #466672; }
+  .member.ai .icon { border-color: rgba(237,242,243,.45); color: var(--white); }
+  .transfer { margin: 0; display: flex; align-items: center; gap: 18px; padding: 24px clamp(24px, 4vw, 48px); border-top: 1px solid rgba(213,224,228,.12); color: var(--line); font-size: 16.5px; }
+  .transfer strong { color: var(--white); font-weight: 600; }
+  .transfer svg { flex: none; color: var(--haze); }
+  @media (max-width: 860px) { .team-grid { grid-template-columns: 1fr; } }
 
   /* Perspectives */
   .persp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -329,14 +351,14 @@
     <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
     <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z"/></symbol>
     <symbol id="i-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13 17 22l-5-3-5 3 1.5-9"/></symbol>
-    <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M3 7h18"/><path d="m6 7-3 7a3 3 0 0 0 6 0z"/><path d="m18 7-3 7a3 3 0 0 0 6 0z"/></symbol>
-    <symbol id="i-bank" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 4l9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/><path d="M3 12h4l2-3 3 6 2-3h7"/></symbol>
-    <symbol id="i-factory" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21V9l6 4V9l6 4V5h4l2 16z"/><path d="M6 17h2M11 17h2M16 17h2"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></symbol>
+    <symbol id="i-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h5a4 4 0 0 1 4 4v5"/><path d="m15.5 12.5 2.5 2.5 2.5-2.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h6M9 14h4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3a6.5 6.5 0 0 1 3.5 5.7"/></symbol>
+    <symbol id="i-agent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 8V4M9 13v2M15 13v2M2 13v2M22 13v2"/><circle cx="12" cy="3.5" r="1"/></symbol>
     <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
-    <symbol id="i-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6"/></symbol>
-    <symbol id="i-gov" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10M20 21V10M2 21h20M12 3l9 5H3z"/><path d="M9 21v-6h6v6"/></symbol>
-    <symbol id="i-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></symbol>
     <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
@@ -354,7 +376,7 @@
       <a href="#about">About</a>
       <a href="#services">Services</a>
       <a href="#framework">Framework</a>
-      <a href="#sectors">Sectors</a>
+      <a href="#areas">Focus areas</a>
       <a href="#perspectives">Perspectives</a>
       <a class="btn btn-ghost" href="#contact">Contact</a>
     </div>
@@ -370,9 +392,9 @@
     </div>
     <div class="wrap">
       <div class="hero-copy">
-        <p class="eyebrow fade-in d3">AI strategy consulting &nbsp;·&nbsp; for every sector</p>
-        <h1><span class="line"><span>Scholarly Insight.</span></span><span class="line"><span><em>Strategic Advantage.</em></span></span></h1>
-        <p class="hero-lead fade-in d1">We help organisations in every industry turn artificial intelligence into lasting advantage, bringing academic rigour to real-world challenges.</p>
+        <p class="eyebrow fade-in d3">AI-native strategy consulting &nbsp;·&nbsp; for every sector</p>
+        <h1><span class="line"><span>Our Field Expertise</span></span><span class="line"><span>&amp; Scholarly Insight.</span></span><span class="line"><span><em>Your Strategic Advantage.</em></span></span></h1>
+        <p class="hero-lead fade-in d1">We help organisations in every industry turn artificial intelligence into lasting advantage, and we practise AI in our own work to deliver higher value.</p>
         <div class="hero-ctas fade-in d2">
           <a class="btn btn-light" href="#services">Our expertise <svg width="16" height="16"><use href="#i-arrow"/></svg></a>
           <a class="btn btn-ghost" href="#contact">Talk to us</a>
@@ -381,14 +403,14 @@
     </div>
   </section>
 
-  <!-- Sector ticker -->
-  <div class="ticker" aria-label="Sectors we serve">
+  <!-- Ticker of the areas we work on -->
+  <div class="ticker" aria-label="Areas we work on">
     <div class="ticker-track">
       <ul>
-        <li>Professional services</li><li>Financial services</li><li>Insurance</li><li>Healthcare</li><li>Life sciences</li><li>Industry</li><li>Energy</li><li>Infrastructure</li><li>Retail &amp; consumer</li><li>Public sector</li><li>Education</li><li>Research</li>
+        <li>Strategy</li><li>Operations</li><li>Customer experience</li><li>Knowledge</li><li>Risk &amp; compliance</li><li>Governance</li><li>Finance</li><li>Performance</li><li>People</li><li>Organisation</li><li>Innovation</li><li>Data</li>
       </ul>
       <ul aria-hidden="true">
-        <li>Professional services</li><li>Financial services</li><li>Insurance</li><li>Healthcare</li><li>Life sciences</li><li>Industry</li><li>Energy</li><li>Infrastructure</li><li>Retail &amp; consumer</li><li>Public sector</li><li>Education</li><li>Research</li>
+        <li>Strategy</li><li>Operations</li><li>Customer experience</li><li>Knowledge</li><li>Risk &amp; compliance</li><li>Governance</li><li>Finance</li><li>Performance</li><li>People</li><li>Organisation</li><li>Innovation</li><li>Data</li>
       </ul>
     </div>
   </div>
@@ -413,7 +435,7 @@
           <h2 class="reveal">Bridging Theory &amp; Practice</h2>
           <div class="editorial-body">
             <p class="reveal" style="--i:1">At Optima Horizons, we operate at the intersection of high-level academic research and practical implementation. As scholars and practitioners, we apply rigorous strategic, economic and data methods to the questions AI raises for every organisation.</p>
-            <p class="reveal" style="--i:2">We don't just advise; we educate and accompany. We have worked with <strong>international and leading organisations around the world</strong>, ensuring they are not only compliant but strategically positioned for the future.</p>
+            <p class="reveal" style="--i:2">We don't just advise; we design, accompany and operationalise your strategy. We have worked with <strong>international and leading organisations around the world</strong>, ensuring they are not only compliant but strategically positioned for the future.</p>
           </div>
           <div class="pillars">
             <div class="pillar reveal" style="--i:0">
@@ -461,7 +483,7 @@
           <h3>Operational Guidance</h3>
           <p><strong>Implementing the strategy.</strong> Strategy requires action. We act as partners in execution, accompanying your teams through the transition, with the mentorship and knowledge transfer needed to embed new capabilities in your organisation.</p>
           <ul>
-            <li>Change management &amp; training</li>
+            <li>Change management &amp; adoption</li>
             <li>Governance &amp; responsible AI</li>
             <li>Performance indicators &amp; accompaniment</li>
           </ul>
@@ -525,7 +547,7 @@
             <p>Transformation succeeds when people see what is in it for them. We design the capabilities, the roles and the ways of working that let teams make AI their own.</p>
             <div class="panel-cols">
               <div><h4>We look at</h4><ul><li>Current skills and readiness</li><li>Roles, career paths and incentives</li><li>Culture and leadership</li></ul></div>
-              <div><h4>You get</h4><ul><li>A skills plan by role and level</li><li>Training that changes daily work</li><li>Leaders equipped to sponsor the change</li></ul></div>
+              <div><h4>You get</h4><ul><li>A skills plan by role and level</li><li>New capabilities built into daily work</li><li>Leaders equipped to sponsor the change</li></ul></div>
             </div>
           </div>
         </div>
@@ -533,25 +555,25 @@
     </div>
   </section>
 
-  <!-- Sectors -->
-  <section class="section" id="sectors">
+  <!-- Focus areas -->
+  <section class="section" id="areas">
     <div class="wrap">
       <div class="section-head center reveal">
-        <p class="eyebrow">Sectors</p>
-        <h2>AI strategy for every industry</h2>
-        <p>The questions are shared; the answers are specific. We bring the same rigour to each sector and adapt it to its rules, its economics and its people.</p>
+        <p class="eyebrow">Where we help</p>
+        <h2>AI across your business operations</h2>
+        <p>Our work is about how an organisation runs, whatever its industry. We focus on the operations every business shares and adapt to the specifics of yours.</p>
       </div>
-      <div class="sector-grid">
-        <div class="sector reveal" style="--i:0"><div class="icon"><svg><use href="#i-scale"/></svg></div><h3>Professional services</h3><p>Knowledge work, client service and quality control, reimagined with AI.</p></div>
-        <div class="sector reveal" style="--i:1"><div class="icon"><svg><use href="#i-bank"/></svg></div><h3>Financial services &amp; insurance</h3><p>Underwriting, claims, compliance and advice, with strong model governance.</p></div>
-        <div class="sector reveal" style="--i:2"><div class="icon"><svg><use href="#i-heart"/></svg></div><h3>Healthcare &amp; life sciences</h3><p>Clinical documentation, research and operations, with patient safety built in.</p></div>
-        <div class="sector reveal" style="--i:3"><div class="icon"><svg><use href="#i-factory"/></svg></div><h3>Industry &amp; manufacturing</h3><p>Quality, maintenance, supply chain and engineering knowledge at work.</p></div>
-        <div class="sector reveal" style="--i:0"><div class="icon"><svg><use href="#i-bolt"/></svg></div><h3>Energy &amp; infrastructure</h3><p>Asset management, forecasting and field operations, at scale and safely.</p></div>
-        <div class="sector reveal" style="--i:1"><div class="icon"><svg><use href="#i-cart"/></svg></div><h3>Retail &amp; consumer</h3><p>Customer experience, pricing and service that reflect your brand.</p></div>
-        <div class="sector reveal" style="--i:2"><div class="icon"><svg><use href="#i-gov"/></svg></div><h3>Public sector</h3><p>Better services for citizens, with transparency and public trust.</p></div>
-        <div class="sector reveal" style="--i:3"><div class="icon"><svg><use href="#i-cap"/></svg></div><h3>Education &amp; research</h3><p>Teaching, assessment and research, with policies that keep them credible.</p></div>
+      <div class="area-grid">
+        <div class="area reveal" style="--i:0"><div class="icon"><svg><use href="#i-compass"/></svg></div><h3>Strategy &amp; growth</h3><p>Where to compete, what to offer and how to grow with AI.</p></div>
+        <div class="area reveal" style="--i:1"><div class="icon"><svg><use href="#i-flow"/></svg></div><h3>Operations &amp; processes</h3><p>Core workflows redesigned for quality, speed and cost.</p></div>
+        <div class="area reveal" style="--i:2"><div class="icon"><svg><use href="#i-chat"/></svg></div><h3>Customer experience</h3><p>Faster, more personal service across every channel.</p></div>
+        <div class="area reveal" style="--i:3"><div class="icon"><svg><use href="#i-book"/></svg></div><h3>Knowledge &amp; expertise</h3><p>What your organisation knows, made usable every day.</p></div>
+        <div class="area reveal" style="--i:0"><div class="icon"><svg><use href="#i-shield"/></svg></div><h3>Risk &amp; governance</h3><p>Responsible AI, aligned with regulation and your values.</p></div>
+        <div class="area reveal" style="--i:1"><div class="icon"><svg><use href="#i-chart"/></svg></div><h3>Finance &amp; performance</h3><p>Clear measures that link AI to business results.</p></div>
+        <div class="area reveal" style="--i:2"><div class="icon"><svg><use href="#i-users"/></svg></div><h3>People &amp; organisation</h3><p>Roles, skills and ways of working that evolve together.</p></div>
+        <div class="area reveal" style="--i:3"><div class="icon"><svg><use href="#i-bolt"/></svg></div><h3>Products &amp; innovation</h3><p>New services and solutions built on your strengths.</p></div>
       </div>
-      <p class="sector-foot reveal">Your sector is not listed? The method travels. <a href="#contact">Tell us about your organisation.</a></p>
+      <p class="area-foot reveal">A question specific to your business? We adapt the method to your context. <a href="#contact">Tell us about your organisation.</a></p>
     </div>
   </section>
 
@@ -561,12 +583,25 @@
       <div class="section-head reveal">
         <p class="eyebrow">How we work</p>
         <h2>From first question to lasting change</h2>
-        <p>Every engagement follows the same arc, sized to your ambition and your calendar.</p>
+        <p>Every engagement follows the same arc, sized to your ambition and your calendar, and is delivered by a team built for it.</p>
       </div>
       <div class="timeline" id="timeline">
         <div class="step"><span class="when">01 &nbsp;Discover</span><h3>Understand and decide</h3><p>We listen to your leaders and teams, study your data and your market, and agree on the few choices that matter most.</p></div>
         <div class="step"><span class="when">02 &nbsp;Design</span><h3>Redesign and test</h3><p>We redesign selected activities with AI, test them in real conditions and measure the results against a clear starting point.</p></div>
         <div class="step"><span class="when">03 &nbsp;Deliver</span><h3>Scale and embed</h3><p>We extend what works, build the governance and skills to sustain it, and hand over a capability your organisation owns.</p></div>
+      </div>
+      <div class="team reveal">
+        <div class="team-head">
+          <p class="eyebrow">An AI-native firm</p>
+          <h3>A tailored team, human and AI</h3>
+          <p>For each engagement we compose a team around your question. We practise AI in our own work, so you get higher value.</p>
+        </div>
+        <div class="team-grid">
+          <div class="member"><div class="icon"><svg><use href="#i-users"/></svg></div><h4>Senior consultants</h4><p>Leading practitioners with hands-on experience of business operations and transformation.</p></div>
+          <div class="member"><div class="icon"><svg><use href="#i-book"/></svg></div><h4>Academic scholars &amp; analysts</h4><p>Rigorous research and analysis behind every recommendation.</p></div>
+          <div class="member ai"><div class="icon"><svg><use href="#i-agent"/></svg></div><h4>A team of AI agents</h4><p>Our own agents support research, analysis and delivery at every step, so our experts spend their time where it counts.</p></div>
+        </div>
+        <p class="transfer"><svg width="22" height="22"><use href="#i-arrow"/></svg><span><strong>Built to stay with you.</strong> When the engagement ends, we transfer the knowledge, the methods and the agents to your teams.</span></p>
       </div>
     </div>
   </section>
@@ -624,6 +659,10 @@
           <div><p>Both. Our work runs from strategy to implementation and, where standard solutions fall short, to developing processes, agents and tools tailored to your organisation.</p></div>
         </details>
         <details>
+          <summary>Do you use AI in your own work?<span class="plus"><svg width="16" height="16"><use href="#i-plus"/></svg></span></summary>
+          <div><p>Yes. We practise AI in our own work: a team of AI agents supports our consultants and scholars in research, analysis and delivery. You get higher value, and we are happy to transfer that know-how to your teams.</p></div>
+        </details>
+        <details>
           <summary>How do you take regulation into account?<span class="plus"><svg width="16" height="16"><use href="#i-plus"/></svg></span></summary>
           <div><p>From the start. Regulatory foresight is part of our strategic work, including frameworks such as the EU AI Act and data protection rules, so that what you build is compliant by design.</p></div>
         </details>
@@ -675,7 +714,6 @@
                 <option>Strategic Architecture</option>
                 <option>Operational Guidance</option>
                 <option>Solutions Development</option>
-                <option>Training &amp; workshops</option>
                 <option>Other inquiry</option>
               </select>
             </div>
@@ -696,7 +734,7 @@
     <div class="footer-top">
       <a href="#home" aria-label="Optima Horizons, back to top"><img src="assets/logo-white.png" alt="Optima Horizons" width="720" height="308"></a>
       <nav class="footer-links" aria-label="Footer">
-        <a href="#about">About</a><a href="#services">Services</a><a href="#framework">Framework</a><a href="#sectors">Sectors</a><a href="#perspectives">Perspectives</a><a href="#contact">Contact</a>
+        <a href="#about">About</a><a href="#services">Services</a><a href="#framework">Framework</a><a href="#areas">Focus areas</a><a href="#perspectives">Perspectives</a><a href="#contact">Contact</a>
       </nav>
     </div>
     <div class="footer-bottom">
